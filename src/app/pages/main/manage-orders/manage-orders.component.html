@@ -1,0 +1,26 @@
+@if(order?.id){
+  <p-accordion [activeIndex]="0">
+    @for(batch of order?.batches; track $index) {
+      <p-accordionTab [header]="'Batch ' + batch.sequence_id">
+        <p-table [value]="batch.touch_points" [tableStyle]="{ 'min-width': '50rem' }">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Shipment</th>
+              <th>Customer</th>
+              <th>Address</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-tp>
+            <tr>
+              <td>{{ tp.touch_point.shipment_id }}</td>
+              <td>{{ tp.touch_point.customer_name }}</td>
+              <td>{{ tp.touch_point.address }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-accordionTab>
+    }
+
+  </p-accordion>
+
+}

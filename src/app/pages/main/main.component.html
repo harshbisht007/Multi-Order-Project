@@ -1,0 +1,33 @@
+<div class="card flex justify-content-center">
+  <p-stepper [activeStep]="activeIndex">
+    <p-stepperPanel header="Header I">
+      <ng-template pTemplate="content" let-nextCallback="nextCallback" let-index="index">
+        <div class="flex flex-column h-12rem">
+          <div class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
+          <app-load-data (goToConfiguration)="setRouteId($event)"></app-load-data>
+          </div>
+        </div>
+
+      </ng-template>
+    </p-stepperPanel>
+    <p-stepperPanel header="Header II">
+      <ng-template pTemplate="content" let-prevCallback="prevCallback" let-nextCallback="nextCallback" let-index="index">
+        <div class="flex flex-column h-12rem">
+          <div class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
+            <app-set-configuration (manageOrders)="activeIndex=2" [routeId]="routeId"></app-set-configuration>
+          </div>
+        </div>
+
+      </ng-template>
+    </p-stepperPanel>
+    <p-stepperPanel header="Header III">
+      <ng-template pTemplate="content" let-prevCallback="prevCallback" let-index="index">
+        <div class="flex flex-column h-12rem">
+          <div class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
+            <app-manage-orders [routeId]="routeId"></app-manage-orders>
+          </div>
+        </div>
+      </ng-template>
+    </p-stepperPanel>
+  </p-stepper>
+</div>

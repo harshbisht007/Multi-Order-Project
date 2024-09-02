@@ -1,0 +1,46 @@
+<div class="card">
+  <p-table
+    #dt1
+    [columns]="headers"
+    [value]="rows"
+    dataKey="shipment_id"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [loading]="loading"
+    [paginator]="true"
+  >
+    <ng-template pTemplate="caption">
+      <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
+
+    </ng-template>
+    <ng-template pTemplate="header" let-columns>
+      <tr>
+        <th *ngFor="let col of columns">
+          {{ col }}
+          <p-columnFilter type="numeric" field="weight" display="menu" />
+        </th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-row let-columns="columns">
+      <tr>
+        <td *ngFor="let col of columns">
+          {{ row[col] }}
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="10">No Shipments found.</td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <button
+        (click)="onSubmit()"
+        [disabled]="rows.length === 0"
+        class="mt-4 bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Submit Data
+      </button>
+    </ng-template>
+  </p-table>
+</div>
