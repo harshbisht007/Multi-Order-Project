@@ -5,3 +5,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+body {
+    margin: 16px 24px;
+    background: #F5F7F9;
+}
+
+
+// ::ng-deep .opt .custom-stepper .p-stepper-header p-button { display: block !important;}
