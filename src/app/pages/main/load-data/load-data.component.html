@@ -88,7 +88,14 @@
       <button
         (click)="onSubmit()"
         [disabled]="rows.length === 0"
-        class="mt-4 bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="mt-4 bg-white border-2 border-grey text-grey font-normal py-2 px-4 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400 "
+      >
+        Submit Data
+      </button>
+      <button
+        (click)="onSubmit()" 
+        [disabled]="rows.length === 0" disabled
+        class="mt-4 bg-[--baseColor] text-white font-normal py-2 px-4 rounded hover:bg-bg-[--baseColor] disabled:opacity-50 disabled:cursor-not-allowed float-right w-[243px]"
       >
         Submit Data
       </button>
