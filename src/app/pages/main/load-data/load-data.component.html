@@ -4,76 +4,75 @@
     <p class="text-[#676879] font-normal text-[13px]">How would you like to import your order data?</p>
     <div class="grid grid-cols-5 gap-8 my-4">
       <div>
-        <label for="" class="flex" ><span class="required mr-2.5 ">Zone </span>
+        <label for="" class="flex"><span class="required mr-2.5 ">Zone </span>
           <img src="../../../../assets/icons/icons-info.svg" alt=""></label>
-        <p-dropdown 
-        [options]="cities" 
-        [(ngModel)]="selectedCity" 
-        optionLabel="name" 
-        placeholder="Select Zone" 
-        class="custom-dropdown mt-2.5 "
-        /></div>
+        <p-dropdown [options]="cities" [(ngModel)]="selectedCity" optionLabel="name" placeholder="Select Zone"
+          class="custom-dropdown mt-2.5 " />
+      </div>
       <!-- ... -->
       <div>
-        <label for="" class="mb-2.5 required">Data Source</label><p-dropdown 
-        [options]="cities" 
-        [(ngModel)]="selectedCity" 
-        optionLabel="name" 
-        placeholder="Select Data Source" 
-        class="custom-dropdown mt-2.5 "/></div>
+        <label for="" class="mb-2.5 required">Data Source</label><p-dropdown [options]="sources" (onChange)="onSourceChange($event)" 
+          [(ngModel)]="selectedSource" optionLabel="name" optionValue="value" placeholder="Select Data Source"
+          class="custom-dropdown mt-2.5 " />
+      </div>
     </div>
   </div>
-  <p-table
-    #dt1
-    [columns]="headers"
-    [value]="rows"
-    dataKey="shipment_id"
-    [rows]="10"
-    [rowsPerPageOptions]="[10, 25, 50]"
-    [loading]="loading"
-    [paginator]="true"
-    styleClass="p-datatable-striped"
-  >
+  <p-table #dt1 [columns]="headers" [value]="rows" dataKey="shipment_id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]"
+    [loading]="loading" [paginator]="true" styleClass="p-datatable-striped">
     <ng-template pTemplate="caption">
-      <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
+      @if(selectedSource=='upload'){
+        <input  type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
+      }
       <div class="grid gap-4 grid-cols-2 mb-2">
         <div>
-          <p-button pRipple class="mr-2" label="Fetch Data" icon="pi pi-refresh" severity="success" (change)="onFileChange($event)"  /> 
-          <p-button pRipple class="mr-2" label="Download Report" icon="pi pi-upload"  [outlined]="true"  severity="success"/> 
-          <p-button pRipple class="" label="Delete" [outlined]="true"  icon="pi pi-trash"  severity="danger" />
+      @if(selectedSource=='fetch'){
+        <p-button pRipple class="mr-2" label="Fetch Data" icon="pi pi-refresh" severity="success"
+          (change)="onFileChange($event)" />
+      }
+          <p-button pRipple class="mr-2" label="Download Report" icon="pi pi-upload" [outlined]="true"
+            severity="success" />
+          <p-button pRipple class="" label="Delete" [outlined]="true" icon="pi pi-trash" severity="danger" />
         </div>
         <div class="flex flex-row-reverse relative">
-          
+
           <div class="bg-white search_selectDataset flex rounded-lg overflow-hidden border border-[#C5C7D0BF]">
             <span class="p-input-icon-left">
               <i class="pi pi-search"></i>
-              <input type="text" class="text-sm font-normal px-8 py-2.5" pInputText [placeholder]="'Search here'"/>
-          </span>
-        </div>
+              <input type="text" class="text-sm font-normal px-8 py-2.5" pInputText [placeholder]="'Search here'" />
+            </span>
+          </div>
           <div class="flex mr-2 px-3 py-2 text-base font-normal warrning_message ml-1 min-w-[550px]">
-              <img src="../../../../assets/icons/icons_check_circle.svg" class="mr-3"> 32 Rows invalid. Data will be ignored while routing.
-              <a href="" class="ml-8 warrning_message">Show All</a>
+            <img src="../../../../assets/icons/icons_check_circle.svg" class="mr-3"> 32 Rows invalid. Data will be
+            ignored while routing.
+            <a href="" class="ml-8 warrning_message">Show All</a>
           </div>
           <!-- <div class="flex px-3 mr-2 py-2 text-sm font-normal success_message ml-1 min-w-[270px]">
               <img src="../../../../assets/icons/icons_warning.svg" class="mr-2"><p>Data looks good! You’re all set.</p> 
           </div> -->
-      </div>
+        </div>
       </div>
 
     </ng-template>
     <ng-template pTemplate="header" let-columns>
       <tr>
+        <th style="width: 3rem">
+					<p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+				</th>
         <th *ngFor="let col of columns">
           <span class="flex">
             {{ col }}
-          <p-columnFilter type="numeric" field="weight" display="menu" />
+            <!-- <p-columnFilter type="numeric" field="weight" display="menu" /> -->
+             
           </span>
-          
         </th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-row let-columns="columns">
       <tr>
+        <td>
+          <p-tableCheckbox [value]="row"></p-tableCheckbox>
+        </td>
+
         <td *ngFor="let col of columns">
           {{ row[col] }}
         </td>
@@ -84,21 +83,14 @@
         <td colspan="10">No Shipments found.</td>
       </tr>
     </ng-template>
-    <ng-template pTemplate="footer">
-      <button
-        (click)="onSubmit()"
-        [disabled]="rows.length === 0"
-        class="mt-4 bg-white border-2 border-grey text-grey font-normal py-2 px-4 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400 "
-      >
-        Submit Data
-      </button>
-      <button
-        (click)="onSubmit()" 
-        [disabled]="rows.length === 0" disabled
-        class="mt-4 bg-[--baseColor] text-white font-normal py-2 px-4 rounded hover:bg-bg-[--baseColor] disabled:opacity-50 disabled:cursor-not-allowed float-right w-[243px]"
-      >
-        Submit Data
-      </button>
-    </ng-template>
+   
+
+    
   </p-table>
 </div>
+  @if(rows?.length){
+  <button (click)="onSubmit()" [disabled]="rows.length === 0"
+    class="mt-4 bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+    Submit Data
+  </button>
+}

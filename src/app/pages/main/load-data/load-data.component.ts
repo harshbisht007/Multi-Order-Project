@@ -5,7 +5,7 @@ import {Button} from "primeng/button";
 import {FormsModule} from "@angular/forms";
 import {InputTextModule} from "primeng/inputtext";
 import {MultiSelectModule} from "primeng/multiselect";
-import {DropdownModule} from "primeng/dropdown";
+import {DropdownChangeEvent, DropdownModule} from "primeng/dropdown";
 import {TagModule} from "primeng/tag";
 import {SliderModule} from "primeng/slider";
 import { TooltipModule } from 'primeng/tooltip';
@@ -14,6 +14,8 @@ import {GraphqlService} from "../../../core/services/graphql.service";
 import {gql} from "apollo-angular";
 import {NgForOf} from "@angular/common";
 import { ButtonModule } from 'primeng/button';
+import { CheckboxModule } from 'primeng/checkbox';
+import { CommonModule } from '@angular/common';
 
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
@@ -25,10 +27,12 @@ export interface CustomTouchPoint extends TouchPoint {
   standalone: true,
   imports: [
     TableModule,
+    CommonModule,
     TooltipModule,
     ButtonModule,
     Button,
     FormsModule,
+    CheckboxModule,
     InputTextModule,
     MultiSelectModule,
     DropdownModule,
@@ -47,14 +51,17 @@ export class LoadDataComponent {
   loading: boolean = false;
   headers: string[] = [];
   activityValues: number[] = [0, 100];
-
+  selectedCity:any;
   searchValue: string | undefined;
-  selectedCity: any;
-
+  selectedSource: any ='upload';
+  sources:any;
   constructor(private graphqlService: GraphqlService) {}
 
   ngOnInit() {
-
+    this.sources = [
+      { name: 'Upload File', value: 'upload' },
+      { name: 'Fetch from Database', value: 'fetch' }
+    ];
   }
 
   clear(table: Table) {
@@ -62,6 +69,16 @@ export class LoadDataComponent {
     this.searchValue = ''
   }
 
+  onSourceChange(event:DropdownChangeEvent) {
+    console.log(event,this.selectedSource,'122')
+    this.headers=[]
+    this.rows=[]
+    if (this.selectedSource === 'upload') {
+      console.log('Upload File selected');
+    } else if (this.selectedSource === 'fetch') {
+      console.log('Fetch from Database selected');
+    }
+  }
   onFileChange(event: any) {
     const target: DataTransfer = <DataTransfer>(event.target);
     if (target.files.length !== 1) {
