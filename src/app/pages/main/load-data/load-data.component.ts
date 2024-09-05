@@ -8,10 +8,12 @@ import {MultiSelectModule} from "primeng/multiselect";
 import {DropdownModule} from "primeng/dropdown";
 import {TagModule} from "primeng/tag";
 import {SliderModule} from "primeng/slider";
+import { TooltipModule } from 'primeng/tooltip';
 import * as XLSX from 'xlsx';
 import {GraphqlService} from "../../../core/services/graphql.service";
 import {gql} from "apollo-angular";
 import {NgForOf} from "@angular/common";
+import { ButtonModule } from 'primeng/button';
 
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
@@ -23,6 +25,8 @@ export interface CustomTouchPoint extends TouchPoint {
   standalone: true,
   imports: [
     TableModule,
+    TooltipModule,
+    ButtonModule,
     Button,
     FormsModule,
     InputTextModule,
@@ -37,6 +41,7 @@ export interface CustomTouchPoint extends TouchPoint {
 })
 export class LoadDataComponent {
   rows!: CustomTouchPoint[];
+  cities: any[] = [];
 
   @Output() goToConfiguration: EventEmitter<string> = new EventEmitter();
   loading: boolean = false;
@@ -44,6 +49,7 @@ export class LoadDataComponent {
   activityValues: number[] = [0, 100];
 
   searchValue: string | undefined;
+  selectedCity: any;
 
   constructor(private graphqlService: GraphqlService) {}
 

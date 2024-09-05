@@ -1,4 +1,28 @@
-<div class="card">
+<div class="">
+  <div class="">
+    <p class="text-[#2C958C] font-semibold text-2xl">Order Data</p>
+    <p class="text-[#676879] font-normal text-[13px]">How would you like to import your order data?</p>
+    <div class="grid grid-cols-5 gap-8 my-4">
+      <div>
+        <label for="" class="flex" ><span class="required mr-2.5 ">Zone </span>
+          <img src="../../../../assets/icons/icons-info.svg" alt=""></label>
+        <p-dropdown 
+        [options]="cities" 
+        [(ngModel)]="selectedCity" 
+        optionLabel="name" 
+        placeholder="Select Zone" 
+        class="custom-dropdown mt-2.5 "
+        /></div>
+      <!-- ... -->
+      <div>
+        <label for="" class="mb-2.5 required">Data Source</label><p-dropdown 
+        [options]="cities" 
+        [(ngModel)]="selectedCity" 
+        optionLabel="name" 
+        placeholder="Select Data Source" 
+        class="custom-dropdown mt-2.5 "/></div>
+    </div>
+  </div>
   <p-table
     #dt1
     [columns]="headers"
@@ -8,16 +32,43 @@
     [rowsPerPageOptions]="[10, 25, 50]"
     [loading]="loading"
     [paginator]="true"
+    styleClass="p-datatable-striped"
   >
     <ng-template pTemplate="caption">
       <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
+      <div class="grid gap-4 grid-cols-2 mb-2">
+        <div>
+          <p-button pRipple class="mr-2" label="Fetch Data" icon="pi pi-refresh" severity="success" (change)="onFileChange($event)"  /> 
+          <p-button pRipple class="mr-2" label="Download Report" icon="pi pi-upload"  [outlined]="true"  severity="success"/> 
+          <p-button pRipple class="" label="Delete" [outlined]="true"  icon="pi pi-trash"  severity="danger" />
+        </div>
+        <div class="flex flex-row-reverse relative">
+          
+          <div class="bg-white search_selectDataset flex rounded-lg overflow-hidden border border-[#C5C7D0BF]">
+            <span class="p-input-icon-left">
+              <i class="pi pi-search"></i>
+              <input type="text" class="text-sm font-normal px-8 py-2.5" pInputText [placeholder]="'Search here'"/>
+          </span>
+        </div>
+          <div class="flex mr-2 px-3 py-2 text-base font-normal warrning_message ml-1 min-w-[550px]">
+              <img src="../../../../assets/icons/icons_check_circle.svg" class="mr-3"> 32 Rows invalid. Data will be ignored while routing.
+              <a href="" class="ml-8 warrning_message">Show All</a>
+          </div>
+          <!-- <div class="flex px-3 mr-2 py-2 text-sm font-normal success_message ml-1 min-w-[270px]">
+              <img src="../../../../assets/icons/icons_warning.svg" class="mr-2"><p>Data looks good! You’re all set.</p> 
+          </div> -->
+      </div>
+      </div>
 
     </ng-template>
     <ng-template pTemplate="header" let-columns>
       <tr>
         <th *ngFor="let col of columns">
-          {{ col }}
+          <span class="flex">
+            {{ col }}
           <p-columnFilter type="numeric" field="weight" display="menu" />
+          </span>
+          
         </th>
       </tr>
     </ng-template>

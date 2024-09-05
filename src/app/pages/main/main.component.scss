@@ -1,0 +1,30 @@
+
+::ng-deep{
+    .opt{
+        .custom-stepper {
+            .p-stepper{
+                .p-stepper-header .p-stepper-action .p-stepper-number {
+                    color: #878682;
+                    border: 1px solid #C5C7D0BF;
+                    border-width: 2px !important;
+                    background: #ffffff;
+                    width: 2.25rem !important;
+                    height: 2.25rem !important;
+                    line-height: 2rem;
+                    font-size: 1.143rem;
+                    border-radius: 50%;
+                    transition: none;
+                    margin: 0 auto;
+                }
+              .p-stepper-header.p-highlight .p-stepper-number {
+                background: #2C958C;
+                color: #fff;
+                border: none;
+                }
+                .p-stepper-header p-button { display: block !important;  
+                }
+                
+            }  
+        }
+    } 
+} 

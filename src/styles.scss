@@ -1,16 +1,30 @@
 /* You can add global styles to this file, and also import other style files */
 @import "primeng/resources/themes/tailwind-light/theme.css";
 @import "primeng/resources/primeng.css";
+@import "primeicons/primeicons.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root{
+    --baseColor : #2C958C;
+}
+
 
 body {
     margin: 16px 24px;
     background: #F5F7F9;
+    font-size: .825rem;
+}
+.required::after {
+    content: ' *';
+    color: #FF0000;
 }
 
 
+
+.p-inputtext, .p-togglebutton, .p-selectbutton, .p-inputgroup{
+    box-shadow: none !important;
+}
 // ::ng-deep .opt .custom-stepper .p-stepper-header p-button { display: block !important;}
