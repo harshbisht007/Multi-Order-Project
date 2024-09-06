@@ -24,7 +24,248 @@ body {
 
 
 
-.p-inputtext, .p-togglebutton, .p-selectbutton, .p-inputgroup{
+.p-inputtext, .p-togglebutton, .p-selectbutton, .p-inputgroup,.p-multiselect{
     box-shadow: none !important;
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid #C5C7D0BF;
+    height: 38px;
+    padding: 0 10px;
+    font-size: .825rem;
+    color: #000000;
+    background: #FFFFFF;
+    margin-top: 10px;
 }
+
+.p-inputtext:disabled{
+    background: #F5F7F9;
+    color: #BDBDBD;
+}
+
+.p-inputtext:focus{
+    border-color: var(--baseColor);
+}
+
+.p-inputtext:disabled{
+    background: #F5F7F9;
+}
+
 // ::ng-deep .opt .custom-stepper .p-stepper-header p-button { display: block !important;}
+::ng-deep {
+    .opt {
+      .custom-dropdown {
+        .p-dropdown {
+          width: 100%;
+          height: 38px;
+          border: 1px solid #ced4da;
+          border-radius: 0.375rem;
+          font-size: 1rem;
+          color: #495057;
+          background-color: #fff;
+          background-clip: padding-box;
+          margin: 10px 0;
+          transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  
+          .p-dropdown-trigger {
+            .p-dropdown-trigger-icon {
+              color: #495057;
+            }
+          }
+  
+          .p-inputtext {
+            font-size: 0.875rem;
+            background: #ffffff;
+            padding: 0 0.75rem;
+            border-radius: 0.375rem;
+            line-height: 36px;
+          }
+        }
+  
+        .p-dropdown:not(.p-disabled).p-focus {
+          outline: 0 none;
+          outline-offset: 0;
+          box-shadow: 0 0 0 1px #2C958C;
+          border-color: #2C958C;
+        }
+      }
+  
+      .p-button {
+        padding: 0.45rem 1rem !important;
+        font-size: 0.825rem !important;
+        transition: none !important;
+        border-radius: 0.275rem !important;
+        outline-color: transparent !important;
+  
+        &:focus {
+          box-shadow: none;
+        }
+  
+        .pi {
+          font-size: 0.725rem;
+        }
+      }
+  
+      .p-button.p-button-success,
+      .p-button-group.p-button-success > .p-button,
+      .p-splitbutton.p-button-success > .p-button {
+        color: #ffffff;
+        background: var(--baseColor);
+        border: 1px solid var(--baseColor);
+      }
+  
+      .p-button.p-button-success.p-button-outlined,
+      .p-button-group.p-button-success > .p-button.p-button-outlined,
+      .p-splitbutton.p-button-success > .p-button.p-button-outlined {
+        background-color: transparent;
+        color: var(--baseColor);
+        border: 1px solid;
+      }
+  
+      .p-button.p-button-danger.p-button-outlined,
+      .p-button-group.p-button-danger > .p-button.p-button-outlined,
+      .p-splitbutton.p-button-danger > .p-button.p-button-outlined {
+        background-color: transparent;
+        color: #ef4444;
+        border: 1px solid;
+      }
+  
+      .p-datatable {
+        font-size: 14px;
+      }
+  
+      .p-datatable .p-datatable-header {
+        padding: 0;
+        background: none;
+      }
+  
+      .p-datatable .p-datatable-thead > tr > th {
+        text-align: left;
+        padding: 0.75rem 1.5rem;
+        border: 1px solid #C5C7D0BF;
+        border-width: 1px;
+        font-weight: 500;
+        color: #6b7280;
+        background: #F4F3F3;
+        transition: none;
+      }
+  
+      .p-datatable.p-datatable-striped .p-datatable-tbody > tr:nth-child(even) {
+        background: #FCFCFC;
+      }
+  
+      .p-datatable .p-datatable-tbody > tr > td {
+        text-align: left;
+        border: 1px solid #C5C7D0BF;
+        border-width: 1px;
+        padding: 1rem 1.5rem;
+      }
+  
+      .success_message {
+        color: #3B9760;
+        background: #EBF6EE;
+      }
+  
+      .warrning_message {
+        color: #C09600;
+        background: #FDF2DF;
+      }
+    }
+  
+    ::ng-deep .p-paginator .p-paginator-first,
+    ::ng-deep .p-paginator .p-paginator-prev,
+    ::ng-deep .p-paginator .p-paginator-next,
+    ::ng-deep .p-paginator .p-paginator-last {
+      background-color: transparent;
+      border-color: #C5C7D0 !important;
+      border-style: solid !important;
+      border-width: 1px 0 1px 1px !important;
+      color: #878682;
+      min-width: 38px;
+      height: 38px;
+      margin: 0;
+      transition: background-color 0.2s, box-shadow 0.2s;
+      border-radius: 0;
+    }
+  
+    ::ng-deep .p-paginator .p-paginator-prev {
+      border-width: 1px 1px 1px 1px !important;
+      color: #878682;
+      min-width: 38px;
+      height: 38px;
+      margin: 0;
+      transition: background-color 0.2s, box-shadow 0.2s;
+      border-radius: 0;
+      border-right: 0 !important;
+    }
+  
+    ::ng-deep .p-paginator .p-paginator-last {
+      border-right: 1px solid #C5C7D0 !important;
+      border-radius: 0 8px 8px 0 !important;
+    }
+  
+    ::ng-deep .p-paginator .p-paginator-first {
+      border-radius: 8px 0 0 8px !important;
+    }
+  
+    ::ng-deep .p-paginator .p-paginator-first:not(.p-disabled):not(.p-highlight):hover,
+    ::ng-deep .p-paginator .p-paginator-prev:not(.p-disabled):not(.p-highlight):hover,
+    ::ng-deep .p-paginator .p-paginator-next:not(.p-disabled):not(.p-highlight):hover,
+    ::ng-deep .p-paginator .p-paginator-last:not(.p-disabled):not(.p-highlight):hover {
+      background: #EBF6F4 !important;
+      border-color: #C5C7D0 !important;
+      color: var(--main-color) !important;
+    }
+  
+    ::ng-deep .p-paginator .p-paginator-pages .p-paginator-page {
+      border-width: 1px !important;
+      border-style: solid !important;
+      border-right: 0 !important;
+      border-color: #C5C7D0 !important;
+      color: #878682 !important;
+      min-width: 38px !important;
+      height: 38px !important;
+    }
+  
+    ::ng-deep .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+      background: #EBF6F4 !important;
+      border-color: #C5C7D0 !important;
+      color: var(--main-color) !important;
+    }
+  
+    ::ng-deep .p-paginator .p-paginator-pages .p-paginator-page:not(.p-highlight):hover {
+      background: #EBF6F4 !important;
+      border-color: #C5C7D0 !important;
+      color: var(--main-color) !important;
+    }
+  
+    ::ng-deep .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+      background: var(--main-color) !important;
+    }
+  
+    ::ng-deep .p-paginator .p-link:focus {
+      box-shadow: none !important;
+    }
+  
+    ::ng-deep .p-paginator .p-link:disabled {
+      color: #e3e3e3 !important;
+      border-color: #C5C7D0 !important;
+      opacity: 1 !important;
+    }
+  
+    ::ng-deep .p-paginator .p-dropdown {
+      border: 1px solid #C5C7D0BF !important;
+      height: 40px;
+    }
+  
+    ::ng-deep .p-paginator .p-dropdown .p-inputtext {
+      box-shadow: none !important;
+      padding: 7px;
+  
+      .p-dropdown:not(.p-disabled).p-focus {
+        outline: 0 none;
+        outline-offset: 0;
+        box-shadow: 0 0 0 1px var(--baseColor) !important;
+        border-color: var(--baseColor);
+      }
+    }
+  }

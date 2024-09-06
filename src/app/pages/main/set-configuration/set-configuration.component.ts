@@ -7,6 +7,11 @@ import {Category} from "../../../graphql/generated";
 import {ToggleButtonModule} from "primeng/togglebutton";
 import {gql} from "apollo-angular";
 import {GraphqlService} from "../../../core/services/graphql.service";
+import { NgClass } from '@angular/common';
+import { AccordionModule } from 'primeng/accordion';
+import { InputTextModule } from 'primeng/inputtext';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
 
 export interface ExtendedCategory extends Category {
   vehiclesCount: number;
@@ -21,10 +26,13 @@ export interface ExtendedCategory extends Category {
   selector: 'app-set-configuration',
   standalone: true,
   imports: [
-    DropdownModule,
+    DropdownModule,ButtonModule,
+    NgClass,InputTextModule,
     FormsModule,
+    AccordionModule,
     MultiSelectModule,
-    ToggleButtonModule
+    ToggleButtonModule,
+    DialogModule
   ],
   templateUrl: './set-configuration.component.html',
   styleUrl: './set-configuration.component.scss'
@@ -51,6 +59,8 @@ export class SetConfigurationComponent {
       shiftTime: 10
     }
   ];
+  showButton: boolean = false;
+  visible: boolean = false;
 
   constructor(private categoryService: CategoryService, private graphqlService: GraphqlService) {
   }
@@ -84,4 +94,11 @@ export class SetConfigurationComponent {
     });
     this.manageOrders.emit(true);
   }
+
+  toggleButton(){
+    this.showButton = !this.showButton;
+  }
+  showDialog() {
+    this.visible = true;
+}
 }
