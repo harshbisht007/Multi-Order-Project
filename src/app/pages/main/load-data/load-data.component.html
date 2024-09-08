@@ -9,7 +9,6 @@
         <p-dropdown [options]="zones" [(ngModel)]="selectedZone" optionLabel="name" placeholder="Select Zone" (onChange)="onZoneChange($event)"
           class="custom-dropdown mt-2.5 " />
       </div>
-      <!-- ... -->
       <div>
         <label for="" class="mb-2.5 required">Data Source</label><p-dropdown [options]="sources"
           (onChange)="onSourceChange($event)" [(ngModel)]="selectedSource" optionLabel="name" optionValue="value"
@@ -122,13 +121,13 @@
 
 
   </p-table>
-</div>
-@if(rows?.length){
-<button (click)="onSubmit()" [disabled]="rows.length === 0" [disabled]="isEditable"
-  class="mt-4 bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
-  Submit Data
-</button>
-}
-<p-toast />
 
-<p-confirmDialog />
+</div>
+
+<div class="flex justify-between items-center"> <button
+  (click)="onSubmit()"
+  [disabled]="rows.length === 0"
+  class="mt-4 bg-white border-2 border-grey text-grey text-sm font-normal px-4 h-9 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400 "
+>  
+  Submit Data
+</button></div>
