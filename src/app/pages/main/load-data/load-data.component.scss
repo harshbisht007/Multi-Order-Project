@@ -407,5 +407,10 @@
       border: 1px solid #333;
       border-radius: 4px;
     }
+    .disabled-icon {
+      color: grey;
+      pointer-events: none;
+    }
+    
   }
   

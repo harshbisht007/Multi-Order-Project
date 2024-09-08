@@ -14,15 +14,14 @@ export class ZoneService {
   }
 
   async init() {
-    await this.graphqlService.runQuery(gql`query {
+    const res=await this.graphqlService.runQuery(gql`query {
       list_zones {
         id
         name
 
       }
-    }`).then((res) => {
-      console.log(res)
-      this.zones.set(res.list_zones)
-    })
+    }`)
+     this.zones.set(res.list_zones)
+    console.log(this.zones(),'122')
   }
 }
