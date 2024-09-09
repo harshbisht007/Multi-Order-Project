@@ -107,8 +107,11 @@ export class LoadDataComponent {
   onZoneChange(event: DropdownChangeEvent) {
     console.log(event, this.selectedZone, '122')
   }
-  async validateData(){
-    this.rows.map((obj : any)=>{
+
+
+  validateData() {
+    this.totalInvalid = 0;
+    this.rows.forEach((obj: any) => {
       const hasComma = Object.values(obj).some(value => typeof value === 'string' && value.includes(','));
       obj.status = hasComma ? 'INVALID' : 'VALID'
     })
@@ -174,7 +177,8 @@ export class LoadDataComponent {
 
   }
   onRowEditSave(arg0: any) {
-    this.isEditable = false
+    this.isEditable = false;
+    this.validateData();
     this.messageService.add({ severity: 'info', summary: 'Saved Successfully', icon: 'pi pi-check' });
 
     console.log(arg0, '122')
@@ -283,7 +287,7 @@ export class LoadDataComponent {
 
   }
   async appendDataToTable(){
-    
+
   }
   async onFileChange(event: any) {
     const target: DataTransfer = <DataTransfer>(event.target);
