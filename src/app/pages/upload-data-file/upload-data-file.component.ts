@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -14,7 +14,7 @@ import * as XLSX from 'xlsx';
   selector: 'app-upload-data-file',
   templateUrl: './upload-data-file.component.html',
   styleUrls: ['./upload-data-file.component.css'],
-  imports: [CardModule,ProgressBarModule,ButtonModule,DialogModule,CheckboxModule,FormsModule]
+  imports: [CardModule, CommonModule, ProgressBarModule, ButtonModule, DialogModule, CheckboxModule, FormsModule]
 })
 
 export class UploadDataFileComponent {
@@ -23,8 +23,9 @@ export class UploadDataFileComponent {
   rowError: boolean = false;
   selectedFile: File | null = null;
   firstRowContainsHeader: boolean = false;
+  MAX_ROWS = 1500;
 
-  constructor(public dialogRef: DynamicDialogRef) {}
+  constructor(public dialogRef: DynamicDialogRef) { }
 
   triggerFileSelect() {
     this.fileInput?.nativeElement.click();
@@ -32,63 +33,61 @@ export class UploadDataFileComponent {
 
   onFileSelect(event: any) {
     const file = event.target.files[0];
-    const fileType = file.name.split('.').pop()?.toLowerCase();
-
-    if (file && ['csv', 'xlsx', 'xls'].includes(fileType)) {
-      this.readFile(file, fileType);
-    } else {
-      this.fileSelected = false;
-      console.error('Please select a valid CSV, XLS, or XLSX file.');
-    }
+    this.processFile(file);
+  }
+  downloadSample() {
+    const link = document.createElement('a');
+    link.href = 'assets/sample_shipments.csv';
+    link.download = 'sample_shipments.csv';
+    link.click();
   }
 
-  readFile(file: File, fileType: string) {
+  processFile(file: File) {
+    const fileType = file?.name.split('.').pop()?.toLowerCase();
+    if (!file || !['csv', 'xlsx', 'xls'].includes(fileType!)) {
+      console.error('Invalid file type.');
+      return;
+    }
+
+    this.fileSelected = false; // Reset file selection state before processing
     const reader = new FileReader();
 
-    // Handle CSV file
     if (fileType === 'csv') {
-      reader.onload = (e: any) => {
-        const csvContent = e.target.result;
-        const rowCount = csvContent.split('\n').length;
-
-        if (rowCount > 1500) {
-          this.rowError = true;
-          this.fileSelected = false;
-          console.error('CSV file has more than 1500 rows.');
-        } else {
-          this.selectedFile = file;
-          this.fileSelected = true;
-          this.rowError = false;
-        }
-      };
+      reader.onload = (e: any) => this.processCSV(e.target.result, file);
       reader.readAsText(file);
-
-    // Handle XLSX or XLS file
     } else {
-      reader.onload = (e: any) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        const rowCount = rows.length;
-
-        if (rowCount > 1500) {
-          this.rowError = true;
-          this.fileSelected = false;
-          console.error('Excel file has more than 1500 rows.');
-        } else {
-          this.selectedFile = file;
-          this.fileSelected = true;
-          this.rowError = false;
-        }
-      };
+      reader.onload = (e: any) => this.processExcel(e.target.result, file);
       reader.readAsArrayBuffer(file);
     }
   }
 
+  processCSV(csvContent: string, file: File) {
+    const rowCount = csvContent.split('\n').length;
+    this.setFileState(file, rowCount);
+  }
+
+  processExcel(data: ArrayBuffer, file: File) {
+    const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    this.setFileState(file, rows.length);
+  }
+
+  setFileState(file: File, rowCount: number) {
+    if (rowCount > this.MAX_ROWS) {
+      this.rowError = true;
+      this.fileSelected = false;
+      console.error(`File exceeds ${this.MAX_ROWS} rows.`);
+    } else {
+      this.selectedFile = file;
+      this.fileSelected = true;
+      this.rowError = false;
+    }
+  }
+
   removeFile() {
-    this.selectedFile = null;
     this.fileSelected = false;
+    this.selectedFile = null;
     this.rowError = false;
   }
 
@@ -100,5 +99,18 @@ export class UploadDataFileComponent {
 
   onCancel() {
     this.dialogRef.close(null);
+  }
+
+  // Drag and drop event handling
+  onDragOver(event: DragEvent) {
+    event.preventDefault(); // Prevent default behavior to avoid blinking
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault(); // Prevent default behavior (e.g., opening the file)
+    if (event.dataTransfer?.files) {
+      const file = event.dataTransfer.files[0];
+      this.processFile(file);
+    }
   }
 }

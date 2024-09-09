@@ -1,67 +1,60 @@
-<div class="p-4 bg-gray-50 rounded-lg">
+<div class="p-4 bg-gray-50 rounded-lg" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
   <!-- Preparing a CSV Section (Only show if no file is selected) -->
-  @if (!fileSelected) {
-    <div class="bg-green-100 p-4 rounded-lg text-gray-700 mb-4">
-      <div class="flex items-center mb-2">
-        <i class="pi pi-info-circle text-green-500 mr-2"></i>
-        <span class="font-semibold">Preparing a CSV</span>
-      </div>
-      <ul class="list-disc ml-6">
-        <li>Use supported headings: Field1, Field2, Field3, Field4, Field5</li>
-        <li>You can import a maximum of 1500 rows</li>
-        <li>Cells must be formatted to type "Text"</li>
-      </ul>
-      <div class="mt-4">
-        <a href="#" class="text-green-500 underline">Download CSV Template</a>
-      </div>
+  <div *ngIf="!fileSelected" class="bg-green-100 p-4 rounded-lg text-gray-700 mb-4">
+    <div class="flex items-center mb-2">
+      <i class="pi pi-info-circle text-green-500 mr-2"></i>
+      <span class="font-semibold">Preparing a CSV</span>
     </div>
-  }
-
-  <!-- CSV Upload Section (Only show if no file is selected) -->
-  @if (!fileSelected) {
-    <div class="p-6 border-2 border-dashed border-gray-300 rounded-lg text-center">
-      <div class="flex items-center justify-center space-x-2">
-        <i class="pi pi-upload text-green-500"></i>
-        <span class="text-gray-600">Drag the file here to begin the upload or</span>
-        <button pButton type="button" class="p-button-text p-button-sm text-green-500" (click)="triggerFileSelect()">Add from computer</button>
-      </div>
-      <small class="block text-gray-400 mt-2">CSV format; Max size - 20MB</small>
+    <ul class="list-disc ml-6">
+      <li>Use supported headings: Field1, Field2, Field3, Field4, Field5</li>
+      <li>You can import a maximum of 1500 rows</li>
+      <li>Cells must be formatted to type "Text"</li>
+    </ul>
+    <div class="mt-4">
+      <p-button pRipple icon="pi pi-download" label="Download CSV Template" class="custom-underline-button"></p-button>
     </div>
-  }
+  </div>
 
-  <!-- File Display Section (Show when file is selected) -->
-  @if (fileSelected) {
-    <div class="p-4 border border-gray-300 rounded-lg flex items-center justify-between">
-      <div>
-        <i class="pi pi-file text-green-500 mr-2"></i>
-        <span>{{ selectedFile?.name }}</span>
-      </div>
-      <div>
-        <i class="pi pi-trash text-red-500 cursor-pointer" (click)="removeFile()"></i>
-      </div>
+  <!-- CSV Upload Section -->
+  <div *ngIf="!fileSelected" class="p-6 border-2 border-dashed border-gray-300 rounded-lg text-center">
+    <div class="flex items-center justify-center space-x-2">
+      <i class="pi pi-upload text-green-500"></i>
+      <span class="text-gray-600">Drag the file here to upload or</span>
+      <button pButton type="button" class="p-button-text p-button-sm text-green-500" (click)="triggerFileSelect()">Add
+        from computer</button>
     </div>
-  }
+    <small class="block text-gray-400 mt-2">CSV format; Max size - 20MB</small>
+  </div>
 
-<!-- Hidden file input -->
-<input type="file" #fileInput style="display:none" accept=".csv, .xlsx, .xls" (change)="onFileSelect($event)" />
+  <!-- File Display Section -->
+  <div *ngIf="fileSelected" class="p-4 border border-gray-300 rounded-lg flex items-center justify-between">
+    <div>
+      <i class="pi pi-file text-green-500 mr-2"></i>
+      <span>{{ selectedFile?.name }}</span>
+    </div>
+    <div>
+      <i class="pi pi-trash text-red-500 cursor-pointer" (click)="removeFile()"></i>
+    </div>
+  </div>
+
+  <!-- Hidden file input -->
+  <input type="file" #fileInput style="display:none" accept=".csv, .xlsx, .xls" (change)="onFileSelect($event)" />
 
   <!-- Error message for too many rows -->
-  @if (rowError) {
-    <div class="mt-2 text-red-500">
-      The CSV file exceeds the 1500 row limit. Please upload a smaller file.
-    </div>
-  }
+  <div *ngIf="rowError" class="mt-2 text-red-500">
+    The CSV file exceeds the 1500 row limit. Please upload a smaller file.
+  </div>
 
   <!-- First Row Contains Header Checkbox -->
-  @if (!rowError) {
-    <div class="mt-4">
-      <p-checkbox [(ngModel)]="firstRowContainsHeader" label="My first row contains column headings"></p-checkbox>
-    </div>
-  }
+  <!-- <div *ngIf="fileSelected && !rowError" class="mt-4">
+    <p-checkbox [(ngModel)]="firstRowContainsHeader" label="My first row contains column headings"></p-checkbox>
+  </div> -->
 
   <!-- Action Buttons -->
   <div class="flex justify-end mt-6 space-x-2">
-    <button pButton type="button" class="p-button-text p-button-sm text-gray-500" (click)="onCancel()">Cancel</button>
-    <button pButton type="button" class="p-button-sm" [disabled]="!fileSelected || rowError" (click)="onUpload()">Upload</button>
+    <p-button pButton pRipple type="button" class="mr-3 p-button-text p-button-sm text-green-500" label="Cancel"
+      (click)="onCancel()" />
+    <p-button pButton pRipple type="button" label="Upload" class="p-button-sm" severity="success"
+      [disabled]="!fileSelected || rowError" (click)="onUpload()" />
   </div>
 </div>

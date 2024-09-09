@@ -88,7 +88,7 @@ export class LoadDataComponent {
   dialogRef: DynamicDialogRef | undefined;
 
 
-  constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService,  public dialogService: DialogService,  ) {
+  constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService, public dialogService: DialogService,) {
     effect(() => {
       this.zones = this.zoneService.zones();
       if (this.zones && this.zones.length > 0) {
@@ -115,7 +115,7 @@ export class LoadDataComponent {
       const hasComma = Object.values(obj).some(value => typeof value === 'string' && value.includes(','));
       const invalidTouchPointType = obj.touch_point_type !== 'PICKUP' && obj.touch_point_type !== 'DROP';
       obj.status = hasComma || invalidTouchPointType ? 'INVALID' : 'VALID';
-  });
+    });
 
     this.showToastForValidCheck = true;
 
@@ -124,7 +124,7 @@ export class LoadDataComponent {
         this.totalInvalid += 1;
       }
     })
-    
+
 
 
     this.validColumnObject = {
@@ -193,13 +193,13 @@ export class LoadDataComponent {
   }
   onRowSelect(event: TableRowSelectEvent) {
     console.log(event, '122')
-    if(this.selectedItems.length===this.rows.length){
-      this.showActions=false;
+    if (this.selectedItems.length === this.rows.length) {
+      this.showActions = false;
     }
   }
   onRowUnselect(event: TableRowUnSelectEvent) {
     console.log(event, '122')
-    this.showActions=true;
+    this.showActions = true;
   }
 
   confirmDelete() {
@@ -288,7 +288,7 @@ export class LoadDataComponent {
 
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
-      const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });      
+      const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
       this.headers = rows[0];
       this.headers = [...this.headers, 'status']
       this.rows = rows.slice(1).map((row: any) => {
@@ -316,7 +316,7 @@ export class LoadDataComponent {
       if (col['status']) {
         // Destructure and remove status
         const { status, latitude, longitude, weight, ...rest } = col;
-  
+
         // Convert latitude, longitude, and weight to integers if they are strings
         const sanitizedRow = {
           ...rest,
@@ -324,18 +324,18 @@ export class LoadDataComponent {
           longitude: typeof longitude === 'string' ? parseInt(longitude, 10) : longitude,
           weight: typeof weight === 'string' ? parseInt(weight, 10) : weight
         };
-  
+
         acc.push(sanitizedRow);
       }
       return acc;
     }, []);
-  
+
     const mutation = gql`
       mutation CreateShipment($data: [CustomTouchPointInput!]!) {
         create_shipments(data: $data)
       }
     `;
-  
+
     try {
       const res = await this.graphqlService.runMutation(mutation, { data: sanitizedRows });
       console.log(res);
@@ -352,7 +352,7 @@ export class LoadDataComponent {
       width: '70%',
       styleClass: 'p-custom-dialog',
     });
-  
+
     // Subscribe to the closing event of the dialog
     this.dialogRef.onClose.subscribe((file: File) => {
       if (file) {

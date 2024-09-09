@@ -16,20 +16,21 @@
       </div> -->
     </div>
   </div>
-  <p-table #dt1 [columns]="headers" [value]="rows" editMode="row" [rows]="10"
-    [rowsPerPageOptions]="[10, 25, 50]" [(selection)]="selectedItems" (onRowSelect)="onRowSelect($event)"
+  <p-table #dt1 [columns]="headers" [value]="rows" editMode="row" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]"
+    [(selection)]="selectedItems" (onRowSelect)="onRowSelect($event)"
     (onHeaderCheckboxToggle)="onHeaderCheckboxToggle($event)" (onRowUnselect)="onRowUnselect($event)"
     [loading]="loading" [paginator]="true" styleClass="p-datatable-striped" [globalFilterFields]="headers">
     <ng-template pTemplate="caption">
-      @if(selectedSource=='upload'){
+      <!-- @if(selectedSource=='upload'){ -->
       <!-- <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" /> -->
-      <p-button (onClick)="uploadData()" label="Upload file"/>
-      }
+      <!-- } -->
       <div class="grid gap-4 grid-cols-2 mb-2">
         <div>
           <!-- @if(selectedSource=='fetch'){ -->
+          <p-button pRipple class="mr-2" (onClick)="uploadData()" severity="success" label="Upload file" />
+
           <p-button pRipple class="mr-2" label="Fetch Data" icon="pi pi-refresh" severity="success"
-            (change)="fetchDataFromDB()" />
+            (onClick)="fetchDataFromDB()" />
           <!-- } -->
           <p-button pRipple class="mr-2" label="Download Report" icon="pi pi-upload" [outlined]="true"
             (onClick)="downloadSample()" severity="success" />
@@ -77,7 +78,7 @@
         <td>
           <p-tableCheckbox [value]="row"></p-tableCheckbox>
         </td>
-    
+
         <td *ngFor="let col of columns" pEditableColumn>
           <ng-container *ngIf="currentEditingRow === row; else displayCell">
             <p-cellEditor>
@@ -85,7 +86,7 @@
                 <input [disabled]="col=='status'" [(ngModel)]="row[col]" class="border border-grey rounded-md px-1 py-1"
                   type="text" pInputText />
               </ng-template>
-    
+
               <ng-template pTemplate="output">
                 <span>
                   {{ row[col] }}
@@ -99,31 +100,32 @@
             </span>
           </ng-template>
         </td>
-        
+
         @if(currentEditingRow === row) {
-          <td>
-            <div class="flex align-items-center justify-content-center gap-1">
-              @if(currentEditingRow === row) {
-                <span pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
-                  [ngClass]="{'disabled-icon': !validateRow(row)}" (click)="onRowEditSave(row)"
-                  class="p-button-rounded p-button-text p-button-success"></span>
-              }
-              @if(currentEditingRow === row) {
-                <span pButton type="button" pCancelEditableRow icon="pi pi-times"
-                  (click)="onRowEditCancel(row, index)" class="p-button-rounded p-button-text p-button-danger"></span>
-              }
-            </div>
-          </td>
+        <td>
+          <div class="flex align-items-center justify-content-center gap-1">
+            @if(currentEditingRow === row) {
+            <span pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
+              [ngClass]="{'disabled-icon': !validateRow(row)}" (click)="onRowEditSave(row)"
+              class="p-button-rounded p-button-text p-button-success"></span>
+            }
+            @if(currentEditingRow === row) {
+            <span pButton type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancel(row, index)"
+              class="p-button-rounded p-button-text p-button-danger"></span>
+            }
+          </div>
+        </td>
         }
         @if(currentEditingRow !== row) {
-          <td>
-            <div class="flex align-items-center justify-content-center gap-1">
-              <span *ngIf="currentEditingRow !== row" pButton pRipple class="p-button-rounded p-button-text p-button-success"
-                type="button" pInitEditableRow icon="pi pi-pencil" (click)="onRowEditInit(row)" class="p-button-rounded p-button-text"></span>
-              <span pButton pRipple class="p-button-rounded p-button-text p-button-danger"
-                (click)="deleteOrder(row)"><i class="pi pi-trash"></i></span>
-            </div>
-          </td>
+        <td>
+          <div class="flex align-items-center justify-content-center gap-1">
+            <span *ngIf="currentEditingRow !== row" pButton pRipple
+              class="p-button-rounded p-button-text p-button-success" type="button" pInitEditableRow icon="pi pi-pencil"
+              (click)="onRowEditInit(row)" class="p-button-rounded p-button-text"></span>
+            <span pButton pRipple class="p-button-rounded p-button-text p-button-danger" (click)="deleteOrder(row)"><i
+                class="pi pi-trash"></i></span>
+          </div>
+        </td>
         }
       </tr>
     </ng-template>
