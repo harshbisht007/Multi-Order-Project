@@ -33,7 +33,9 @@ export class UploadDataFileComponent {
 
   onFileSelect(event: any) {
     const file = event.target.files[0];
-    this.processFile(file);
+    if(file){
+      this.processFile(file);
+    }
   }
   downloadSample() {
     const link = document.createElement('a');
