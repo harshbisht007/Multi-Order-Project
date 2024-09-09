@@ -48,7 +48,7 @@ export interface CustomTouchPoint extends TouchPoint {
     SliderModule,
     NgForOf
   ],
-  providers: [ConfirmationService, MessageService,ZoneService],
+  providers: [ConfirmationService, MessageService, ZoneService],
 
   templateUrl: './load-data.component.html',
   styleUrl: './load-data.component.scss'
@@ -59,15 +59,15 @@ export class LoadDataComponent {
   loading: boolean = false;
   headers: string[] = [];
   activityValues: number[] = [0, 100];
-  showActions:any=true;
+  showActions: any = true;
   searchValue: string | undefined;
   selectedSource: any = 'upload';
   sources: any;
-	isEditable:boolean =false
-  zones:any;
-  selectedZone:any;
+  isEditable: boolean = false
+  zones: any;
+  selectedZone: any;
   selectedItems: any;
-  constructor(private zoneService:ZoneService,private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) { 
+  constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
     effect(() => {
       this.zones = this.zoneService.zones();
       if (this.zones && this.zones.length > 0) {
@@ -83,44 +83,44 @@ export class LoadDataComponent {
     ];
   }
 
-  onZoneChange(event:DropdownChangeEvent){
+  onZoneChange(event: DropdownChangeEvent) {
 
-    console.log(event,this.selectedZone,'122')
+    console.log(event, this.selectedZone, '122')
   }
 
-  
-  
-  downloadSample(){
+
+
+  downloadSample() {
     const link = document.createElement('a');
-    link.href = 'assets/sample_shipments.xlsx'; 
-    link.download = 'sample_shipments.xlsx';     
+    link.href = 'assets/sample_shipments.xlsx';
+    link.download = 'sample_shipments.xlsx';
     link.click();
   }
 
   onRowEditInit(arg0: any) {
-		this.isEditable=true
-    
+    this.isEditable = true
+
     console.log(arg0, '122')
 
   }
   onRowEditSave(arg0: any) {
-		this.isEditable=false
+    this.isEditable = false
     this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Saved Successfully' });
 
     console.log(arg0, '122')
   }
   onRowEditCancel(arg0: any, _t65: any) {
-		this.isEditable=false
+    this.isEditable = false
     this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
 
     console.log(arg0, _t65, '122')
   }
-  onHeaderCheckboxToggle(arg0:any){
-    console.log(arg0,'122')
-    if(arg0.checked==true){
-      this.showActions=false;
-    }else if(arg0.checked==false){
-      this.showActions=true;
+  onHeaderCheckboxToggle(arg0: any) {
+    console.log(arg0, '122')
+    if (arg0.checked == true) {
+      this.showActions = false;
+    } else if (arg0.checked == false) {
+      this.showActions = true;
     }
   }
   onRowSelect(event: TableRowSelectEvent) {
@@ -151,8 +151,8 @@ export class LoadDataComponent {
     })
   }
   validateRow(item: any): boolean {
-		return item.shipment_id && item.external_id && item.address;
-	}
+    return item.shipment_id && item.external_id && item.address;
+  }
   deleteOrder(event: any) {
     console.log(event, '122')
     this.confirmationService.confirm({
@@ -204,7 +204,7 @@ export class LoadDataComponent {
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
       const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
-      this.headers = rows[0]; 
+      this.headers = rows[0];
       this.rows = rows.slice(1).map((row: any) => {
         const obj: any = {};
         row.forEach((cell: any, index: number) => {

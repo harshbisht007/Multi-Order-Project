@@ -6,8 +6,8 @@
       <div>
         <label for="" class="flex"><span class="required mr-2.5 ">Zone </span>
           <img src="../../../../assets/icons/icons-info.svg" alt=""></label>
-        <p-dropdown [options]="zones" [(ngModel)]="selectedZone" optionLabel="name" placeholder="Select Zone" (onChange)="onZoneChange($event)"
-          class="custom-dropdown mt-2.5 " />
+        <p-dropdown [options]="zones" [(ngModel)]="selectedZone" optionLabel="name" placeholder="Select Zone"
+          (onChange)="onZoneChange($event)" class="custom-dropdown mt-2.5 " />
       </div>
       <div>
         <label for="" class="mb-2.5 required">Data Source</label><p-dropdown [options]="sources"
@@ -17,9 +17,9 @@
     </div>
   </div>
   <p-table #dt1 [columns]="headers" [value]="rows" dataKey="shipment_id" editMode="row" [rows]="10"
-    [rowsPerPageOptions]="[10, 25, 50]" [(selection)]="selectedItems" (onRowSelect)="onRowSelect($event)" (onHeaderCheckboxToggle)="onHeaderCheckboxToggle($event)"
-    (onRowUnselect)="onRowUnselect($event)" [loading]="loading" [paginator]="true" styleClass="p-datatable-striped"
-    [globalFilterFields]="headers">
+    [rowsPerPageOptions]="[10, 25, 50]" [(selection)]="selectedItems" (onRowSelect)="onRowSelect($event)"
+    (onHeaderCheckboxToggle)="onHeaderCheckboxToggle($event)" (onRowUnselect)="onRowUnselect($event)"
+    [loading]="loading" [paginator]="true" styleClass="p-datatable-striped" [globalFilterFields]="headers">
     <ng-template pTemplate="caption">
       @if(selectedSource=='upload'){
       <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
@@ -30,8 +30,8 @@
           <p-button pRipple class="mr-2" label="Fetch Data" icon="pi pi-refresh" severity="success"
             (change)="onFileChange($event)" />
           }
-          <p-button pRipple class="mr-2" label="Download Report" icon="pi pi-upload" [outlined]="true" (onClick)="downloadSample()"
-            severity="success" />
+          <p-button pRipple class="mr-2" label="Download Report" icon="pi pi-upload" [outlined]="true"
+            (onClick)="downloadSample()" severity="success" />
           <p-button [disabled]="!rows?.length || !selectedItems?.length" pRipple class="" label="Delete"
             [outlined]="true" icon="pi pi-trash" severity="danger" (onClick)="confirmDelete()" />
         </div>
@@ -59,7 +59,7 @@
     <ng-template pTemplate="header" let-columns>
       <tr>
         <th style="width: 3rem">
-          <p-tableHeaderCheckbox ></p-tableHeaderCheckbox>
+          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
         </th>
         <th *ngFor="let col of columns" pSortableColumn="{{col}}">
           <span class="flex">
@@ -68,7 +68,7 @@
           </span>
         </th>
         @if(showActions){
-          <th>Actions</th>
+        <th>Actions</th>
         }
 
       </tr>
@@ -95,19 +95,21 @@
           </ng-template>
         </td>
         @if(showActions){
-          <td>
-            <div class="flex align-items-center justify-content-center gap-2">
-              <span *ngIf="!editing" pButton pRipple type="buttooriginalEventn" pInitEditableRow icon="pi pi-pencil" [ngClass]="{'disabled-icon':isEditable}"
-                (click)="onRowEditInit(row)" class="p-button-rounded p-button-text"></span>
-              <span *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"  [ngClass]="{'disabled-icon': !validateRow(row)}"
-                (click)="onRowEditSave(row)" class="p-button-rounded p-button-text p-button-success mr-2"></span>
-              <span *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times"
-                (click)="onRowEditCancel(row, index)" class="p-button-rounded p-button-text p-button-danger"></span>
-              <span class="mr-10 ml-15 cursor"  [ngClass]="{'disabled-icon': isEditable}"
-                (click)="deleteOrder(row)"><i class="pi pi-trash"></i></span>
-  
-            </div>
-          </td>
+        <td>
+          <div class="flex align-items-center justify-content-center gap-2">
+            <span *ngIf="!editing" pButton pRipple type="buttooriginalEventn" pInitEditableRow icon="pi pi-pencil"
+              [ngClass]="{'disabled-icon':isEditable}" (click)="onRowEditInit(row)"
+              class="p-button-rounded p-button-text"></span>
+            <span *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
+              [ngClass]="{'disabled-icon': !validateRow(row)}" (click)="onRowEditSave(row)"
+              class="p-button-rounded p-button-text p-button-success mr-2"></span>
+            <span *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times"
+              (click)="onRowEditCancel(row, index)" class="p-button-rounded p-button-text p-button-danger"></span>
+            <span class="mr-10 ml-15 cursor" [ngClass]="{'disabled-icon': isEditable}" (click)="deleteOrder(row)"><i
+                class="pi pi-trash"></i></span>
+
+          </div>
+        </td>
         }
 
       </tr>
@@ -126,11 +128,8 @@
 
 @if(rows?.length){
 
-  <div class="flex justify-between items-center"> <button
-    (click)="onSubmit()"
-    [disabled]="rows.length === 0"
-    class="mt-4 bg-white border-2 border-grey text-grey text-sm font-normal px-4 h-9 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400 "
-  >  
+<div class="flex justify-between items-center"> <button (click)="onSubmit()" [disabled]="rows.length === 0"
+    class="mt-4 bg-white border-2 border-grey text-grey text-sm font-normal px-4 h-9 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400 ">
     Submit Data
   </button></div>
 }
