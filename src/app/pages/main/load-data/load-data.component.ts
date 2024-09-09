@@ -22,6 +22,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ValidateColumnPipe } from '../../../core/pipes/validate-column.pipe';
+import { DialogModule } from 'primeng/dialog';
 
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
@@ -48,7 +49,8 @@ export interface CustomTouchPoint extends TouchPoint {
     RippleModule,
     SliderModule,
     NgForOf,
-    ValidateColumnPipe
+    ValidateColumnPipe,
+    DialogModule
   ],
   providers: [ConfirmationService, MessageService, ZoneService],
 
@@ -77,6 +79,11 @@ export class LoadDataComponent {
     message : '',
     imageSrc : ''
   }
+
+  visible: boolean = false;
+  dontAskAgain: boolean = false;
+  confirmationMessage: string = '';
+  displayConfirmation: boolean = false;
 
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
     effect(() => {
@@ -165,7 +172,7 @@ export class LoadDataComponent {
   }
   onRowEditSave(arg0: any) {
     this.isEditable = false
-    this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Saved Successfully' });
+    this.messageService.add({ severity: 'info', summary: 'Saved Successfully', icon: 'pi pi-check' });
 
     console.log(arg0, '122')
   }
@@ -191,34 +198,49 @@ export class LoadDataComponent {
   }
 
   confirmDelete() {
-    console.log(this.selectedItems, '122')
-    this.confirmationService.confirm({
-      message: `Do you want to delete ${this.selectedItems.length} rows? `,
-      header: 'Delete Confirmation',
-      icon: 'pi pi-info-circle',
-      acceptButtonStyleClass: "p-button-danger p-button-text",
-      rejectButtonStyleClass: "p-button-text p-button-text",
-      acceptIcon: "none",
-      rejectIcon: "none",
-      accept: () => {
-        this.rows = this.rows.filter(row => !this.selectedItems.some((selected: { shipment_id: string; }) => selected.shipment_id === row.shipment_id));
-        this.selectedItems = [];
-        this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Rows deleted' });
-      },
-      reject: () => {
-        this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
-      }
-    })
+    if (this.dontAskAgain) {
+      this.executeDeletion();
+      return;
+    }
+    this.confirmationMessage = `Do you want to delete ${this.selectedItems.length} rows?`;
+    this.displayConfirmation = true;
   }
+  onAccept() {
+    this.executeDeletion();
+    this.displayConfirmation = false;
+  }
+
+  onReject() {
+    this.displayConfirmation = false;
+    this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
+  }
+  // Method to handle the deletion logic
+  private executeDeletion() {
+    this.rows = this.rows.filter(
+      (row) =>
+        !this.selectedItems.some(
+          (selected: { shipment_id: string }) =>
+            selected.shipment_id === row.shipment_id
+        )
+    );
+    this.selectedItems = [];
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Rows deleted',
+      detail: 'Rows deleted',
+    });
+  }
+
   validateRow(item: any): boolean {
     return item.shipment_id && item.external_id && item.address;
   }
+  
   deleteOrder(event: any) {
     console.log(event, '122')
     this.confirmationService.confirm({
       message: 'Do you want to delete this row?',
-      header: 'Delete Confirmation',
-      icon: 'pi pi-info-circle',
+      header: 'Are you sure?',
+      icon: 'pi pi-exclamation-triangle',
       acceptButtonStyleClass: "p-button-danger p-button-text",
       rejectButtonStyleClass: "p-button-text p-button-text",
       acceptIcon: "none",

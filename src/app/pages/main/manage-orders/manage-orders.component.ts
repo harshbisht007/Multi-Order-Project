@@ -4,13 +4,14 @@ import {gql} from "apollo-angular";
 import {Order} from "../../../graphql/generated";
 import {AccordionModule} from "primeng/accordion";
 import {TableModule} from "primeng/table";
+import { TabViewModule } from 'primeng/tabview';
 
 @Component({
   selector: 'app-manage-orders',
   standalone: true,
   imports: [
     AccordionModule,
-    TableModule
+    TableModule, TabViewModule
   ],
   templateUrl: './manage-orders.component.html',
   styleUrl: './manage-orders.component.scss'

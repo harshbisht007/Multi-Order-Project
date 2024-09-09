@@ -37,10 +37,10 @@
         </div>
         <div class="flex flex-row-reverse relative">
 
-          <div class="bg-white search_selectDataset flex rounded-lg overflow-hidden border border-[#C5C7D0BF]">
+          <div>
             <span class="p-input-icon-left">
               <i class="pi pi-search"></i>
-              <input type="text" class="text-sm font-normal px-8 py-2.5" pInputText [placeholder]="'Search here'"
+              <input type="text" pInputText class="text-sm font-normal" style="padding-left: 40px !important;"  [placeholder]="'Search here'"
                 (input)="dt1.filterGlobal($any($event.target).value, 'contains')" />
             </span>
           </div>
@@ -56,7 +56,7 @@
     </ng-template>
     <ng-template pTemplate="header" let-columns>
       <tr>
-        <th style="width: 3rem">
+        <th style="width: 1rem">
           <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
         </th>
         <th *ngFor="let col of columns" pSortableColumn="{{col}}">
@@ -98,16 +98,16 @@
         </td>
         @if(showActions){
         <td>
-          <div class="flex align-items-center justify-content-center gap-2">
-            <span *ngIf="!editing" pButton pRipple type="buttooriginalEventn" pInitEditableRow icon="pi pi-pencil"
+          <div class="flex align-items-center justify-content-center gap-1">
+            <span *ngIf="!editing" pButton pRipple class="p-button-rounded p-button-text p-button-sucess" type="buttooriginalEventn" pInitEditableRow icon="pi pi-pencil"
               [ngClass]="{'disabled-icon':isEditable}" (click)="onRowEditInit(row)"
               class="p-button-rounded p-button-text"></span>
             <span *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
               [ngClass]="{'disabled-icon': !validateRow(row)}" (click)="onRowEditSave(row)"
-              class="p-button-rounded p-button-text p-button-success mr-2"></span>
-            <span *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times"
+              class="p-button-rounded p-button-text p-button-success"></span>
+            <span *ngIf="editing" pButton  type="button" pCancelEditableRow icon="pi pi-times"
               (click)="onRowEditCancel(row, index)" class="p-button-rounded p-button-text p-button-danger"></span>
-            <span class="mr-10 ml-15 cursor" [ngClass]="{'disabled-icon': isEditable}" (click)="deleteOrder(row)"><i
+            <span class="cursor" pButton pRipple class="p-button-rounded p-button-text p-button-danger" [ngClass]="{'disabled-icon': isEditable}" (click)="deleteOrder(row)"><i
                 class="pi pi-trash"></i></span>
 
           </div>
@@ -136,4 +136,16 @@
   </button></div>
 }
 <p-toast />
-<p-confirmDialog />
+
+<p-dialog header="Delete Confirmation" [(visible)]="displayConfirmation" [modal]="true">
+  <p>{{ confirmationMessage }}</p>
+  <p-checkbox [(ngModel)]="dontAskAgain" [binary]="true" label="Don't ask again"></p-checkbox>
+  <div class="ui-dialog-footer">
+    <button pButton label="No" icon="pi pi-times" (click)="onReject()"></button>
+    <button pButton label="Yes" icon="pi pi-check" class="p-button-danger" (click)="onAccept()"></button>
+  </div>
+</p-dialog>
+
+
+
+
