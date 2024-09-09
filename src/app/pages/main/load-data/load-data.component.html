@@ -72,26 +72,25 @@
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-row let-index="rowIndex" let-editing="editing" let-columns="columns">
-      <tr [pEditableRow]="row" [pSelectableRow]="row" [pSelectableRowIndex]="index" [pEditableRow]="row">
+      <tr [pEditableRow]="row" [pSelectableRow]="row" [pSelectableRowIndex]="index">
         <td>
           <p-tableCheckbox [value]="row"></p-tableCheckbox>
         </td>
-
+    
         <td *ngFor="let col of columns" pEditableColumn>
-          <ng-container *ngIf="editing; else displayCell">
+          <ng-container *ngIf="currentEditingRow === row; else displayCell">
             <p-cellEditor>
               <ng-template pTemplate="input">
                 <input [disabled]="col=='status'" [(ngModel)]="row[col]" class="border border-grey rounded-md px-1 py-1"
                   type="text" pInputText />
               </ng-template>
-
+    
               <ng-template pTemplate="output">
                 <span>
                   {{ row[col] }}
                 </span>
               </ng-template>
             </p-cellEditor>
-
           </ng-container>
           <ng-template #displayCell>
             <span [ngStyle]="{'color': row[col] | validateColumn: col}">
@@ -99,24 +98,32 @@
             </span>
           </ng-template>
         </td>
-        @if(showActions){
-        <td>
-          <div class="flex align-items-center justify-content-center gap-1">
-            <span *ngIf="!editing" pButton pRipple class="p-button-rounded p-button-text p-button-sucess"
-              type="buttooriginalEventn" pInitEditableRow icon="pi pi-pencil" [ngClass]="{'disabled-icon':isEditable}"
-              (click)="onRowEditInit(row)" class="p-button-rounded p-button-text"></span>
-            <span *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
-              [ngClass]="{'disabled-icon': !validateRow(row)}" (click)="onRowEditSave(row)"
-              class="p-button-rounded p-button-text p-button-success"></span>
-            <span *ngIf="editing" pButton type="button" pCancelEditableRow icon="pi pi-times"
-              (click)="onRowEditCancel(row, index)" class="p-button-rounded p-button-text p-button-danger"></span>
-            <span class="cursor" pButton pRipple class="p-button-rounded p-button-text p-button-danger"
-              [ngClass]="{'disabled-icon': isEditable}" (click)="deleteOrder(row)"><i class="pi pi-trash"></i></span>
-
-          </div>
-        </td>
+        
+        @if(currentEditingRow === row) {
+          <td>
+            <div class="flex align-items-center justify-content-center gap-1">
+              @if(currentEditingRow === row) {
+                <span pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
+                  [ngClass]="{'disabled-icon': !validateRow(row)}" (click)="onRowEditSave(row)"
+                  class="p-button-rounded p-button-text p-button-success"></span>
+              }
+              @if(currentEditingRow === row) {
+                <span pButton type="button" pCancelEditableRow icon="pi pi-times"
+                  (click)="onRowEditCancel(row, index)" class="p-button-rounded p-button-text p-button-danger"></span>
+              }
+            </div>
+          </td>
         }
-
+        @if(currentEditingRow !== row) {
+          <td>
+            <div class="flex align-items-center justify-content-center gap-1">
+              <span *ngIf="currentEditingRow !== row" pButton pRipple class="p-button-rounded p-button-text p-button-success"
+                type="button" pInitEditableRow icon="pi pi-pencil" (click)="onRowEditInit(row)" class="p-button-rounded p-button-text"></span>
+              <span pButton pRipple class="p-button-rounded p-button-text p-button-danger"
+                (click)="deleteOrder(row)"><i class="pi pi-trash"></i></span>
+            </div>
+          </td>
+        }
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">

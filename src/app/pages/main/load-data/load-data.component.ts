@@ -78,6 +78,9 @@ export class LoadDataComponent {
     message: '',
     imageSrc: ''
   }
+  currentEditingRow: any = null;
+
+
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
     effect(() => {
       this.zones = this.zoneService.zones();
@@ -156,24 +159,22 @@ export class LoadDataComponent {
     link.click();
   }
 
-  onRowEditInit(arg0: any) {
+  onRowEditInit(row: any) {
     this.isEditable = true
-
-    console.log(arg0, '122')
-
+    this.currentEditingRow = row;
   }
-  onRowEditSave(arg0: any) {
+
+  onRowEditSave(row: any) {
     this.isEditable = false;
     this.validateData();
     this.messageService.add({ severity: 'info', summary: 'Saved Successfully', icon: 'pi pi-check' });
-
-    console.log(arg0, '122')
+    this.currentEditingRow = null;
   }
-  onRowEditCancel(arg0: any, _t65: any) {
-    this.isEditable = false
+  onRowEditCancel(row: any, index: any) {
+    this.isEditable = false;
+    this.currentEditingRow = null;
     this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
 
-    console.log(arg0, _t65, '122')
   }
   onHeaderCheckboxToggle(arg0: any) {
     console.log(arg0, '122')
