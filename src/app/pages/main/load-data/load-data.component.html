@@ -16,7 +16,7 @@
       </div> -->
     </div>
   </div>
-  <p-table #dt1 [columns]="headers" [value]="rows" dataKey="shipment_id" editMode="row" [rows]="10"
+  <p-table #dt1 [columns]="headers" [value]="rows" editMode="row" [rows]="10"
     [rowsPerPageOptions]="[10, 25, 50]" [(selection)]="selectedItems" (onRowSelect)="onRowSelect($event)"
     (onHeaderCheckboxToggle)="onHeaderCheckboxToggle($event)" (onRowUnselect)="onRowUnselect($event)"
     [loading]="loading" [paginator]="true" styleClass="p-datatable-striped" [globalFilterFields]="headers">
