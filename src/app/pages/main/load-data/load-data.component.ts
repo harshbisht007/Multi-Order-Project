@@ -13,7 +13,6 @@ import { TooltipModule } from 'primeng/tooltip';
 import * as XLSX from 'xlsx';
 import { GraphqlService } from "../../../core/services/graphql.service";
 import { gql } from "apollo-angular";
-import { NgForOf } from "@angular/common";
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { CommonModule } from '@angular/common';
@@ -27,7 +26,7 @@ import { DialogModule } from 'primeng/dialog';
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
   longitude: number;
-  status:Boolean
+  status: Boolean
 
 }
 
@@ -50,9 +49,7 @@ export interface CustomTouchPoint extends TouchPoint {
     ConfirmDialogModule,
     RippleModule,
     SliderModule,
-    NgForOf,
     ValidateColumnPipe,
-    DialogModule
   ],
   providers: [ConfirmationService, MessageService, ZoneService],
 
@@ -61,7 +58,7 @@ export interface CustomTouchPoint extends TouchPoint {
 })
 export class LoadDataComponent {
   rows!: CustomTouchPoint[];
-  @ViewChild('fileInput') fileInput!: any; 
+  @ViewChild('fileInput') fileInput!: any;
   @Output() goToConfiguration: EventEmitter<string> = new EventEmitter();
   loading: boolean = false;
   headers: string[] = [];
@@ -75,19 +72,13 @@ export class LoadDataComponent {
   selectedZone: any;
   selectedItems: any;
   globalFilterFields: string[] = [];
-  totalInvalid : number = 0;
-  showToastForValidCheck : boolean = false;
+  totalInvalid: number = 0;
+  showToastForValidCheck: boolean = false;
   validColumnObject = {
-    classes : {},
-    message : '',
-    imageSrc : ''
+    classes: {},
+    message: '',
+    imageSrc: ''
   }
-
-  visible: boolean = false;
-  dontAskAgain: boolean = false;
-  confirmationMessage: string = '';
-  displayConfirmation: boolean = false;
-
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
     effect(() => {
       this.zones = this.zoneService.zones();
@@ -118,15 +109,15 @@ export class LoadDataComponent {
 
     this.showToastForValidCheck = true;
 
-    this.rows.map((obj : any)=>{
-      if(obj.status === 'INVALID') {
+    this.rows.map((obj: any) => {
+      if (obj.status === 'INVALID') {
         this.totalInvalid += 1;
       }
     })
 
 
     this.validColumnObject = {
-      classes : {
+      classes: {
         'flex': true,
         'mr-2': true,
         'px-3': true,
@@ -139,24 +130,24 @@ export class LoadDataComponent {
         'min-w-[550px]': this.totalInvalid > 0,
         'min-w-[270px]': this.totalInvalid === 0
       },
-    
-      message : this.totalInvalid > 0
+
+      message: this.totalInvalid > 0
         ? `${this.totalInvalid} Rows invalid. Data will be ignored while routing.`
         : this.totalInvalid === 0
-        ? 'Data looks good! You’re all set.'
-        : '',
-    
-      imageSrc : this.totalInvalid === 0
-      ? '../../../../assets/icons/icons_warning.svg'
+          ? 'Data looks good! You’re all set.'
+          : '',
+
+      imageSrc: this.totalInvalid === 0
+        ? '../../../../assets/icons/icons_warning.svg'
         : '../../../../assets/icons/icons_check_circle.svg'
     }
 
-    
+
   }
 
 
   hasComma(value: string): boolean {
-    if (typeof value === 'string') {      
+    if (typeof value === 'string') {
       return /,/.test(value);
     }
     return false;
@@ -199,49 +190,39 @@ export class LoadDataComponent {
   }
   onRowSelect(event: TableRowSelectEvent) {
     console.log(event, '122')
+    if(this.selectedItems.length===this.rows.length){
+      this.showActions=false;
+    }
   }
   onRowUnselect(event: TableRowUnSelectEvent) {
     console.log(event, '122')
+    this.showActions=true;
   }
 
   confirmDelete() {
-    if (this.dontAskAgain) {
-      this.executeDeletion();
-      return;
-    }
-    this.confirmationMessage = `Do you want to delete ${this.selectedItems.length} rows?`;
-    this.displayConfirmation = true;
-  }
-  onAccept() {
-    this.executeDeletion();
-    this.displayConfirmation = false;
-  }
-
-  onReject() {
-    this.displayConfirmation = false;
-    this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
-  }
-  // Method to handle the deletion logic
-  private executeDeletion() {
-    this.rows = this.rows.filter(
-      (row) =>
-        !this.selectedItems.some(
-          (selected: { shipment_id: string }) =>
-            selected.shipment_id === row.shipment_id
-        )
-    );
-    this.selectedItems = [];
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Rows deleted',
-      detail: 'Rows deleted',
-    });
+    this.confirmationService.confirm({
+      message: `Do you want to delete ${this.selectedItems.length} rows? `,
+      header: 'Delete Confirmation',
+      icon: 'pi pi-info-circle',
+      acceptButtonStyleClass: "p-button-danger p-button-text",
+      rejectButtonStyleClass: "p-button-text p-button-text",
+      acceptIcon: "none",
+      rejectIcon: "none",
+      accept: () => {
+        this.rows = this.rows.filter(row => !this.selectedItems.some((selected: { shipment_id: string; }) => selected.shipment_id === row.shipment_id));
+        this.selectedItems = [];
+        this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Rows deleted' });
+      },
+      reject: () => {
+        this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
+      }
+    })
   }
 
   validateRow(item: any): boolean {
     return item.shipment_id && item.external_id && item.address;
   }
-  
+
   deleteOrder(event: any) {
     console.log(event, '122')
     this.confirmationService.confirm({
@@ -268,8 +249,8 @@ export class LoadDataComponent {
     if (this.fileInput) {
       this.fileInput.nativeElement.value = '';  // Reset the file input
     }
-    this.rows=[];
-    this.headers=[]
+    this.rows = [];
+    this.headers = []
   }
 
   onSourceChange(event: DropdownChangeEvent) {
@@ -283,10 +264,10 @@ export class LoadDataComponent {
     }
   }
 
-  async fetchDataFromDB(){
+  async fetchDataFromDB() {
 
   }
-  async appendDataToTable(){
+  async appendDataToTable() {
 
   }
   async onFileChange(event: any) {
@@ -304,9 +285,9 @@ export class LoadDataComponent {
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
       const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
       console.log(rows[0]);
-      
+
       this.headers = rows[0];
-      this.headers=[...this.headers,'status']
+      this.headers = [...this.headers, 'status']
       this.rows = rows.slice(1).map((row: any) => {
         const obj: any = {};
         row.forEach((cell: any, index: number) => {
@@ -319,7 +300,7 @@ export class LoadDataComponent {
 
       this.loading = false;
       await this.validateData();
-      console.log(this.globalFilterFields,'122')
+      console.log(this.globalFilterFields, '122')
 
     };
     reader.readAsBinaryString(target.files[0]);
