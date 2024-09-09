@@ -28,7 +28,7 @@
         <div>
           @if(selectedSource=='fetch'){
           <p-button pRipple class="mr-2" label="Fetch Data" icon="pi pi-refresh" severity="success"
-            (change)="onFileChange($event)" />
+            (change)="fetchDataFromDB()" />
           }
           <p-button pRipple class="mr-2" label="Download Report" icon="pi pi-upload" [outlined]="true"
             (onClick)="downloadSample()" severity="success" />
@@ -140,7 +140,7 @@
         class="bg-blue-500 text-white text-sm font-normal px-4 h-9 rounded hover:bg-blue-600">
         Validate Data
       </button>
-      <button (click)="onSubmit()" [disabled]="rows.length === 0"
+      <button (click)="onSubmit()" [disabled]="rows.length === 0" [disabled]="totalInvalid>0"
         class="bg-blue-500 text-white text-sm font-normal px-4 h-9 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400">
         Continue
       </button>
@@ -149,7 +149,7 @@
   
 }
 <p-toast />
-
+<p-confirmDialog />
 <p-dialog header="Delete Confirmation" [(visible)]="displayConfirmation" [modal]="true">
   <p>{{ confirmationMessage }}</p>
   <p-checkbox [(ngModel)]="dontAskAgain" [binary]="true" label="Don't ask again"></p-checkbox>

@@ -107,14 +107,11 @@ export class LoadDataComponent {
   onZoneChange(event: DropdownChangeEvent) {
     console.log(event, this.selectedZone, '122')
   }
-
-
-  validateData() {
-    this.rows.forEach((obj: any) => {
+  async validateData(){
+    this.rows.map((obj : any)=>{
       const hasComma = Object.values(obj).some(value => typeof value === 'string' && value.includes(','));
-      const invalidTouchPointType = obj.touch_point_type !== 'PICKUP' && obj.touch_point_type !== 'DROP';
-      obj.status = hasComma || invalidTouchPointType ? 'INVALID' : 'VALID';
-  });
+      obj.status = hasComma ? 'INVALID' : 'VALID'
+    })
 
     this.showToastForValidCheck = true;
 
@@ -152,6 +149,14 @@ export class LoadDataComponent {
     }
 
     
+  }
+
+
+  hasComma(value: string): boolean {
+    if (typeof value === 'string') {      
+      return /,/.test(value);
+    }
+    return false;
   }
 
 
@@ -273,6 +278,13 @@ export class LoadDataComponent {
       console.log('Fetch from Database selected');
     }
   }
+
+  async fetchDataFromDB(){
+
+  }
+  async appendDataToTable(){
+    
+  }
   async onFileChange(event: any) {
     const target: DataTransfer = <DataTransfer>(event.target);
     if (target.files.length !== 1) {
@@ -286,7 +298,9 @@ export class LoadDataComponent {
 
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
-      const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });      
+      const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      console.log(rows[0]);
+      
       this.headers = rows[0];
       this.headers=[...this.headers,'status']
       this.rows = rows.slice(1).map((row: any) => {
@@ -296,8 +310,11 @@ export class LoadDataComponent {
         });
         return obj;
       });
+
+      console.log(this.rows);
+
       this.loading = false;
-      this.validateData();
+      await this.validateData();
       console.log(this.globalFilterFields,'122')
 
     };
