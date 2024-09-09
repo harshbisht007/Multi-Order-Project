@@ -92,8 +92,8 @@ export class LoadDataComponent {
   
   downloadSample(){
     const link = document.createElement('a');
-    link.href = 'assets/sample-shipments.xlsx'; 
-    link.download = 'sample-shipments.xlsx';     
+    link.href = 'assets/sample_shipments.xlsx'; 
+    link.download = 'sample_shipments.xlsx';     
     link.click();
   }
 
