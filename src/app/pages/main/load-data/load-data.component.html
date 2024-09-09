@@ -138,4 +138,16 @@
   </button></div>
 }
 <p-toast />
-<p-confirmDialog />
+
+<p-dialog header="Delete Confirmation" [(visible)]="displayConfirmation" [modal]="true">
+  <p>{{ confirmationMessage }}</p>
+  <p-checkbox [(ngModel)]="dontAskAgain" [binary]="true" label="Don't ask again"></p-checkbox>
+  <div class="ui-dialog-footer">
+    <button pButton label="No" icon="pi pi-times" (click)="onReject()"></button>
+    <button pButton label="Yes" icon="pi pi-check" class="p-button-danger" (click)="onAccept()"></button>
+  </div>
+</p-dialog>
+
+
+
+
