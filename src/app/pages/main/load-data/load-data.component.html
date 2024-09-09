@@ -19,7 +19,7 @@
   <p-table #dt1 [columns]="headers" [value]="rows" dataKey="shipment_id" editMode="row" [rows]="10"
     [rowsPerPageOptions]="[10, 25, 50]" [(selection)]="selectedItems" (onRowSelect)="onRowSelect($event)"
     (onHeaderCheckboxToggle)="onHeaderCheckboxToggle($event)" (onRowUnselect)="onRowUnselect($event)"
-    [loading]="loading" [paginator]="true" styleClass="p-datatable-striped" [globalFilterFields]="headers">
+    [loading]="loading" [paginator]="true" styleClass="p-datatable-striped"  [globalFilterFields]="headers">
     <ng-template pTemplate="caption">
       @if(selectedSource=='upload'){
       <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
@@ -86,12 +86,16 @@
                 <input [(ngModel)]="row[col]" class="border border-grey rounded-md px-1 py-1" type="text" pInputText />
               </ng-template>
               <ng-template pTemplate="output">
-                {{ row[col] }}
+                <span [ngClass]="{'text-red-500': isInvalid(row[col], col)}">
+                  {{ row[col] }}
+                </span>
               </ng-template>
             </p-cellEditor>
           </ng-container>
           <ng-template #displayCell>
-            {{ row[col] }}
+            <span [ngClass]="{'text-red-500': isInvalid(row[col], col)}">
+              {{ row[col] }}
+            </span>
           </ng-template>
         </td>
         @if(showActions){
