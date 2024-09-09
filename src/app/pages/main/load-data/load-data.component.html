@@ -22,7 +22,8 @@
     [loading]="loading" [paginator]="true" styleClass="p-datatable-striped" [globalFilterFields]="headers">
     <ng-template pTemplate="caption">
       @if(selectedSource=='upload'){
-      <input #fileInput type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
+      <!-- <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" /> -->
+      <p-button (onClick)="uploadData()" label="Upload file"/>
       }
       <div class="grid gap-4 grid-cols-2 mb-2">
         <div>

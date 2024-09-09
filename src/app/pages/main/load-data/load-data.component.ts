@@ -15,13 +15,15 @@ import { GraphqlService } from "../../../core/services/graphql.service";
 import { gql } from "apollo-angular";
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgForOf } from '@angular/common';
 import { RippleModule } from 'primeng/ripple';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ValidateColumnPipe } from '../../../core/pipes/validate-column.pipe';
 import { DialogModule } from 'primeng/dialog';
+import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { UploadDataFileComponent } from '../../upload-data-file/upload-data-file.component';
 
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
@@ -50,8 +52,11 @@ export interface CustomTouchPoint extends TouchPoint {
     RippleModule,
     SliderModule,
     ValidateColumnPipe,
+    NgForOf,
+    DialogModule,
+    DynamicDialogModule
   ],
-  providers: [ConfirmationService, MessageService, ZoneService],
+  providers: [ConfirmationService, MessageService, ZoneService, DialogService],
 
   templateUrl: './load-data.component.html',
   styleUrl: './load-data.component.scss'
@@ -79,9 +84,11 @@ export class LoadDataComponent {
     imageSrc: ''
   }
   currentEditingRow: any = null;
+  globalFilterFields: string[] = [];
+  dialogRef: DynamicDialogRef | undefined;
 
 
-  constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
+  constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService,  public dialogService: DialogService,  ) {
     effect(() => {
       this.zones = this.zoneService.zones();
       if (this.zones && this.zones.length > 0) {
@@ -337,6 +344,23 @@ export class LoadDataComponent {
       console.error('GraphQL Error:', error);
     }
   }
+
+
+  uploadData(): void {
+    this.dialogRef = this.dialogService.open(UploadDataFileComponent, {
+      header: 'Upload Data File',
+      width: '70%',
+      styleClass: 'p-custom-dialog',
+    });
   
-  
+    // Subscribe to the closing event of the dialog
+    this.dialogRef.onClose.subscribe((file: File) => {
+      if (file) {
+        // Handle the file in the parent component (process or trigger reading logic)
+        this.onFileChange({ target: { files: [file] } });
+      } else {
+        console.log('Dialog was closed without file upload');
+      }
+    });
+  }
 }
