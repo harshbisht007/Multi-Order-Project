@@ -21,6 +21,7 @@ import { RippleModule } from 'primeng/ripple';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { ValidateColumnPipe } from '../../../core/pipes/validate-column.pipe';
 
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
@@ -46,7 +47,8 @@ export interface CustomTouchPoint extends TouchPoint {
     ConfirmDialogModule,
     RippleModule,
     SliderModule,
-    NgForOf
+    NgForOf,
+    ValidateColumnPipe
   ],
   providers: [ConfirmationService, MessageService, ZoneService],
 
@@ -68,6 +70,13 @@ export class LoadDataComponent {
   selectedZone: any;
   selectedItems: any;
   globalFilterFields: string[] = [];
+  totalInvalid : number = 0;
+  showToastForValidCheck : boolean = false;
+  validColumnObject = {
+    classes : {},
+    message : '',
+    imageSrc : ''
+  }
 
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
     effect(() => {
@@ -86,27 +95,58 @@ export class LoadDataComponent {
   }
 
   onZoneChange(event: DropdownChangeEvent) {
-
     console.log(event, this.selectedZone, '122')
   }
   async validateData(){
-     this.rows.forEach((row:any) => {
-      this.headers.forEach((col) => {
-        this.hasComma(row[col])? row.status = false: row.status=true;
-      });
-    });
-    console.log(this.rows,'122')
+    this.rows.map((obj : any)=>{
+      const hasComma = Object.values(obj).some(value => typeof value === 'string' && value.includes(','));
+      obj.status = hasComma ? 'INVALID' : 'VALID'
+    })
 
+    this.showToastForValidCheck = true;
+
+    this.rows.map((obj : any)=>{
+      if(obj.status === 'INVALID') {
+        this.totalInvalid += 1;
+      }
+    })
+
+
+    this.validColumnObject = {
+      classes : {
+        'flex': true,
+        'mr-2': true,
+        'px-3': true,
+        'py-2': true,
+        'text-base': this.totalInvalid > 0,
+        'font-normal': true,
+        'warning_message': this.totalInvalid > 0,
+        'success_message': this.totalInvalid === 0,
+        'ml-1': true,
+        'min-w-[550px]': this.totalInvalid > 0,
+        'min-w-[270px]': this.totalInvalid === 0
+      },
+    
+      message : this.totalInvalid > 0
+        ? `${this.totalInvalid} Rows invalid. Data will be ignored while routing.`
+        : this.totalInvalid === 0
+        ? 'Data looks good! You’re all set.'
+        : '',
+    
+      imageSrc : this.totalInvalid === 0
+      ? '../../../../assets/icons/icons_warning.svg'
+        : '../../../../assets/icons/icons_check_circle.svg'
+    }
+
+    
   }
+
+
   hasComma(value: string): boolean {
-    if (typeof value === 'string') {
+    if (typeof value === 'string') {      
       return /,/.test(value);
     }
     return false;
-  }
-
-  isInvalid(value: string, col: string): boolean {
-    return this.hasComma(value);
   }
 
 
@@ -224,6 +264,8 @@ export class LoadDataComponent {
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
       const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      console.log(rows[0]);
+      
       this.headers = rows[0];
       this.headers=[...this.headers,'status']
       this.rows = rows.slice(1).map((row: any) => {

@@ -44,14 +44,12 @@
                 (input)="dt1.filterGlobal($any($event.target).value, 'contains')" />
             </span>
           </div>
-          <div class="flex mr-2 px-3 py-2 text-base font-normal warrning_message ml-1 min-w-[550px]">
-            <img src="../../../../assets/icons/icons_check_circle.svg" class="mr-3"> 32 Rows invalid. Data will be
-            ignored while routing.
-            <a href="" class="ml-8 warrning_message">Show All</a>
-          </div>
-          <!-- <div class="flex px-3 mr-2 py-2 text-sm font-normal success_message ml-1 min-w-[270px]">
-                <img src="../../../../assets/icons/icons_warning.svg" class="mr-2"><p>Data looks good! You’re all set.</p> 
-            </div> -->
+          @if (showToastForValidCheck) {
+            <div  [ngClass]="validColumnObject?.classes">
+              <img [src]="validColumnObject?.imageSrc" class="mr-3">
+              <span>{{ validColumnObject?.message }}</span>
+            </div>
+          }
         </div>
       </div>
 
@@ -86,14 +84,14 @@
                 <input [(ngModel)]="row[col]" class="border border-grey rounded-md px-1 py-1" type="text" pInputText />
               </ng-template>
               <ng-template pTemplate="output">
-                <span [ngClass]="{'text-red-500': isInvalid(row[col], col)}">
+                <span>
                   {{ row[col] }}
                 </span>
               </ng-template>
             </p-cellEditor>
           </ng-container>
           <ng-template #displayCell>
-            <span [ngClass]="{'text-red-500': isInvalid(row[col], col)}">
+            <span [ngStyle]="{'color': row[col] | validateColumn: col}">
               {{ row[col] }}
             </span>
           </ng-template>
