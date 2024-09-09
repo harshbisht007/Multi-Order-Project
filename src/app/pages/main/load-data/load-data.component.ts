@@ -110,6 +110,7 @@ export class LoadDataComponent {
 
 
   validateData() {
+    this.totalInvalid = 0;
     this.rows.forEach((obj: any) => {
       const hasComma = Object.values(obj).some(value => typeof value === 'string' && value.includes(','));
       const invalidTouchPointType = obj.touch_point_type !== 'PICKUP' && obj.touch_point_type !== 'DROP';
@@ -169,7 +170,8 @@ export class LoadDataComponent {
 
   }
   onRowEditSave(arg0: any) {
-    this.isEditable = false
+    this.isEditable = false;
+    this.validateData();
     this.messageService.add({ severity: 'info', summary: 'Saved Successfully', icon: 'pi pi-check' });
 
     console.log(arg0, '122')
