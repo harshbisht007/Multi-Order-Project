@@ -19,16 +19,16 @@
   <p-table #dt1 [columns]="headers" [value]="rows" dataKey="shipment_id" editMode="row" [rows]="10"
     [rowsPerPageOptions]="[10, 25, 50]" [(selection)]="selectedItems" (onRowSelect)="onRowSelect($event)"
     (onHeaderCheckboxToggle)="onHeaderCheckboxToggle($event)" (onRowUnselect)="onRowUnselect($event)"
-    [loading]="loading" [paginator]="true" styleClass="p-datatable-striped"  [globalFilterFields]="headers">
+    [loading]="loading" [paginator]="true" styleClass="p-datatable-striped" [globalFilterFields]="headers">
     <ng-template pTemplate="caption">
       @if(selectedSource=='upload'){
-      <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
+      <input #fileInput type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
       }
       <div class="grid gap-4 grid-cols-2 mb-2">
         <div>
           @if(selectedSource=='fetch'){
           <p-button pRipple class="mr-2" label="Fetch Data" icon="pi pi-refresh" severity="success"
-            (change)="onFileChange($event)" />
+            (change)="fetchDataFromDB()" />
           }
           <p-button pRipple class="mr-2" label="Download Report" icon="pi pi-upload" [outlined]="true"
             (onClick)="downloadSample()" severity="success" />
@@ -40,18 +40,16 @@
           <div>
             <span class="p-input-icon-left">
               <i class="pi pi-search"></i>
-              <input type="text" pInputText class="text-sm font-normal" style="padding-left: 40px !important;"  [placeholder]="'Search here'"
-                (input)="dt1.filterGlobal($any($event.target).value, 'contains')" />
+              <input type="text" pInputText class="text-sm font-normal" style="padding-left: 40px !important;"
+                [placeholder]="'Search here'" (input)="dt1.filterGlobal($any($event.target).value, 'contains')" />
             </span>
           </div>
-          <div class="flex mr-2 px-3 py-2 text-base font-normal warrning_message ml-1 min-w-[550px]">
-            <img src="../../../../assets/icons/icons_check_circle.svg" class="mr-3"> 32 Rows invalid. Data will be
-            ignored while routing.
-            <a href="" class="ml-8 warrning_message">Show All</a>
+          @if (showToastForValidCheck) {
+          <div [ngClass]="validColumnObject?.classes">
+            <img [src]="validColumnObject?.imageSrc" class="mr-3">
+            <span>{{ validColumnObject?.message }}</span>
           </div>
-          <!-- <div class="flex px-3 mr-2 py-2 text-sm font-normal success_message ml-1 min-w-[270px]">
-                <img src="../../../../assets/icons/icons_warning.svg" class="mr-2"><p>Data looks good! You’re all set.</p> 
-            </div> -->
+          }
         </div>
       </div>
 
@@ -83,17 +81,20 @@
           <ng-container *ngIf="editing; else displayCell">
             <p-cellEditor>
               <ng-template pTemplate="input">
-                <input [(ngModel)]="row[col]" class="border border-grey rounded-md px-1 py-1" type="text" pInputText />
+                <input [disabled]="col=='status'" [(ngModel)]="row[col]" class="border border-grey rounded-md px-1 py-1"
+                  type="text" pInputText />
               </ng-template>
+
               <ng-template pTemplate="output">
-                <span [ngClass]="{'text-red-500': isInvalid(row[col], col)}">
+                <span>
                   {{ row[col] }}
                 </span>
               </ng-template>
             </p-cellEditor>
+
           </ng-container>
           <ng-template #displayCell>
-            <span [ngClass]="{'text-red-500': isInvalid(row[col], col)}">
+            <span [ngStyle]="{'color': row[col] | validateColumn: col}">
               {{ row[col] }}
             </span>
           </ng-template>
@@ -101,16 +102,16 @@
         @if(showActions){
         <td>
           <div class="flex align-items-center justify-content-center gap-1">
-            <span *ngIf="!editing" pButton pRipple class="p-button-rounded p-button-text p-button-sucess" type="buttooriginalEventn" pInitEditableRow icon="pi pi-pencil"
-              [ngClass]="{'disabled-icon':isEditable}" (click)="onRowEditInit(row)"
-              class="p-button-rounded p-button-text"></span>
+            <span *ngIf="!editing" pButton pRipple class="p-button-rounded p-button-text p-button-sucess"
+              type="buttooriginalEventn" pInitEditableRow icon="pi pi-pencil" [ngClass]="{'disabled-icon':isEditable}"
+              (click)="onRowEditInit(row)" class="p-button-rounded p-button-text"></span>
             <span *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
               [ngClass]="{'disabled-icon': !validateRow(row)}" (click)="onRowEditSave(row)"
               class="p-button-rounded p-button-text p-button-success"></span>
-            <span *ngIf="editing" pButton  type="button" pCancelEditableRow icon="pi pi-times"
+            <span *ngIf="editing" pButton type="button" pCancelEditableRow icon="pi pi-times"
               (click)="onRowEditCancel(row, index)" class="p-button-rounded p-button-text p-button-danger"></span>
-            <span class="cursor" pButton pRipple class="p-button-rounded p-button-text p-button-danger" [ngClass]="{'disabled-icon': isEditable}" (click)="deleteOrder(row)"><i
-                class="pi pi-trash"></i></span>
+            <span class="cursor" pButton pRipple class="p-button-rounded p-button-text p-button-danger"
+              [ngClass]="{'disabled-icon': isEditable}" (click)="deleteOrder(row)"><i class="pi pi-trash"></i></span>
 
           </div>
         </td>
@@ -131,11 +132,21 @@
 </div>
 
 @if(rows?.length){
+<div class="flex justify-between items-center mt-4">
+  <button (click)="onCancel()"
+    class="mt-4 bg-white border-2 border-grey text-grey text-sm font-normal px-4 h-9 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400">
+    Cancel
+  </button>
 
-<div class="flex justify-between items-center"> <button (click)="onSubmit()" [disabled]="rows.length === 0"
-    class="mt-4 bg-white border-2 border-grey text-grey text-sm font-normal px-4 h-9 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400 ">
-    Submit Data
-  </button></div>
+  <div class="flex space-x-2">
+
+    <button (click)="onSubmit()" [disabled]="rows.length === 0" [disabled]="totalInvalid>0"
+      class="bg-blue-500 text-white text-sm font-normal px-4 h-9 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400">
+      Continue
+    </button>
+  </div>
+</div>
+
 }
 <p-toast />
 <p-confirmDialog />

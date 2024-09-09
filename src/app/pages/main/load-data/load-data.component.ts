@@ -13,7 +13,6 @@ import { TooltipModule } from 'primeng/tooltip';
 import * as XLSX from 'xlsx';
 import { GraphqlService } from "../../../core/services/graphql.service";
 import { gql } from "apollo-angular";
-import { NgForOf } from "@angular/common";
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { CommonModule } from '@angular/common';
@@ -21,10 +20,14 @@ import { RippleModule } from 'primeng/ripple';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { ValidateColumnPipe } from '../../../core/pipes/validate-column.pipe';
+import { DialogModule } from 'primeng/dialog';
 
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
   longitude: number;
+  status: Boolean
+
 }
 
 @Component({
@@ -46,7 +49,7 @@ export interface CustomTouchPoint extends TouchPoint {
     ConfirmDialogModule,
     RippleModule,
     SliderModule,
-    NgForOf
+    ValidateColumnPipe,
   ],
   providers: [ConfirmationService, MessageService, ZoneService],
 
@@ -55,6 +58,7 @@ export interface CustomTouchPoint extends TouchPoint {
 })
 export class LoadDataComponent {
   rows!: CustomTouchPoint[];
+  @ViewChild('fileInput') fileInput!: any;
   @Output() goToConfiguration: EventEmitter<string> = new EventEmitter();
   loading: boolean = false;
   headers: string[] = [];
@@ -68,7 +72,13 @@ export class LoadDataComponent {
   selectedZone: any;
   selectedItems: any;
   globalFilterFields: string[] = [];
-
+  totalInvalid: number = 0;
+  showToastForValidCheck: boolean = false;
+  validColumnObject = {
+    classes: {},
+    message: '',
+    imageSrc: ''
+  }
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
     effect(() => {
       this.zones = this.zoneService.zones();
@@ -86,27 +96,63 @@ export class LoadDataComponent {
   }
 
   onZoneChange(event: DropdownChangeEvent) {
-
     console.log(event, this.selectedZone, '122')
   }
-  async validateData(){
-     this.rows.forEach((row:any) => {
-      this.headers.forEach((col) => {
-        this.hasComma(row[col])? row.status = false: row.status=true;
-      });
-    });
-    console.log(this.rows,'122')
+
+
+  validateData() {
+    this.totalInvalid = 0;
+    this.rows.forEach((obj: any) => {
+      const hasComma = Object.values(obj).some(value => typeof value === 'string' && value.includes(','));
+      const invalidTouchPointType = obj.touch_point_type !== 'PICKUP' && obj.touch_point_type !== 'DROP';
+      obj.status = hasComma || invalidTouchPointType ? 'INVALID' : 'VALID';
+  });
+
+    this.showToastForValidCheck = true;
+
+    this.rows.map((obj: any) => {
+      if (obj.status === 'INVALID') {
+        this.totalInvalid += 1;
+      }
+    })
+    
+
+
+    this.validColumnObject = {
+      classes: {
+        'flex': true,
+        'mr-2': true,
+        'px-3': true,
+        'py-2': true,
+        'text-base': this.totalInvalid > 0,
+        'font-normal': true,
+        'warning_message': this.totalInvalid > 0,
+        'success_message': this.totalInvalid === 0,
+        'ml-1': true,
+        'min-w-[550px]': this.totalInvalid > 0,
+        'min-w-[270px]': this.totalInvalid === 0
+      },
+
+      message: this.totalInvalid > 0
+        ? `${this.totalInvalid} Rows invalid. Data will be ignored while routing.`
+        : this.totalInvalid === 0
+          ? 'Data looks good! You’re all set.'
+          : '',
+
+      imageSrc: this.totalInvalid === 0
+        ? '../../../../assets/icons/icons_warning.svg'
+        : '../../../../assets/icons/icons_check_circle.svg'
+    }
+
 
   }
+
+
   hasComma(value: string): boolean {
     if (typeof value === 'string') {
       return /,/.test(value);
     }
     return false;
-  }
-
-  isInvalid(value: string, col: string): boolean {
-    return this.hasComma(value);
   }
 
 
@@ -124,7 +170,8 @@ export class LoadDataComponent {
 
   }
   onRowEditSave(arg0: any) {
-    this.isEditable = false
+    this.isEditable = false;
+    this.validateData();
     this.messageService.add({ severity: 'info', summary: 'Saved Successfully', icon: 'pi pi-check' });
 
     console.log(arg0, '122')
@@ -145,13 +192,16 @@ export class LoadDataComponent {
   }
   onRowSelect(event: TableRowSelectEvent) {
     console.log(event, '122')
+    if(this.selectedItems.length===this.rows.length){
+      this.showActions=false;
+    }
   }
   onRowUnselect(event: TableRowUnSelectEvent) {
     console.log(event, '122')
+    this.showActions=true;
   }
 
   confirmDelete() {
-    console.log(this.selectedItems, '122')
     this.confirmationService.confirm({
       message: `Do you want to delete ${this.selectedItems.length} rows? `,
       header: 'Delete Confirmation',
@@ -170,9 +220,11 @@ export class LoadDataComponent {
       }
     })
   }
+
   validateRow(item: any): boolean {
     return item.shipment_id && item.external_id && item.address;
   }
+
   deleteOrder(event: any) {
     console.log(event, '122')
     this.confirmationService.confirm({
@@ -195,9 +247,12 @@ export class LoadDataComponent {
   }
 
 
-  clear(table: Table) {
-    table.clear();
-    this.searchValue = ''
+  onCancel() {
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = '';  // Reset the file input
+    }
+    this.rows = [];
+    this.headers = []
   }
 
   onSourceChange(event: DropdownChangeEvent) {
@@ -209,6 +264,13 @@ export class LoadDataComponent {
     } else if (this.selectedSource === 'fetch') {
       console.log('Fetch from Database selected');
     }
+  }
+
+  async fetchDataFromDB() {
+
+  }
+  async appendDataToTable() {
+
   }
   async onFileChange(event: any) {
     const target: DataTransfer = <DataTransfer>(event.target);
@@ -223,9 +285,9 @@ export class LoadDataComponent {
 
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
-      const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });      
       this.headers = rows[0];
-      this.headers=[...this.headers,'status']
+      this.headers = [...this.headers, 'status']
       this.rows = rows.slice(1).map((row: any) => {
         const obj: any = {};
         row.forEach((cell: any, index: number) => {
@@ -233,11 +295,8 @@ export class LoadDataComponent {
         });
         return obj;
       });
-
-      console.log(this.rows);
-
       this.loading = false;
-      await this.validateData();
+      this.validateData();
       console.log(this.globalFilterFields,'122')
 
     };
