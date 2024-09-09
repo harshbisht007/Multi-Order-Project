@@ -67,6 +67,8 @@ export class LoadDataComponent {
   zones: any;
   selectedZone: any;
   selectedItems: any;
+  globalFilterFields: string[] = [];
+
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
     effect(() => {
       this.zones = this.zoneService.zones();
@@ -87,7 +89,25 @@ export class LoadDataComponent {
 
     console.log(event, this.selectedZone, '122')
   }
+  async validateData(){
+     this.rows.forEach((row:any) => {
+      this.headers.forEach((col) => {
+        this.hasComma(row[col])? row.status = false: row.status=true;
+      });
+    });
+    console.log(this.rows,'122')
 
+  }
+  hasComma(value: string): boolean {
+    if (typeof value === 'string') {
+      return /,/.test(value);
+    }
+    return false;
+  }
+
+  isInvalid(value: string, col: string): boolean {
+    return this.hasComma(value);
+  }
 
 
   downloadSample() {
@@ -190,14 +210,14 @@ export class LoadDataComponent {
       console.log('Fetch from Database selected');
     }
   }
-  onFileChange(event: any) {
+  async onFileChange(event: any) {
     const target: DataTransfer = <DataTransfer>(event.target);
     if (target.files.length !== 1) {
       throw new Error('Cannot use multiple files');
     }
     this.rows = [];
     const reader: FileReader = new FileReader();
-    reader.onload = (e: any) => {
+    reader.onload = async (e: any) => {
       const bstr: string = e.target.result;
       const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
 
@@ -205,6 +225,7 @@ export class LoadDataComponent {
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
       const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
       this.headers = rows[0];
+      this.headers=[...this.headers,'status']
       this.rows = rows.slice(1).map((row: any) => {
         const obj: any = {};
         row.forEach((cell: any, index: number) => {
@@ -216,8 +237,10 @@ export class LoadDataComponent {
       console.log(this.rows);
 
       this.loading = false;
-    };
+      await this.validateData();
+      console.log(this.globalFilterFields,'122')
 
+    };
     reader.readAsBinaryString(target.files[0]);
   }
 

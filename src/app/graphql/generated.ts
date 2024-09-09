@@ -1304,6 +1304,7 @@ export type TouchPoint = {
   customer_phone?: Maybe<Scalars['String']['output']>;
   external_id?: Maybe<Scalars['String']['output']>;
   geom?: Maybe<Geom>;
+  status:Maybe<Boolean>;
   id: Scalars['String']['output'];
   opening_time?: Maybe<Scalars['Time']['output']>;
   pincode?: Maybe<Scalars['String']['output']>;
