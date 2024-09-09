@@ -22,7 +22,7 @@
     [loading]="loading" [paginator]="true" styleClass="p-datatable-striped"  [globalFilterFields]="headers">
     <ng-template pTemplate="caption">
       @if(selectedSource=='upload'){
-      <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
+      <input #fileInput type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
       }
       <div class="grid gap-4 grid-cols-2 mb-2">
         <div>
@@ -47,7 +47,6 @@
           <div class="flex mr-2 px-3 py-2 text-base font-normal warrning_message ml-1 min-w-[550px]">
             <img src="../../../../assets/icons/icons_check_circle.svg" class="mr-3"> 32 Rows invalid. Data will be
             ignored while routing.
-            <a href="" class="ml-8 warrning_message">Show All</a>
           </div>
           <!-- <div class="flex px-3 mr-2 py-2 text-sm font-normal success_message ml-1 min-w-[270px]">
                 <img src="../../../../assets/icons/icons_warning.svg" class="mr-2"><p>Data looks good! You’re all set.</p> 
@@ -131,11 +130,24 @@
 </div>
 
 @if(rows?.length){
-
-<div class="flex justify-between items-center"> <button (click)="onSubmit()" [disabled]="rows.length === 0"
-    class="mt-4 bg-white border-2 border-grey text-grey text-sm font-normal px-4 h-9 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400 ">
-    Submit Data
-  </button></div>
+  <div class="flex justify-between items-center mt-4">
+    <button (click)="onCancel()"
+      class="mt-4 bg-white border-2 border-grey text-grey text-sm font-normal px-4 h-9 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400">
+      Cancel
+    </button>
+  
+    <div class="flex space-x-2">
+      <button (click)="validateData()"
+        class="bg-blue-500 text-white text-sm font-normal px-4 h-9 rounded hover:bg-blue-600">
+        Validate Data
+      </button>
+      <button (click)="onSubmit()" [disabled]="rows.length === 0"
+        class="bg-blue-500 text-white text-sm font-normal px-4 h-9 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400">
+        Continue
+      </button>
+    </div>
+  </div>
+  
 }
 <p-toast />
 <p-confirmDialog />

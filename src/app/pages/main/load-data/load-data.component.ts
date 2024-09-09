@@ -25,6 +25,8 @@ import { ToastModule } from 'primeng/toast';
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
   longitude: number;
+  status:Boolean
+
 }
 
 @Component({
@@ -55,6 +57,7 @@ export interface CustomTouchPoint extends TouchPoint {
 })
 export class LoadDataComponent {
   rows!: CustomTouchPoint[];
+  @ViewChild('fileInput') fileInput!: any; 
   @Output() goToConfiguration: EventEmitter<string> = new EventEmitter();
   loading: boolean = false;
   headers: string[] = [];
@@ -195,9 +198,12 @@ export class LoadDataComponent {
   }
 
 
-  clear(table: Table) {
-    table.clear();
-    this.searchValue = ''
+  onCancel() {
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = '';  // Reset the file input
+    }
+    this.rows=[];
+    this.headers=[]
   }
 
   onSourceChange(event: DropdownChangeEvent) {
