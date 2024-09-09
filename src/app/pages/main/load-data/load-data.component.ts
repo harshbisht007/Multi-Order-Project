@@ -21,6 +21,8 @@ import { RippleModule } from 'primeng/ripple';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { ValidateColumnPipe } from '../../../core/pipes/validate-column.pipe';
+import { DialogModule } from 'primeng/dialog';
 
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
@@ -48,7 +50,9 @@ export interface CustomTouchPoint extends TouchPoint {
     ConfirmDialogModule,
     RippleModule,
     SliderModule,
-    NgForOf
+    NgForOf,
+    ValidateColumnPipe,
+    DialogModule
   ],
   providers: [ConfirmationService, MessageService, ZoneService],
 
@@ -71,6 +75,18 @@ export class LoadDataComponent {
   selectedZone: any;
   selectedItems: any;
   globalFilterFields: string[] = [];
+  totalInvalid : number = 0;
+  showToastForValidCheck : boolean = false;
+  validColumnObject = {
+    classes : {},
+    message : '',
+    imageSrc : ''
+  }
+
+  visible: boolean = false;
+  dontAskAgain: boolean = false;
+  confirmationMessage: string = '';
+  displayConfirmation: boolean = false;
 
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
     effect(() => {
@@ -89,27 +105,58 @@ export class LoadDataComponent {
   }
 
   onZoneChange(event: DropdownChangeEvent) {
-
     console.log(event, this.selectedZone, '122')
   }
   async validateData(){
-     this.rows.forEach((row:any) => {
-      this.headers.forEach((col) => {
-        this.hasComma(row[col])? row.status = false: row.status=true;
-      });
-    });
-    console.log(this.rows,'122')
+    this.rows.map((obj : any)=>{
+      const hasComma = Object.values(obj).some(value => typeof value === 'string' && value.includes(','));
+      obj.status = hasComma ? 'INVALID' : 'VALID'
+    })
 
+    this.showToastForValidCheck = true;
+
+    this.rows.map((obj : any)=>{
+      if(obj.status === 'INVALID') {
+        this.totalInvalid += 1;
+      }
+    })
+
+
+    this.validColumnObject = {
+      classes : {
+        'flex': true,
+        'mr-2': true,
+        'px-3': true,
+        'py-2': true,
+        'text-base': this.totalInvalid > 0,
+        'font-normal': true,
+        'warning_message': this.totalInvalid > 0,
+        'success_message': this.totalInvalid === 0,
+        'ml-1': true,
+        'min-w-[550px]': this.totalInvalid > 0,
+        'min-w-[270px]': this.totalInvalid === 0
+      },
+    
+      message : this.totalInvalid > 0
+        ? `${this.totalInvalid} Rows invalid. Data will be ignored while routing.`
+        : this.totalInvalid === 0
+        ? 'Data looks good! You’re all set.'
+        : '',
+    
+      imageSrc : this.totalInvalid === 0
+      ? '../../../../assets/icons/icons_warning.svg'
+        : '../../../../assets/icons/icons_check_circle.svg'
+    }
+
+    
   }
+
+
   hasComma(value: string): boolean {
-    if (typeof value === 'string') {
+    if (typeof value === 'string') {      
       return /,/.test(value);
     }
     return false;
-  }
-
-  isInvalid(value: string, col: string): boolean {
-    return this.hasComma(value);
   }
 
 
@@ -154,28 +201,43 @@ export class LoadDataComponent {
   }
 
   confirmDelete() {
-    console.log(this.selectedItems, '122')
-    this.confirmationService.confirm({
-      message: `Do you want to delete ${this.selectedItems.length} rows? `,
-      header: 'Delete Confirmation',
-      icon: 'pi pi-info-circle',
-      acceptButtonStyleClass: "p-button-danger p-button-text",
-      rejectButtonStyleClass: "p-button-text p-button-text",
-      acceptIcon: "none",
-      rejectIcon: "none",
-      accept: () => {
-        this.rows = this.rows.filter(row => !this.selectedItems.some((selected: { shipment_id: string; }) => selected.shipment_id === row.shipment_id));
-        this.selectedItems = [];
-        this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Rows deleted' });
-      },
-      reject: () => {
-        this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
-      }
-    })
+    if (this.dontAskAgain) {
+      this.executeDeletion();
+      return;
+    }
+    this.confirmationMessage = `Do you want to delete ${this.selectedItems.length} rows?`;
+    this.displayConfirmation = true;
   }
+  onAccept() {
+    this.executeDeletion();
+    this.displayConfirmation = false;
+  }
+
+  onReject() {
+    this.displayConfirmation = false;
+    this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
+  }
+  // Method to handle the deletion logic
+  private executeDeletion() {
+    this.rows = this.rows.filter(
+      (row) =>
+        !this.selectedItems.some(
+          (selected: { shipment_id: string }) =>
+            selected.shipment_id === row.shipment_id
+        )
+    );
+    this.selectedItems = [];
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Rows deleted',
+      detail: 'Rows deleted',
+    });
+  }
+
   validateRow(item: any): boolean {
     return item.shipment_id && item.external_id && item.address;
   }
+  
   deleteOrder(event: any) {
     console.log(event, '122')
     this.confirmationService.confirm({
@@ -230,6 +292,8 @@ export class LoadDataComponent {
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
       const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      console.log(rows[0]);
+      
       this.headers = rows[0];
       this.headers=[...this.headers,'status']
       this.rows = rows.slice(1).map((row: any) => {
