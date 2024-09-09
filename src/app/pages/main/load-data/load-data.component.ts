@@ -71,7 +71,6 @@ export class LoadDataComponent {
   zones: any;
   selectedZone: any;
   selectedItems: any;
-  globalFilterFields: string[] = [];
   totalInvalid: number = 0;
   showToastForValidCheck: boolean = false;
   validColumnObject = {
@@ -148,12 +147,6 @@ export class LoadDataComponent {
   }
 
 
-  hasComma(value: string): boolean {
-    if (typeof value === 'string') {
-      return /,/.test(value);
-    }
-    return false;
-  }
 
 
   downloadSample() {
@@ -268,9 +261,11 @@ export class LoadDataComponent {
 
   async fetchDataFromDB() {
 
+    this.appendDataToTable()
   }
   async appendDataToTable() {
 
+    this.validateData()
   }
   async onFileChange(event: any) {
     const target: DataTransfer = <DataTransfer>(event.target);
@@ -296,8 +291,7 @@ export class LoadDataComponent {
         return obj;
       });
       this.loading = false;
-      this.validateData();
-      console.log(this.globalFilterFields,'122')
+      this.appendDataToTable();
 
     };
     reader.readAsBinaryString(target.files[0]);

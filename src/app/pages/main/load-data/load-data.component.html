@@ -9,11 +9,11 @@
         <p-dropdown [options]="zones" [(ngModel)]="selectedZone" optionLabel="name" placeholder="Select Zone"
           (onChange)="onZoneChange($event)" class="custom-dropdown mt-2.5 " />
       </div>
-      <div>
+      <!-- <div>
         <label for="" class="mb-2.5 required">Data Source</label><p-dropdown [options]="sources"
           (onChange)="onSourceChange($event)" [(ngModel)]="selectedSource" optionLabel="name" optionValue="value"
           placeholder="Select Data Source" class="custom-dropdown mt-2.5 " />
-      </div>
+      </div> -->
     </div>
   </div>
   <p-table #dt1 [columns]="headers" [value]="rows" dataKey="shipment_id" editMode="row" [rows]="10"
@@ -26,10 +26,10 @@
       }
       <div class="grid gap-4 grid-cols-2 mb-2">
         <div>
-          @if(selectedSource=='fetch'){
+          <!-- @if(selectedSource=='fetch'){ -->
           <p-button pRipple class="mr-2" label="Fetch Data" icon="pi pi-refresh" severity="success"
             (change)="fetchDataFromDB()" />
-          }
+          <!-- } -->
           <p-button pRipple class="mr-2" label="Download Report" icon="pi pi-upload" [outlined]="true"
             (onClick)="downloadSample()" severity="success" />
           <p-button [disabled]="!rows?.length || !selectedItems?.length" pRipple class="" label="Delete"
