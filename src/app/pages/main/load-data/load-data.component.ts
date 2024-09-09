@@ -304,16 +304,38 @@ export class LoadDataComponent {
   }
 
   async submitData(rows: any[]) {
-    const mutation = gql`mutation CreateShipment($data: [CustomTouchPointInput!]!) {
-      create_shipments(data: $data)
-    }`;
-
+    const sanitizedRows = rows.reduce((acc, col) => {
+      if (col['status']) {
+        // Destructure and remove status
+        const { status, latitude, longitude, weight, ...rest } = col;
+  
+        // Convert latitude, longitude, and weight to integers if they are strings
+        const sanitizedRow = {
+          ...rest,
+          latitude: typeof latitude === 'string' ? parseInt(latitude, 10) : latitude,
+          longitude: typeof longitude === 'string' ? parseInt(longitude, 10) : longitude,
+          weight: typeof weight === 'string' ? parseInt(weight, 10) : weight
+        };
+  
+        acc.push(sanitizedRow);
+      }
+      return acc;
+    }, []);
+  
+    const mutation = gql`
+      mutation CreateShipment($data: [CustomTouchPointInput!]!) {
+        create_shipments(data: $data)
+      }
+    `;
+  
     try {
-      const res = await this.graphqlService.runMutation(mutation, { data: rows });
+      const res = await this.graphqlService.runMutation(mutation, { data: sanitizedRows });
       console.log(res);
       this.goToConfiguration.emit(res.create_shipments);
     } catch (error) {
       console.error('GraphQL Error:', error);
     }
   }
+  
+  
 }
