@@ -1,34 +1,404 @@
 <p class="text-2xl font-semibold mb-4 text-[--baseColor]">Review</p>
 <p-tabView>
   <p-tabPanel header="Cluster 1">
-      <p class="font-sm">Total Vehicles: <span  class="font-semibold mr-8"> 10</span> Vehicles Required in Cluster <span  class="font-semibold  mr-8"> 1: 2</span> Zone: <span class="font-semibold"> Zone 1 - Dubai</span></p>
-      <p-accordion [activeIndex]="0" class="relative">
-        <p-accordionTab>
-          <ng-template pTemplate="header">
-            <span class="flex align-items-center gap-2 w-full">
-              <span class="font-semibold">Order 1</span>
-              <span class="flex align-items-center gap-2">
-                <span class="font-semibold">Vehicle Type: </span>
-                <span class="font-semibold">Car</span>
+      <p class="font-sm mb-3.5">Total Vehicles: <span  class="font-semibold mr-8"> 10</span> Vehicles Required in Cluster <span  class="font-semibold  mr-8"> 1: 2</span> Zone: <span class="font-semibold"> Zone 1 - Dubai</span></p>
+      <div class="h-[56vh] overflow-y-auto custom_scrollbar">
+        <p-accordion [activeIndex]="1">
+          <p-accordionTab>
+            <ng-template pTemplate="header">
+              <span class="flex align-items-center justify-between gap-2 w-full text-sm ">
+                <span class="font-semibold">Batch 1</span>
+                <span class="flex align-items-center gap-2">
+                  <span class="font-semibold ml-2"> <span class="before:[content:'\2022'] before:mr-1.5">30 Orders</span></span>
+                </span>
               </span>
-            </span>
-        </ng-template>
-          <span class="absolute top-[20px] right-[20px] text-sm font-bold"> <span class="before:content-['\2022'] before:mr-1"> 30 Orders </span></span>
-            <p>
-                Lorem ipsum dolor sit amet...
-            </p>
-        </p-accordionTab>
-        <p-accordionTab header="Batch 2">
-            <p>
-                Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium...
-            </p>
-        </p-accordionTab>
-        <p-accordionTab header="Batch 3">
-            <p>
-                At vero eos et accusamus et iusto odio dignissimos...
-            </p>
-        </p-accordionTab>
-    </p-accordion>
+          </ng-template>
+          <div class="bg-[#EBF6F4] p-[1.25rem]  border-[#E5E7EB]" [ngClass]="{'border-b': orderDetails}">
+            <table class="table-auto w-full cursor-pointer" (click)="showOrders()">
+            <tbody>
+              <tr class="font-sm">
+                <td>
+                  <p class="text-[#878682]">Batch ID</p>
+                  <p>00-01</p></td>
+                <td><p class="text-[#878682]">Order Volume</p>
+                  <p>30</p></td>
+                <td><p class="text-[#878682]">Category</p>
+                  <p>Truck</p></td>
+                <td><p class="text-[#878682]">Total Distance</p>
+                  <p>98.00 Km</p></td>
+                <td><p class="text-[#878682]">Estimated Time</p>
+                  <p>2.00 Hrs</p></td>
+                <td class="w-[200px]"><p class="text-[#878682]">Assigned Driver</p>
+                    <p-dropdown optionLabel="name" placeholder="Select Assigned Driverd" [options]="assignDriver" /></td>
+              </tr>
+            </tbody>
+            </table>
+          </div>
+          @if (!orderDetails) {
+          <div class="grid grid-cols-2 gap-4  p-[1.25rem]">
+            <div>
+              <table class="border-collapse border border-slate-400 w-full table-striped">
+                <thead>
+                  <tr class="bg-[#F4F3F3]">
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">#</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Order ID</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Customer</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Delivery Address</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="border border-slate-300 p-3">1.</td>
+                    <td class="border border-slate-300 p-3">Indianapolis</td>
+                    <td class="border border-slate-300 p-3">John Doe</td>
+                    <td class="border border-slate-300 p-3">123 Main St, Indianapolis</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-2">
+                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
+                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-300 p-3">2.</td>
+                    <td class="border border-slate-300 p-3">Columbus</td>
+                    <td class="border border-slate-300 p-3">Jane Smith</td>
+                    <td class="border border-slate-300 p-3">456 Elm St, Columbus</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-2">
+                      <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
+                      <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                    </div></td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-300 p-3">3.</td>
+                    <td class="border border-slate-300 p-3">Detroit</td>
+                    <td class="border border-slate-300 p-3">Mike Johnson</td>
+                    <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-2">
+                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
+                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-300 p-3">4.</td>
+                    <td class="border border-slate-300 p-3">Detroit</td>
+                    <td class="border border-slate-300 p-3">Mike Johnson</td>
+                    <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-2">
+                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
+                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+               
+            </div>
+            <div class="h-full w-full bg-white rounded-lg  border border-[#E5E7EB]">
+              <img src="../../../../assets/map-demo.png" alt="">
+            </div>
+          </div>}
+          </p-accordionTab>
+          <p-accordionTab>
+            <ng-template pTemplate="header">
+              <span class="flex align-items-center justify-between gap-2 w-full text-sm ">
+                <span class="font-semibold">Batch 1</span>
+                <span class="flex align-items-center gap-2">
+                  <span class="font-semibold ml-2"> <span class="before:[content:'\2022'] before:mr-1.5">30 Orders</span></span>
+                </span>
+              </span>
+          </ng-template>
+          <div class="bg-[#EBF6F4] p-[1.25rem]  border-[#E5E7EB]" [ngClass]="{'border-b': orderDetails}">
+            <table class="table-auto w-full cursor-pointer" (click)="showOrders()">
+            <tbody>
+              <tr class="font-sm">
+                <td>
+                  <p class="text-[#878682]">Batch ID</p>
+                  <p>00-01</p></td>
+                <td><p class="text-[#878682]">Order Volume</p>
+                  <p>30</p></td>
+                <td><p class="text-[#878682]">Category</p>
+                  <p>Truck</p></td>
+                <td><p class="text-[#878682]">Total Distance</p>
+                  <p>98.00 Km</p></td>
+                <td><p class="text-[#878682]">Estimated Time</p>
+                  <p>2.00 Hrs</p></td>
+                <td class="w-[200px]"><p class="text-[#878682]">Assigned Driver</p>
+                    <p-dropdown optionLabel="name" placeholder="Select Assigned Driverd" [options]="assignDriver" /></td>
+              </tr>
+            </tbody>
+            </table>
+          </div>
+          @if (!orderDetails) {
+          <div class="grid grid-cols-2 gap-4  p-[1.25rem]">
+            <div>
+              <table class="border-collapse border border-slate-400 w-full table-striped">
+                <thead>
+                  <tr class="bg-[#F4F3F3]">
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">#</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Order ID</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Customer</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Delivery Address</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="border border-slate-300 p-3">1.</td>
+                    <td class="border border-slate-300 p-3">Indianapolis</td>
+                    <td class="border border-slate-300 p-3">John Doe</td>
+                    <td class="border border-slate-300 p-3">123 Main St, Indianapolis</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-2">
+                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
+                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-300 p-3">2.</td>
+                    <td class="border border-slate-300 p-3">Columbus</td>
+                    <td class="border border-slate-300 p-3">Jane Smith</td>
+                    <td class="border border-slate-300 p-3">456 Elm St, Columbus</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-2">
+                      <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
+                      <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                    </div></td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-300 p-3">3.</td>
+                    <td class="border border-slate-300 p-3">Detroit</td>
+                    <td class="border border-slate-300 p-3">Mike Johnson</td>
+                    <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-2">
+                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
+                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-300 p-3">4.</td>
+                    <td class="border border-slate-300 p-3">Detroit</td>
+                    <td class="border border-slate-300 p-3">Mike Johnson</td>
+                    <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-2">
+                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
+                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+               
+            </div>
+            <div class="h-full w-full bg-white rounded-lg  border border-[#E5E7EB]">
+              <img src="../../../../assets/map-demo.png" alt="">
+            </div>
+          </div>}
+          </p-accordionTab>
+          <p-accordionTab>
+            <ng-template pTemplate="header">
+              <span class="flex align-items-center justify-between gap-2 w-full text-sm ">
+                <span class="font-semibold">Batch 1</span>
+                <span class="flex align-items-center gap-2">
+                  <span class="font-semibold ml-2"> <span class="before:[content:'\2022'] before:mr-1.5">30 Orders</span></span>
+                </span>
+              </span>
+          </ng-template>
+          <div class="bg-[#EBF6F4] p-[1.25rem]  border-[#E5E7EB]" [ngClass]="{'border-b': orderDetails}">
+            <table class="table-auto w-full cursor-pointer" (click)="showOrders()">
+            <tbody>
+              <tr class="font-sm">
+                <td>
+                  <p class="text-[#878682]">Batch ID</p>
+                  <p>00-01</p></td>
+                <td><p class="text-[#878682]">Order Volume</p>
+                  <p>30</p></td>
+                <td><p class="text-[#878682]">Category</p>
+                  <p>Truck</p></td>
+                <td><p class="text-[#878682]">Total Distance</p>
+                  <p>98.00 Km</p></td>
+                <td><p class="text-[#878682]">Estimated Time</p>
+                  <p>2.00 Hrs</p></td>
+                <td class="w-[200px]"><p class="text-[#878682]">Assigned Driver</p>
+                    <p-dropdown optionLabel="name" placeholder="Select Assigned Driverd" [options]="assignDriver" /></td>
+              </tr>
+            </tbody>
+            </table>
+          </div>
+          @if (!orderDetails) {
+          <div class="grid grid-cols-2 gap-4  p-[1.25rem]">
+            <div>
+              <table class="border-collapse border border-slate-400 w-full table-striped">
+                <thead>
+                  <tr class="bg-[#F4F3F3]">
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">#</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Order ID</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Customer</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Delivery Address</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="border border-slate-300 p-3">1.</td>
+                    <td class="border border-slate-300 p-3">Indianapolis</td>
+                    <td class="border border-slate-300 p-3">John Doe</td>
+                    <td class="border border-slate-300 p-3">123 Main St, Indianapolis</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-2">
+                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
+                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-300 p-3">2.</td>
+                    <td class="border border-slate-300 p-3">Columbus</td>
+                    <td class="border border-slate-300 p-3">Jane Smith</td>
+                    <td class="border border-slate-300 p-3">456 Elm St, Columbus</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-2">
+                      <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
+                      <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                    </div></td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-300 p-3">3.</td>
+                    <td class="border border-slate-300 p-3">Detroit</td>
+                    <td class="border border-slate-300 p-3">Mike Johnson</td>
+                    <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-2">
+                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
+                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-300 p-3">4.</td>
+                    <td class="border border-slate-300 p-3">Detroit</td>
+                    <td class="border border-slate-300 p-3">Mike Johnson</td>
+                    <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-2">
+                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
+                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+               
+            </div>
+            <div class="h-full w-full bg-white rounded-lg  border border-[#E5E7EB]">
+              <img src="../../../../assets/map-demo.png" alt="">
+            </div>
+          </div>}
+          </p-accordionTab>
+          <p-accordionTab>
+            <ng-template pTemplate="header">
+              <span class="flex align-items-center justify-between gap-2 w-full text-sm ">
+                <span class="font-semibold">Missed Orders</span>
+                <span class="flex align-items-center gap-2">
+                  <span class="font-semibold ml-2 text-[--baseColor]"><i class=" pi pi-download  mr-2 font-sm"></i> Download</span>
+                  <span class="font-semibold ml-2"> <span class="before:[content:'\2022'] before:mr-1.5">30 Orders</span></span>
+                </span>
+              </span>
+          </ng-template>
+          
+          <div class="grid grid-cols-2 gap-4  p-[1.25rem]">
+            <div>
+              <table class="border-collapse border border-slate-400 w-full table-striped">
+                <thead>
+                  <tr class="bg-[#F4F3F3]">
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">#</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Order ID</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Customer</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Delivery Address</th>
+                    <th class="border border-[#C5C7D0BF] p-3 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="border border-slate-300 p-3">1.</td>
+                    <td class="border border-slate-300 p-3">Indianapolis</td>
+                    <td class="border border-slate-300 p-3">John Doe</td>
+                    <td class="border border-slate-300 p-3">123 Main St, Indianapolis</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-5">
+                        <span pTooltip="Synco AI suggests adding this order to Batch 1"
+                        hideDelay="3" tooltipPosition="left"><img src="../../../../assets/icons/Icons_aiAssistant.svg" alt=""></span>
+                        <span  pTooltip="Move Order"
+                        hideDelay="3" tooltipPosition="left" ><img src="../../../../assets/icons/icons_move.svg" alt=""></span>
+                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-300 p-3">2.</td>
+                    <td class="border border-slate-300 p-3">Columbus</td>
+                    <td class="border border-slate-300 p-3">Jane Smith</td>
+                    <td class="border border-slate-300 p-3">456 Elm St, Columbus</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-5">
+                        <span pTooltip="Synco AI suggests adding this order to Batch 1"
+                        hideDelay="3" tooltipPosition="left"><img src="../../../../assets/icons/Icons_aiAssistant.svg" alt=""></span>
+                        <span pTooltip="Move Order"
+                        hideDelay="3" tooltipPosition="left" ><img src="../../../../assets/icons/icons_move.svg" alt=""></span>
+                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                      </div></td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-300 p-3">3.</td>
+                    <td class="border border-slate-300 p-3">Detroit</td>
+                    <td class="border border-slate-300 p-3">Mike Johnson</td>
+                    <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-5">
+                        <span pTooltip="Synco AI suggests adding this order to Batch 1"
+                        hideDelay="3" tooltipPosition="left"><img src="../../../../assets/icons/Icons_aiAssistant.svg" alt=""></span>
+                        <span  pTooltip="Move Order"
+                        hideDelay="3" tooltipPosition="left" ><img src="../../../../assets/icons/icons_move.svg" alt=""></span>
+                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-300 p-3">4.</td>
+                    <td class="border border-slate-300 p-3">Detroit</td>
+                    <td class="border border-slate-300 p-3">Mike Johnson</td>
+                    <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
+                    <td class="border border-slate-300 p-3 text-center">
+                      <div class="flex items-center gap-5">
+                        <span pTooltip="Synco AI suggests adding this order to Batch 1"
+                        hideDelay="3" tooltipPosition="left"><img src="../../../../assets/icons/Icons_aiAssistant.svg" alt=""></span>
+                        <span  pTooltip="Move Order"
+                        hideDelay="3" tooltipPosition="left" ><img src="../../../../assets/icons/icons_move.svg" alt=""></span>
+                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+               
+            </div>
+            <div class="h-full w-full bg-white rounded-lg  border border-[#E5E7EB]">
+              <img src="../../../../assets/map-demo.png" alt="">
+            </div>
+          </div>
+          </p-accordionTab>
+      </p-accordion>
+      </div>
+
 
   </p-tabPanel>
   <p-tabPanel header="Cluster 2">

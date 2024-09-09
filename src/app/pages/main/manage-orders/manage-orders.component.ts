@@ -5,26 +5,42 @@ import {Order} from "../../../graphql/generated";
 import {AccordionModule} from "primeng/accordion";
 import {TableModule} from "primeng/table";
 import { TabViewModule } from 'primeng/tabview';
+import { DropdownModule } from 'primeng/dropdown';
+import { NgClass } from '@angular/common';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-manage-orders',
   standalone: true,
   imports: [
-    AccordionModule,
-    TableModule, TabViewModule
+    AccordionModule,NgClass,TooltipModule,
+    TableModule, TabViewModule,DropdownModule 
   ],
   templateUrl: './manage-orders.component.html',
   styleUrl: './manage-orders.component.scss'
 })
 export class ManageOrdersComponent implements AfterViewInit {
-
+  assignDriver: { name: string, code: string }[] = [];
   @Input() routeId!: string;
   order!: Order;
+  orderDetails: boolean = false;
   constructor(private graphqlService: GraphqlService) {
+  }
+
+  ngOnInit() {
+    this.assignDriver = [
+      { name: 'Assigned', code: 'assigned' },
+      { name: 'Unassigned', code: 'unassigned' },
+      { name: 'In Progress', code: 'inProgress' },
+    ];
   }
 
   ngAfterViewInit() {
     this.getOrder().then();
+  }
+
+  showOrders(){
+    this.orderDetails = !this.orderDetails;
   }
 
   async getOrder() {
