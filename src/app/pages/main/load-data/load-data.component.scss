@@ -228,46 +228,6 @@
         }
       }
   
-      .p-button {
-        padding: 0.45rem 1rem !important;
-        font-size: 0.825rem !important;
-        transition: none !important;
-        border-radius: 0.275rem !important;
-        outline-color: transparent !important;
-  
-        &:focus {
-          box-shadow: none;
-        }
-  
-        .pi {
-          font-size: 0.725rem;
-        }
-      }
-  
-      .p-button.p-button-success,
-      .p-button-group.p-button-success > .p-button,
-      .p-splitbutton.p-button-success > .p-button {
-        color: #ffffff;
-        background: var(--baseColor);
-        border: 1px solid var(--baseColor);
-      }
-  
-      .p-button.p-button-success.p-button-outlined,
-      .p-button-group.p-button-success > .p-button.p-button-outlined,
-      .p-splitbutton.p-button-success > .p-button.p-button-outlined {
-        background-color: transparent;
-        color: var(--baseColor);
-        border: 1px solid;
-      }
-  
-      .p-button.p-button-danger.p-button-outlined,
-      .p-button-group.p-button-danger > .p-button.p-button-outlined,
-      .p-splitbutton.p-button-danger > .p-button.p-button-outlined {
-        background-color: transparent;
-        color: #ef4444;
-        border: 1px solid;
-      }
-  
       .p-datatable {
         font-size: 14px;
       }
@@ -399,6 +359,7 @@
     ::ng-deep .p-paginator .p-dropdown .p-inputtext {
       box-shadow: none !important;
       padding: 7px;
+      border: none !important;
   
       .p-dropdown:not(.p-disabled).p-focus {
         outline: 0 none;

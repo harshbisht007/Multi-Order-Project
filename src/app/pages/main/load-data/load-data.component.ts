@@ -105,7 +105,7 @@ export class LoadDataComponent {
   }
   onRowEditSave(arg0: any) {
     this.isEditable = false
-    this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Saved Successfully' });
+    this.messageService.add({ severity: 'info', summary: 'Saved Successfully', icon: 'pi pi-check' });
 
     console.log(arg0, '122')
   }
@@ -157,8 +157,8 @@ export class LoadDataComponent {
     console.log(event, '122')
     this.confirmationService.confirm({
       message: 'Do you want to delete this row?',
-      header: 'Delete Confirmation',
-      icon: 'pi pi-info-circle',
+      header: 'Are you sure?',
+      icon: 'pi pi-exclamation-triangle',
       acceptButtonStyleClass: "p-button-danger p-button-text",
       rejectButtonStyleClass: "p-button-text p-button-text",
       acceptIcon: "none",
