@@ -15,13 +15,15 @@ import { GraphqlService } from "../../../core/services/graphql.service";
 import { gql } from "apollo-angular";
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgForOf } from '@angular/common';
 import { RippleModule } from 'primeng/ripple';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ValidateColumnPipe } from '../../../core/pipes/validate-column.pipe';
 import { DialogModule } from 'primeng/dialog';
+import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { UploadDataFileComponent } from '../../upload-data-file/upload-data-file.component';
 
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
@@ -50,8 +52,11 @@ export interface CustomTouchPoint extends TouchPoint {
     RippleModule,
     SliderModule,
     ValidateColumnPipe,
+    NgForOf,
+    DialogModule,
+    DynamicDialogModule
   ],
-  providers: [ConfirmationService, MessageService, ZoneService],
+  providers: [ConfirmationService, MessageService, ZoneService, DialogService],
 
   templateUrl: './load-data.component.html',
   styleUrl: './load-data.component.scss'
@@ -71,7 +76,6 @@ export class LoadDataComponent {
   zones: any;
   selectedZone: any;
   selectedItems: any;
-  globalFilterFields: string[] = [];
   totalInvalid: number = 0;
   showToastForValidCheck: boolean = false;
   validColumnObject = {
@@ -79,7 +83,12 @@ export class LoadDataComponent {
     message: '',
     imageSrc: ''
   }
-  constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
+  currentEditingRow: any = null;
+  globalFilterFields: string[] = [];
+  dialogRef: DynamicDialogRef | undefined;
+
+
+  constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService, public dialogService: DialogService,) {
     effect(() => {
       this.zones = this.zoneService.zones();
       if (this.zones && this.zones.length > 0) {
@@ -106,7 +115,7 @@ export class LoadDataComponent {
       const hasComma = Object.values(obj).some(value => typeof value === 'string' && value.includes(','));
       const invalidTouchPointType = obj.touch_point_type !== 'PICKUP' && obj.touch_point_type !== 'DROP';
       obj.status = hasComma || invalidTouchPointType ? 'INVALID' : 'VALID';
-  });
+    });
 
     this.showToastForValidCheck = true;
 
@@ -115,7 +124,7 @@ export class LoadDataComponent {
         this.totalInvalid += 1;
       }
     })
-    
+
 
 
     this.validColumnObject = {
@@ -148,12 +157,6 @@ export class LoadDataComponent {
   }
 
 
-  hasComma(value: string): boolean {
-    if (typeof value === 'string') {
-      return /,/.test(value);
-    }
-    return false;
-  }
 
 
   downloadSample() {
@@ -163,24 +166,22 @@ export class LoadDataComponent {
     link.click();
   }
 
-  onRowEditInit(arg0: any) {
+  onRowEditInit(row: any) {
     this.isEditable = true
-
-    console.log(arg0, '122')
-
+    this.currentEditingRow = row;
   }
-  onRowEditSave(arg0: any) {
+
+  onRowEditSave(row: any) {
     this.isEditable = false;
     this.validateData();
     this.messageService.add({ severity: 'info', summary: 'Saved Successfully', icon: 'pi pi-check' });
-
-    console.log(arg0, '122')
+    this.currentEditingRow = null;
   }
-  onRowEditCancel(arg0: any, _t65: any) {
-    this.isEditable = false
+  onRowEditCancel(row: any, index: any) {
+    this.isEditable = false;
+    this.currentEditingRow = null;
     this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
 
-    console.log(arg0, _t65, '122')
   }
   onHeaderCheckboxToggle(arg0: any) {
     console.log(arg0, '122')
@@ -192,13 +193,13 @@ export class LoadDataComponent {
   }
   onRowSelect(event: TableRowSelectEvent) {
     console.log(event, '122')
-    if(this.selectedItems.length===this.rows.length){
-      this.showActions=false;
+    if (this.selectedItems.length === this.rows.length) {
+      this.showActions = false;
     }
   }
   onRowUnselect(event: TableRowUnSelectEvent) {
     console.log(event, '122')
-    this.showActions=true;
+    this.showActions = true;
   }
 
   confirmDelete() {
@@ -268,9 +269,11 @@ export class LoadDataComponent {
 
   async fetchDataFromDB() {
 
+    this.appendDataToTable()
   }
   async appendDataToTable() {
 
+    this.validateData()
   }
   async onFileChange(event: any) {
     const target: DataTransfer = <DataTransfer>(event.target);
@@ -285,7 +288,7 @@ export class LoadDataComponent {
 
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
-      const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });      
+      const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
       this.headers = rows[0];
       this.headers = [...this.headers, 'status']
       this.rows = rows.slice(1).map((row: any) => {
@@ -296,8 +299,7 @@ export class LoadDataComponent {
         return obj;
       });
       this.loading = false;
-      this.validateData();
-      console.log(this.globalFilterFields,'122')
+      this.appendDataToTable();
 
     };
     reader.readAsBinaryString(target.files[0]);
@@ -310,16 +312,55 @@ export class LoadDataComponent {
   }
 
   async submitData(rows: any[]) {
-    const mutation = gql`mutation CreateShipment($data: [CustomTouchPointInput!]!) {
-      create_shipments(data: $data)
-    }`;
+    const sanitizedRows = rows.reduce((acc, col) => {
+      if (col['status']) {
+        // Destructure and remove status
+        const { status, latitude, longitude, weight, ...rest } = col;
+
+        // Convert latitude, longitude, and weight to integers if they are strings
+        const sanitizedRow = {
+          ...rest,
+          latitude: typeof latitude === 'string' ? parseInt(latitude, 10) : latitude,
+          longitude: typeof longitude === 'string' ? parseInt(longitude, 10) : longitude,
+          weight: typeof weight === 'string' ? parseInt(weight, 10) : weight
+        };
+
+        acc.push(sanitizedRow);
+      }
+      return acc;
+    }, []);
+
+    const mutation = gql`
+      mutation CreateShipment($data: [CustomTouchPointInput!]!) {
+        create_shipments(data: $data)
+      }
+    `;
 
     try {
-      const res = await this.graphqlService.runMutation(mutation, { data: rows });
+      const res = await this.graphqlService.runMutation(mutation, { data: sanitizedRows });
       console.log(res);
       this.goToConfiguration.emit(res.create_shipments);
     } catch (error) {
       console.error('GraphQL Error:', error);
     }
+  }
+
+
+  uploadData(): void {
+    this.dialogRef = this.dialogService.open(UploadDataFileComponent, {
+      header: 'Upload Data File',
+      width: '70%',
+      styleClass: 'p-custom-dialog',
+    });
+
+    // Subscribe to the closing event of the dialog
+    this.dialogRef.onClose.subscribe((file: File) => {
+      if (file) {
+        // Handle the file in the parent component (process or trigger reading logic)
+        this.onFileChange({ target: { files: [file] } });
+      } else {
+        console.log('Dialog was closed without file upload');
+      }
+    });
   }
 }

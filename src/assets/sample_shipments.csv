@@ -1,0 +1,3 @@
+weight,shipment_id,category_type,address,pincode,opening_time,closing_time,touch_point_type,latitude,longitude,external_id
+10.5,SHP12345,Electronics,Address 1,110001,09:00:00,18:00:00,PICKUP,28.28,72.72,q1
+15,SHP67890,Furniture,Address 2,110002,08:00:00,17:00:00,DROP,28.72,72.28,q11
