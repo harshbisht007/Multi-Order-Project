@@ -2,6 +2,8 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {DropdownModule} from "primeng/dropdown";
 import {FormsModule} from "@angular/forms";
 import {MultiSelectModule} from "primeng/multiselect";
+import { InputSwitchModule } from 'primeng/inputswitch';
+
 import {CategoryService} from "../../../core/services/category.service";
 import {Category} from "../../../graphql/generated";
 import {ToggleButtonModule} from "primeng/togglebutton";
@@ -29,6 +31,7 @@ export interface ExtendedCategory extends Category {
     DropdownModule,ButtonModule,
     NgClass,InputTextModule,
     FormsModule,
+    InputSwitchModule,
     AccordionModule,
     MultiSelectModule,
     ToggleButtonModule,
@@ -61,6 +64,22 @@ export class SetConfigurationComponent {
   ];
   showButton: boolean = false;
   visible: boolean = false;
+  checked:boolean=false;
+  maxMinInput: Array<{ label: string, placeholder: string, value: number ,src:string}> = [
+    {
+      label: 'Max. Orders in Each Cluster',
+      placeholder: 'Enter maximum orders',
+      value: 0 ,
+      src:'../../../../assets/icons/icons-info.svg'
+    },
+    {
+      label: 'Min. Orders in Each Cluster',
+      placeholder: 'Enter minimum orders',
+      value: 0 ,
+      src:'../../../../assets/icons/icons-info.svg'
+    }
+  ];
+  
 
   constructor(private categoryService: CategoryService, private graphqlService: GraphqlService) {
   }

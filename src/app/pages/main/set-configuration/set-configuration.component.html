@@ -2,104 +2,117 @@
   <h2 class="font-semibold text-2xl text-[--baseColor] mb-4">Zone Configuration</h2>
   <p-accordion [activeIndex]="0">
     <p-accordionTab header="Configurations">
-      <div class="flex justify-content-center items-center"><p class="flex mr-4 font-sm">Single Batch <img src="../../../../assets/icons/icons-info.svg" alt="" class="ml-2"></p><div class="custom-toggle" (click)="toggleButton()" ><div class="toggle_button" [ngClass]="{active: !showButton}"></div></div><p class="flex ml-4 font-sm">Multi Batch <img src="../../../../assets/icons/icons-info.svg" alt="" class="ml-2"></p></div>
-      @if (!showButton) {
-        <p class="font-sm font-semibold mt-4 mb-1">Clusters</p>
-        <div class="grid grid-cols-3 gap-8">
-          <div>
-            <label for="" class="flex font-sm"><span class="required"> Max. Orders in Each Cluster</span> <img src="../../../../assets/icons/icons-info.svg" alt="" class="ml-2"></label>
-            <input type="number" pInputText class="p-inputText" placeholder="Max. Orders in Each Cluster"/>
-          </div>
-          <div>
-            <label for="" class="flex font-sm"><span class="required">Max. Orders in Each Cluster</span><img src="../../../../assets/icons/icons-info.svg" alt="" class="ml-2"></label>
-            <input type="number" pInputText class="p-inputText" placeholder="Max. Orders in Each Cluster"/>
-          </div>
+      <div class="flex justify-content-center items-center">
+        <p class="flex mr-4 font-sm">Single Batch <img src="../../../../assets/icons/icons-info.svg" alt=""
+            class="ml-2"></p>
+        <p-inputSwitch [(ngModel)]="checked" />
+        <p class="flex ml-4 font-sm">Multi Batch <img src="../../../../assets/icons/icons-info.svg" alt="" class="ml-2">
+        </p>
+      </div>
+
+      @if (checked) {
+      <p class="font-sm font-semibold mt-4 mb-1">Clusters</p>
+      <div class="grid grid-cols-3 gap-8">
+        @for(input of maxMinInput; track $index){
+        <div>
+          <label for="" class="flex font-sm">
+            <span class="required">{{ input.label }}</span>
+            <img [src]="input.src" alt="" class="ml-2">
+          </label>
+          <input type="number" [(ngModel)]="input.value" pInputText class="p-inputText"
+            [placeholder]="input.placeholder" />
         </div>
+        }
+      </div>
+
       }
-      
-      
+
+
       <div class="grid grid-cols-2 gap-4 mt-4">
-        <div class="grid grid-cols-3 gap-4 inline-grid items-center">
+        <div class="grid grid-cols-3 gap-4 items-center">
           <div class="flex items-center">
-            <input type="checkbox" id="startHub" class="h-4 w-4 rounded  accent-[--baseColor] mr-1" [(ngModel)]="startFromHub" />
-            <label for="startHub" class="flex"> <span CLASS=""> Start from hub</span><img src="../../../../assets/icons/icons-info.svg" alt="" class="ml-2"></label>
+            <input type="checkbox" id="startHub" class="h-4 w-4 rounded  accent-[--baseColor] mr-1"
+              [(ngModel)]="startFromHub" />
+            <label for="startHub" class="flex"> <span CLASS=""> Start from hub</span><img
+                src="../../../../assets/icons/icons-info.svg" alt="" class="ml-2"></label>
           </div>
           <div class="flex items-center">
-            <input type="checkbox" id="endHub" class="h-4 w-4 rounded accent-[--baseColor] mr-1" [(ngModel)]="endAtHub"/>
-            <label for="endHub" class="flex"> <span class=" mr-1"> End at hub</span><img src="../../../../assets/icons/icons-info.svg" alt=""></label>
+            <input type="checkbox" id="endHub" class="h-4 w-4 rounded accent-[--baseColor] mr-1"
+              [(ngModel)]="endAtHub" />
+            <label for="endHub" class="flex"> <span class=" mr-1"> End at hub</span><img
+                src="../../../../assets/icons/icons-info.svg" alt=""></label>
           </div>
           <div class="flex items-center">
-            <input type="checkbox" id="overwrite" class="h-4 w-4 rounded accent-[--baseColor] mr-1" [(ngModel)]="overWriteDuplicate"/>
-            <label for="overwrite" class="flex"> <span class=" mr-1">Overwrite Duplicate Data</span><img src="../../../../assets/icons/icons-info.svg" alt=""></label>
+            <input type="checkbox" id="overwrite" class="h-4 w-4 rounded accent-[--baseColor] mr-1"
+              [(ngModel)]="overWriteDuplicate" />
+            <label for="overwrite" class="flex"> <span class=" mr-1">Overwrite Duplicate Data</span><img
+                src="../../../../assets/icons/icons-info.svg" alt=""></label>
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div class="">
             <label for="routeStartTime" class="required">Route Start Time <span class="tw-text-red-500">*</span></label>
-            <input id="routeStartTime" pInputText type="date" class="" [(ngModel)]="startTime"/>
+            <input id="routeStartTime" pInputText type="date" class="" [(ngModel)]="startTime" />
           </div>
           <div class="">
-            <label for="vehicleCategory" class="required">Vehicle Category <span class="tw-text-red-500">*</span></label>
-            <p-multiSelect 
-              [options]="categories()"
-              [(ngModel)]="selectedCategories"
-              id="vehicleCategory"
-              optionLabel="name"
-              placeholder="Select Cities" />
+            <label for="vehicleCategory" class="required">Vehicle Category <span
+                class="tw-text-red-500">*</span></label>
+            <p-multiSelect [options]="categories()" [(ngModel)]="selectedCategories" id="vehicleCategory"
+              optionLabel="name" placeholder="Select Cities" />
           </div>
         </div>
       </div>
-        @for(category of selectedCategories; track $index) {
-          <h3 class="font-sm font-semibold mt-4 mb-1">{{category.name}}</h3>
-          <div class="grid grid-cols-3 gap-x-8 gap-y-4">
-            <div>
-              <label for="noOfVehicles" class="required">No. of Vehicles</label>
-              <input id="noOfVehicles" pInputText [(ngModel)]="category.vehiclesCount" type="number" class="form-input" />
-            </div>
-            <div>
-              <label for="capacityOfVehicle" class="required">Capacity of Each Vehicle </label>
-              <input id="capacityOfVehicle" pInputText [(ngModel)]="category.capacity" type="number" class="form-input" />
-            </div>
-            <div>
-              <label for="maxRange" class="required">Max Range of Each Vehicle </label>
-              <input id="maxRange" pInputText [(ngModel)]="category.range" type="number" class="form-input" />
-            </div>
-            <div>
-              <label for="waitTime" class="required">Wait Time per Stop </label>
-              <input id="waitTime" pInputText [(ngModel)]="category.waitTime" type="number" class="form-input" />
-            </div>
-            <div>
-              <label for="totalShiftTime" class="required">Total Shift Time </label>
-              <input id="totalShiftTime" pInputText [(ngModel)]="category.shiftTime" type="number" class="form-input" />
-            </div>
-          </div>
-      
-        }
-        <p class="text-right">
-          <p-button pRipple class="mr-2 mt-2 " label="Create Clusters" icon="pi pi-plus" severity="success" (click)="showDialog()" /> 
-        </p>
+      @for(category of selectedCategories; track $index) {
+      <h3 class="font-sm font-semibold mt-4 mb-1">{{category.name}}</h3>
+      <div class="grid grid-cols-3 gap-x-8 gap-y-4">
+        <div>
+          <label for="noOfVehicles" class="required">No. of Vehicles</label>
+          <input id="noOfVehicles" pInputText [(ngModel)]="category.vehiclesCount" type="number" class="form-input" />
+        </div>
+        <div>
+          <label for="capacityOfVehicle" class="required">Capacity of Each Vehicle </label>
+          <input id="capacityOfVehicle" pInputText [(ngModel)]="category.capacity" type="number" class="form-input" />
+        </div>
+        <div>
+          <label for="maxRange" class="required">Max Range of Each Vehicle </label>
+          <input id="maxRange" pInputText [(ngModel)]="category.range" type="number" class="form-input" />
+        </div>
+        <div>
+          <label for="waitTime" class="required">Wait Time per Stop </label>
+          <input id="waitTime" pInputText [(ngModel)]="category.waitTime" type="number" class="form-input" />
+        </div>
+        <div>
+          <label for="totalShiftTime" class="required">Total Shift Time </label>
+          <input id="totalShiftTime" pInputText [(ngModel)]="category.shiftTime" type="number" class="form-input" />
+        </div>
+      </div>
+
+      }
+      <p class="text-right">
+        <p-button pRipple class="mr-2 mt-2 " label="Create Clusters" icon="pi pi-plus" severity="success"
+          (click)="showDialog()" />
+      </p>
     </p-accordionTab>
   </p-accordion>
-    
+
 </div>
 
 
 
-<p-dialog header="Edit Profile" [modal]="true" 
-[draggable]="false" [(visible)]="visible" [style]="{ width: '25rem' }">
+<p-dialog header="Edit Profile" [modal]="true" [draggable]="false" [(visible)]="visible" [style]="{ width: '25rem' }">
   <span class="p-text-secondary block mb-5">Update your information.</span>
   <div class="flex align-items-center gap-3 mb-3">
-      <label for="username" class="font-semibold w-6rem">Username</label>
-      <input pInputText id="username" class="flex-auto" autocomplete="off" />
+    <label for="username" class="font-semibold w-6rem">Username</label>
+    <input pInputText id="username" class="flex-auto" autocomplete="off" />
   </div>
   <div class="flex align-items-center gap-3 mb-5">
-      <label for="email" class="font-semibold w-6rem">Email</label>
-      <input pInputText id="email" class="flex-auto" autocomplete="off" />
+    <label for="email" class="font-semibold w-6rem">Email</label>
+    <input pInputText id="email" class="flex-auto" autocomplete="off" />
   </div>
   <div class="flex justify-content-end gap-2">
-      <p-button label="Cancel" severity="secondary" (onClick)="visible = false" />
-      <p-button label="Save" (onClick)="visible = false" />
+    <p-button label="Cancel" severity="secondary" (onClick)="visible = false" />
+    <p-button label="Save" (onClick)="visible = false" />
   </div>
 </p-dialog>
 
