@@ -349,8 +349,8 @@ export class LoadDataComponent {
   uploadData(): void {
     this.dialogRef = this.dialogService.open(UploadDataFileComponent, {
       header: 'Upload Data File',
-      width: '70%',
-      styleClass: 'p-custom-dialog',
+      width: '60vw',
+      styleClass: 'data_upload',
     });
 
     // Subscribe to the closing event of the dialog

@@ -262,11 +262,19 @@
       .success_message {
         color: #3B9760;
         background: #EBF6EE;
+        width: 300px;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
       }
   
       .warrning_message {
         color: #C09600;
-        background: #FDF2DF;
+        background: #FDF2DF; 
+        width: 300px;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
       }
     }
   
@@ -379,7 +387,18 @@
     .text-red-500 {
       color: red;
     }
-    
-    
+    .data_upload{
+        .p-dialog-header {
+            background: var(--baseColor) !important;
+            color: #fff !important;
+            padding: 1.5rem !important;
+            border-top-right-radius: 0.5rem !important;
+            border-top-left-radius: 0.5rem !important;
+
+            .p-dialog-title {
+              font-weight: 400 !important;
+          }
+    }
   }
+}
   
