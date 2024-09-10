@@ -108,8 +108,6 @@
             <span pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
               [ngClass]="{'disabled-icon': !validateRow(row)}" (click)="onRowEditSave(row)"
               class="p-button-rounded p-button-text p-button-success"></span>
-            }
-            @if(currentEditingRow === row) {
             <span pButton type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancel(row, index)"
               class="p-button-rounded p-button-text p-button-danger"></span>
             }

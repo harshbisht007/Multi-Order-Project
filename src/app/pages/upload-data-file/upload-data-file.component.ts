@@ -27,6 +27,7 @@ export class UploadDataFileComponent {
   selectedFile: File | null = null;
   firstRowContainsHeader: boolean = false;
   MAX_ROWS = 1500;
+  MAX_FILE_SIZE_MB = 20;
 
   constructor(public dialogRef: DynamicDialogRef,private messageService: MessageService) { }
 
@@ -49,14 +50,22 @@ export class UploadDataFileComponent {
 
   processFile(file: File) {
     const fileType = file?.name.split('.').pop()?.toLowerCase();
+    const fileSizeMB = file.size / (1024 * 1024);
+    if (fileSizeMB > this.MAX_FILE_SIZE_MB) {
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: `File size exceeds ${this.MAX_FILE_SIZE_MB}MB. Please upload a smaller file.`});
+      this.rowError = true;
+      this.fileSelected = false;
+      return;
+    }
+  
     if (!file || !['csv', 'xlsx', 'xls'].includes(fileType!)) {
-      console.error('Invalid file type.');
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Invalid File Type'});
       return;
     }
 
-    this.fileSelected = false; // Reset file selection state before processing
+    this.fileSelected = false; 
     const reader = new FileReader();
-
+  
     if (fileType === 'csv') {
       reader.onload = (e: any) => this.processCSV(e.target.result, file);
       reader.readAsText(file);
@@ -65,7 +74,6 @@ export class UploadDataFileComponent {
       reader.readAsArrayBuffer(file);
     }
   }
-
   processCSV(csvContent: string, file: File) {
     const rowCount = csvContent.split('\n').length;
     this.setFileState(file, rowCount);
@@ -82,7 +90,8 @@ export class UploadDataFileComponent {
     if (rowCount > this.MAX_ROWS) {
       this.rowError = true;
       this.fileSelected = false;
-      console.error(`File exceeds ${this.MAX_ROWS} rows.`);
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: `File exceeds ${this.MAX_ROWS} rows.`});
+
     } else {
       this.selectedFile = file;
       this.fileSelected = true;
@@ -108,13 +117,12 @@ export class UploadDataFileComponent {
     this.dialogRef.close(null);
   }
 
-  // Drag and drop event handling
   onDragOver(event: DragEvent) {
-    event.preventDefault(); // Prevent default behavior to avoid blinking
+    event.preventDefault(); 
   }
 
   onDrop(event: DragEvent) {
-    event.preventDefault(); // Prevent default behavior (e.g., opening the file)
+    event.preventDefault(); 
     if (event.dataTransfer?.files) {
       const file = event.dataTransfer.files[0];
       this.processFile(file);
