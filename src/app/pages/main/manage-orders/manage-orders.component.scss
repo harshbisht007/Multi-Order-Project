@@ -8,11 +8,7 @@
         .p-tabview .p-tabview-nav li {
             width: 50%;
         }
-        .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-            background: none;
-            border-color: var(--baseColor) !important;
-            color: var(--baseColor) !important;
-        }
+       
         .p-tabview .p-tabview-nav li .p-tabview-nav-link {
             border: solid #e5e7eb;
             border-width: 0 0 2px 0 !important;
@@ -26,6 +22,12 @@
             transition: none;
             margin: 0 0 -2px 0;
             justify-content: center;
+        }
+        .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+            background: none;
+            border-color: var(--baseColor) !important;
+            color: var(--baseColor) !important;
+            border-bottom: 4px solid !important;
         }
         .p-tabview .p-tabview-panels {
             padding: 1.25rem 0;
