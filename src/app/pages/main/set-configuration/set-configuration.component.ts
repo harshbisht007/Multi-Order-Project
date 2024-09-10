@@ -1,15 +1,15 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {DropdownModule} from "primeng/dropdown";
-import {FormsModule} from "@angular/forms";
-import {MultiSelectModule} from "primeng/multiselect";
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { DropdownModule } from "primeng/dropdown";
+import { FormsModule } from "@angular/forms";
+import { MultiSelectModule } from "primeng/multiselect";
 import { InputSwitchModule } from 'primeng/inputswitch';
 
-import {CategoryService} from "../../../core/services/category.service";
-import {Category} from "../../../graphql/generated";
-import {ToggleButtonModule} from "primeng/togglebutton";
-import {gql} from "apollo-angular";
-import {GraphqlService} from "../../../core/services/graphql.service";
-import { NgClass } from '@angular/common';
+import { CategoryService } from "../../../core/services/category.service";
+import { Category } from "../../../graphql/generated";
+import { ToggleButtonModule } from "primeng/togglebutton";
+import { gql } from "apollo-angular";
+import { GraphqlService } from "../../../core/services/graphql.service";
+import { CommonModule, NgClass } from '@angular/common';
 import { AccordionModule } from 'primeng/accordion';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
@@ -29,10 +29,11 @@ export interface ExtendedCategory extends Category {
   selector: 'app-set-configuration',
   standalone: true,
   imports: [
-    DropdownModule,ButtonModule,
-    NgClass,InputTextModule,
+    CommonModule,
+    DropdownModule, ButtonModule,
+    NgClass, InputTextModule,
     FormsModule,
-    AccordionModule,TooltipModule,
+    AccordionModule, TooltipModule,
     InputSwitchModule,
     AccordionModule,
     MultiSelectModule,
@@ -49,7 +50,20 @@ export class SetConfigurationComponent {
   singleBatch: boolean = true;
   overWriteDuplicate: boolean = true;
   startTime: string = '00:45';
+  categoryFields: Array<{ label: string; model: keyof ExtendedCategory; placeholder: string; id: string }> = [
+    { label: 'No. of Vehicles', model: 'vehiclesCount', placeholder: 'Enter number of vehicles', id: 'noOfVehicles' },
+    { label: 'Capacity of Each Vehicle', model: 'capacity', placeholder: 'Enter vehicle capacity', id: 'capacityOfVehicle' },
+    { label: 'Max Range of Each Vehicle', model: 'range', placeholder: 'Enter max range', id: 'maxRange' },
+    { label: 'Wait Time per Stop', model: 'waitTime', placeholder: 'Enter wait time', id: 'waitTime' },
+    { label: 'Total Shift Time', model: 'shiftTime', placeholder: 'Enter total shift time', id: 'totalShiftTime' }
+  ];
 
+
+  checkboxOptions = [
+    { id: 'startHub', label: 'Start from hub', model: this.startFromHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'Start the route from the hub.' },
+    { id: 'endHub', label: 'End at hub', model: this.endAtHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'End the route at the hub.' },
+    { id: 'overwrite', label: 'Overwrite Duplicate Data', model: this.overWriteDuplicate, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'Overwrite any duplicate data found.' }
+  ]
   @Input() routeId!: string;
   @Output() manageOrders: EventEmitter<boolean> = new EventEmitter<boolean>();
   categories = this.categoryService.categories;
@@ -66,22 +80,22 @@ export class SetConfigurationComponent {
   ];
   showButton: boolean = false;
   visible: boolean = false;
-  checked:boolean=false;
-  maxMinInput: Array<{ label: string, placeholder: string, value: number ,src:string}> = [
+  checked: boolean = false;
+  maxMinInput: Array<{ label: string, placeholder: string, value: number, src: string }> = [
     {
       label: 'Max. Orders in Each Cluster',
       placeholder: 'Enter maximum orders',
-      value: 0 ,
-      src:'../../../../assets/icons/icons-info.svg'
+      value: 0,
+      src: '../../../../assets/icons/icons-info.svg'
     },
     {
       label: 'Min. Orders in Each Cluster',
       placeholder: 'Enter minimum orders',
-      value: 0 ,
-      src:'../../../../assets/icons/icons-info.svg'
+      value: 0,
+      src: '../../../../assets/icons/icons-info.svg'
     }
   ];
-  
+
 
   constructor(private categoryService: CategoryService, private graphqlService: GraphqlService) {
   }
@@ -116,10 +130,10 @@ export class SetConfigurationComponent {
     this.manageOrders.emit(true);
   }
 
-  toggleButton(){
+  toggleButton() {
     this.showButton = !this.showButton;
   }
   showDialog() {
     this.visible = true;
-}
+  }
 }
