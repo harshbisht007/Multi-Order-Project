@@ -1,19 +1,19 @@
-<div class="p-4 bg-gray-50 rounded-lg" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
+<div class="" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
   <!-- Preparing a CSV Section (Only show if no file is selected) -->
   @if(!fileSelected){
 
-  <div class="bg-green-100 p-4 rounded-lg text-gray-700 mb-4">
+  <div class="bg-[#EBF6F4] p-4 rounded-lg text-gray-700 my-6">
     <div class="flex items-center mb-2">
-      <i class="pi pi-info-circle text-green-500 mr-2"></i>
-      <span class="font-semibold">Preparing a CSV</span>
+      <i class="pi pi-info-circle mr-2"></i>
+      <span class="font-sm font-semibold">Preparing a CSV</span>
     </div>
     <ul class="list-disc ml-6">
       <li>Use supported headings: Field1, Field2, Field3, Field4, Field5</li>
       <li>You can import a maximum of 1500 rows</li>
       <li>Cells must be formatted to type "Text"</li>
     </ul>
-    <div class="mt-4">
-      <p-button pRipple icon="pi pi-download" label="Download CSV Template" class="custom-underline-button"></p-button>
+    <div class="ml-3 my-5">
+      <span class="text-[--baseColor] cursor-pointer font-sm font-semiBold"><i class="pi pi-download mr-2"></i>Download CSV Template</span>
     </div>
   </div>
   }
@@ -21,27 +21,26 @@
   <!-- CSV Upload Section -->
   @if(!fileSelected){
 
-  <div class="p-6 border-2 border-dashed border-gray-300 rounded-lg text-center">
-    <div class="flex items-center justify-center space-x-2">
-      <i class="pi pi-upload text-green-500"></i>
-      <span class="text-gray-600">Drag the file here to upload or</span>
-      <button pButton type="button" class="p-button-text p-button-sm text-green-500" (click)="triggerFileSelect()">Add
-        from computer</button>
+  <div class="p-6 border-2 border-dashed border-gray-300 rounded-lg text-center h-[120px]">
+    <div class="flex items-center justify-center space-x-2 cursor-pointer">
+      <span class="beforeUpload mr-5 relative">Drag the file here to upload or</span>
+      <span class="beforecomputer text-[--baseColor] ml-4 relative" (click)="triggerFileSelect()">Add
+        from computer</span>
     </div>
-    <small class="block text-gray-400 mt-2">CSV format; Max size - 20MB</small>
+    <small class="block text-gray-400 mt-2 cursor-pointer">CSV format; Max size - 20MB</small>
   </div>
   }
 
   <!-- File Display Section -->
   @if(fileSelected){
 
-  <div class="p-4 border border-gray-300 rounded-lg flex items-center justify-between">
-    <div>
-      <i class="pi pi-file text-green-500 mr-2"></i>
-      <span>{{ selectedFile?.name }}</span>
+  <div class="p-4 border border-gray-300 rounded-lg flex items-center justify-between mt-6">
+    <div class="cursor-pointer">
+      <i class="pi pi-file text-[--baseColor] mr-2"></i>
+      <span class=" text-[--baseColor] mr-2">{{ selectedFile?.name ? selectedFile?.name : 'No file selected'  }}</span>
     </div>
     <div>
-      <i class="pi pi-trash text-red-500 cursor-pointer" (click)="removeFile()"></i>
+      <i class="pi pi-times text-red-500 cursor-pointer" (click)="removeFile()"></i>
     </div>
   </div>
   }
@@ -61,12 +60,16 @@
   <!-- <div *ngIf="fileSelected && !rowError" class="mt-4">
     <p-checkbox [(ngModel)]="firstRowContainsHeader" label="My first row contains column headings"></p-checkbox>
   </div> -->
-
+  <p-checkbox 
+  [(ngModel)]="pizza"
+  label="My first row contains column headings" 
+  name="pizza" class="mt-4 mb-2 font-medium"
+  value="Cheese" />
   <!-- Action Buttons -->
   <div class="flex justify-end mt-6 space-x-2">
-    <p-button pButton pRipple type="button" class="mr-3 p-button-text p-button-sm text-green-500" label="Cancel"
+    <p-button pButton type="button" class="mr-3 p-button-text p-button-sm text-[--baseColor]" label="Cancel"
       (click)="onCancel()" />
-    <p-button pButton pRipple type="button" label="Upload" class="p-button-sm" severity="success"
-      [disabled]="!fileSelected || rowError" (click)="onUpload()" />
+    <p-button type="button" label="Upload" class="w-[120px] text-sm text-center text-white bg-[--baseColor] grid rounded-md focus:boxshadow-none"
+      [disabled]="!fileSelected || rowError" (click)="onUpload()"/>
   </div>
 </div>

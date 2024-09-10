@@ -8,19 +8,21 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { DialogModule } from 'primeng/dialog';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { ToastModule } from 'primeng/toast';
 import * as XLSX from 'xlsx';
 
 @Component({
   standalone: true,
   selector: 'app-upload-data-file',
   templateUrl: './upload-data-file.component.html',
-  styleUrls: ['./upload-data-file.component.css'],
-  imports: [CardModule, CommonModule, ProgressBarModule, ButtonModule, DialogModule, CheckboxModule, FormsModule]
+  styleUrls: ['./upload-data-file.component.scss'],
+  imports: [CardModule, CommonModule,ToastModule , ProgressBarModule, ButtonModule, DialogModule, CheckboxModule, FormsModule]
 })
 
 export class UploadDataFileComponent {
   @ViewChild('fileInput') fileInput: ElementRef | undefined;
   fileSelected: boolean = false;
+  pizza: string[] = [];
   rowError: boolean = false;
   selectedFile: File | null = null;
   firstRowContainsHeader: boolean = false;
@@ -106,7 +108,9 @@ export class UploadDataFileComponent {
   onUpload() {
     if (this.selectedFile) {
       this.dialogRef.close(this.selectedFile);
+      this.messageService.add({ severity: 'success', summary: 'Data Upload Succesfully'});
     }
+
   }
 
   onCancel() {
