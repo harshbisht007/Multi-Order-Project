@@ -52,7 +52,17 @@ body {
 .p-stepper .p-stepper-panels {
   padding: 1.25rem 0;
 }
-
+.p-tooltip.p-tooltip-right .p-tooltip-arrow{
+  border-color: transparent !important;
+  border-right-color: #333 !important;
+  border-width: 0.25em 0.25em 0.25em 0 !important;
+}
+.p-tooltip .p-tooltip-text{
+  padding: 0.725rem !important;
+  font-size: 14px;
+  font-weight: 400;
+  // height: 38px !important;
+}
 .opt {
   .p-toast {
     .p-toast-message {

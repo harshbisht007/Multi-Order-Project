@@ -12,6 +12,7 @@ import { AccordionModule } from 'primeng/accordion';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
+import { TooltipModule } from 'primeng/tooltip';
 
 export interface ExtendedCategory extends Category {
   vehiclesCount: number;
@@ -29,7 +30,7 @@ export interface ExtendedCategory extends Category {
     DropdownModule,ButtonModule,
     NgClass,InputTextModule,
     FormsModule,
-    AccordionModule,
+    AccordionModule,TooltipModule,
     MultiSelectModule,
     ToggleButtonModule,
     DialogModule
