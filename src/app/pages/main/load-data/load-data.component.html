@@ -105,8 +105,7 @@
         <td>
           <div class="flex align-items-center justify-content-center gap-1">
             @if(currentEditingRow === row) {
-            <span pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
-              [ngClass]="{'disabled-icon': !validateRow(row)}" (click)="onRowEditSave(row)"
+            <span pButton pRipple type="button" pSaveEditableRow icon="pi pi-check" (click)="onRowEditSave(row)"
               class="p-button-rounded p-button-text p-button-success"></span>
             <span pButton type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancel(row, index)"
               class="p-button-rounded p-button-text p-button-danger"></span>
