@@ -1,127 +1,169 @@
-::ng-deep{
-    .opt{
-        .p-accordion .p-accordion-tab .p-accordion-header .p-accordion-header-link .p-accordion-toggle-icon {
-            position: absolute;
-            right: 15px;
-            transform: rotate(90deg);
-            transition: transform 0.3s ease;
-        }
-        .p-accordion .p-accordion-tab.p-accordion-tab-active .p-accordion-header .p-accordion-header-link .p-accordion-toggle-icon {
-            transform: rotate(180deg);
-            transition: transform 0.3s ease;
-        }
-        .p-accordion .p-accordion-header .p-accordion-header-link {
-            background: #F9FAFB;
-            border-color: #E5E7EB;
-            border-width:1px;
-            color: #3A3937;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        .p-accordion-header-text::after{
-            content: 'Required';
-            color: #EA4F62;
-            font-size: 14px;
-            font-weight: 400;
-            margin-left: 15px;
-            background: #FFEEEE;
-            padding: 8px 12px;
-            border-radius: 4px;;
-        }
-        .p-accordion .p-accordion-content {
-            padding: 1.25rem;
-            border: 1px solid #E5E7EB;
-            background: #ffffff;
-            color: #3f3f46;
-            border-top: 0;
-        }
-        .custom-toggle{
-            height: 24px;
-            width: 48px;
-            border-radius: 12px;
-            background: #E5E7EB;
-            display: flex;
-            align-items: center;
-            position: relative;
-            cursor: pointer;
-            transition: background 0.3s ease;
+::ng-deep {
 
-            .toggle_button{
-                height: 18px;
-                width: 18px;
-                background: grey;
-                border-radius: 50%;
-                transition: transform 0.5s ease;
-                position: absolute;
-                left: 3px;
-            }
-            .toggle_button.active{
-                background: var(--baseColor);
-                right: 3px;
-                left: auto;
-            }
-        }
+  .p-multiselect-label.p-placeholder {
+    padding: 10px 0;
+    color: #000;
+  }
 
-        .p-button {
-            padding: 0.45rem 1rem !important;
-            font-size: 0.825rem !important;
-            transition: none !important;
-            border-radius: 0.275rem !important;
-            outline-color: transparent !important;
-      
-            &:focus {
-              box-shadow: none;
-            }
-      
-            .pi {
-              font-size: 0.725rem;
-            }
-          }
-      
-          .p-button.p-button-success,
-          .p-button-group.p-button-success > .p-button,
-          .p-splitbutton.p-button-success > .p-button {
-            color: #ffffff;
-            background: var(--baseColor);
-            border: 1px solid var(--baseColor);
-          }
-      
-          .p-button.p-button-success.p-button-outlined,
-          .p-button-group.p-button-success > .p-button.p-button-outlined,
-          .p-splitbutton.p-button-success > .p-button.p-button-outlined {
-            background-color: transparent;
-            color: var(--baseColor);
-            border: 1px solid;
-          }
-      
-          .p-button.p-button-danger.p-button-outlined,
-          .p-button-group.p-button-danger > .p-button.p-button-outlined,
-          .p-splitbutton.p-button-danger > .p-button.p-button-outlined {
-            background-color: transparent;
-            color: #ef4444;
-            border: 1px solid;
-          }
+  .p-multiselect-trigger {
+    margin: 2px -14px 0 0 !important;
+  }
 
-          .cust_multi_select .p-multiselect{
-            margin-top: 10px !important;
-        }
+  .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
+    background: var(--baseColor);
+  }
 
-        .progess_popUp{
-          .p-dialog{
-            .p-dialog-header{
-              padding: 6px 10px 0 0 !important;
-              position: absolute;
-              right: 0;
-              border-radius: 0 !important;
-            }
-            .p-dialog-content {
-              background: #ffffff;
-              color: #3f3f46;
-              padding: 1.5rem 1.5rem 1.5rem 1.5rem;
-              border-radius: 0 !important;
-            }
-          } 
-        }
-      
+  .p-inputswitch.p-focus .p-inputswitch-slider {
+    box-shadow: 0 0 0 0 var(--baseColor);
+  }
+
+  .p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-highlight):not(.p-disabled).p-focus {
+    color: #000;
+    background: #cff7f4;
+  }
+
+  .p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-highlight):not(.p-disabled):hover {
+    color: #000;
+    background: #8aebe5;
+  }
+
+  .p-checkbox:not(.p-checkbox-disabled) .p-checkbox-box.p-highlight:hover,
+  .p-checkbox .p-checkbox-box.p-highlight {
+    border-color: var(--baseColor);
+    background: var(--baseColor);
+  }
+
+  .opt {
+    .p-accordion .p-accordion-tab .p-accordion-header .p-accordion-header-link .p-accordion-toggle-icon {
+      position: absolute;
+      right: 15px;
+      transform: rotate(90deg);
+      transition: transform 0.3s ease;
     }
+
+    .p-accordion .p-accordion-tab.p-accordion-tab-active .p-accordion-header .p-accordion-header-link .p-accordion-toggle-icon {
+      transform: rotate(180deg);
+      transition: transform 0.3s ease;
+    }
+
+    .p-accordion .p-accordion-header .p-accordion-header-link {
+      background: #F9FAFB;
+      border-color: #E5E7EB;
+      border-width: 1px;
+      color: #3A3937;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .p-accordion-header-text::after {
+      content: 'Required';
+      color: #EA4F62;
+      font-size: 14px;
+      font-weight: 400;
+      margin-left: 15px;
+      background: #FFEEEE;
+      padding: 8px 12px;
+      border-radius: 4px;
+      ;
+    }
+
+    .p-accordion .p-accordion-content {
+      padding: 1.25rem;
+      border: 1px solid #E5E7EB;
+      background: #ffffff;
+      color: #3f3f46;
+      border-top: 0;
+    }
+
+    .custom-toggle {
+      height: 24px;
+      width: 48px;
+      border-radius: 12px;
+      background: #E5E7EB;
+      display: flex;
+      align-items: center;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s ease;
+
+      .toggle_button {
+        height: 18px;
+        width: 18px;
+        background: grey;
+        border-radius: 50%;
+        transition: transform 0.5s ease;
+        position: absolute;
+        left: 3px;
+      }
+
+      .toggle_button.active {
+        background: var(--baseColor);
+        right: 3px;
+        left: auto;
+      }
+    }
+
+    .p-button {
+      padding: 0.45rem 1rem !important;
+      font-size: 0.825rem !important;
+      transition: none !important;
+      border-radius: 0.275rem !important;
+      outline-color: transparent !important;
+
+      &:focus {
+        box-shadow: none;
+      }
+
+      .pi {
+        font-size: 0.725rem;
+      }
+    }
+
+    .p-button.p-button-success,
+    .p-button-group.p-button-success>.p-button,
+    .p-splitbutton.p-button-success>.p-button {
+      color: #ffffff;
+      background: var(--baseColor);
+      border: 1px solid var(--baseColor);
+    }
+
+    .p-button.p-button-success.p-button-outlined,
+    .p-button-group.p-button-success>.p-button.p-button-outlined,
+    .p-splitbutton.p-button-success>.p-button.p-button-outlined {
+      background-color: transparent;
+      color: var(--baseColor);
+      border: 1px solid;
+    }
+
+    .p-button.p-button-danger.p-button-outlined,
+    .p-button-group.p-button-danger>.p-button.p-button-outlined,
+    .p-splitbutton.p-button-danger>.p-button.p-button-outlined {
+      background-color: transparent;
+      color: #ef4444;
+      border: 1px solid;
+    }
+
+    .cust_multi_select .p-multiselect {
+      margin-top: 8px !important;
+    }
+
+    .progess_popUp {
+      .p-dialog {
+        .p-dialog-header {
+          padding: 6px 10px 0 0 !important;
+          position: absolute;
+          right: 0;
+          border-radius: 0 !important;
+        }
+
+        .p-dialog-content {
+          background: #ffffff;
+          color: #3f3f46;
+          padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+          border-radius: 0 !important;
+        }
+      }
+    }
+
+  }
 }

@@ -14,15 +14,14 @@ export class CategoryService {
   }
 
   async init() {
-    await this.graphqlService.runQuery(gql`query {
+    const res=await this.graphqlService.runQuery(gql`query {
       list_categories {
         id
         name
 
       }
-    }`).then((res) => {
-      console.log(res)
-      this.categories.set(res.list_categories)
-    })
+    }`);
+    this.categories.set(res.list_categories)
+
   }
 }

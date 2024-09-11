@@ -3,10 +3,10 @@
   <p-accordion [activeIndex]="0">
     <p-accordionTab header="Configurations">
       <div class="flex justify-content-center items-center">
-        <p class="flex mr-4 font-sm">Single Batch <img pTooltip="Enter your username" tooltipPosition="right"
+        <p class="flex mr-4 font-sm">Single Batch <img pTooltip="Creater order in single batch" tooltipPosition="right"
             src="../../../../assets/icons/icons-info.svg" alt="" class="ml-2"></p>
         <p-inputSwitch [(ngModel)]="checked" />
-        <p class="flex ml-4 font-sm">Multi Batch <img pTooltip="Enter your username" tooltipPosition="right"
+        <p class="flex ml-4 font-sm">Multi Batch <img pTooltip="Create Orders In Clusters" tooltipPosition="right"
             src="../../../../assets/icons/icons-info.svg" alt="" class="ml-2">
         </p>
       </div>
@@ -18,9 +18,9 @@
         <div>
           <label for="" class="flex font-sm">
             <span class="required">{{ input.label }}</span>
-            <img [src]="input.src" alt="" class="ml-2">
+            <img [src]="input.src" alt="" class="ml-2" pTooltip="{{ input.tooltip }}">
           </label>
-          <input type="number" [(ngModel)]="input.value" pInputText class="p-inputText"
+          <input type="number" [(ngModel)]="input.value" pInputText class="p-inputText mt-2"
             [placeholder]="input.placeholder" />
         </div>
         }
@@ -31,14 +31,18 @@
 
       <div class="grid grid-cols-2 gap-4 mt-4">
         <div class="grid grid-cols-3 gap-4 items-center">
-          <div *ngFor="let option of checkboxOptions" class="flex items-center">
+          @for( option of checkboxOptions; track $index){
+          <div class="flex items-center">
             <input type="checkbox" [id]="option.id" class="h-4 w-4 rounded accent-[--baseColor] mr-1"
               [(ngModel)]="option.model" />
             <label [for]="option.id" class="flex">
               <span>{{ option.label }}</span>
-              <img *ngIf="option.icon" [src]="option.icon" alt="" class="ml-2" pTooltip="{{ option.tooltip }}" />
+              @if(option.icon){
+              <img [src]="option.icon" alt="" class="ml-2" pTooltip="{{ option.tooltip }}" />
+              }
             </label>
           </div>
+          }
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
@@ -48,7 +52,7 @@
 
           <div>
             <label for="vehicleCategory">Vehicle Category</label>
-            <p-multiSelect [options]="categories()" [(ngModel)]="selectedCategories" id="vehicleCategory"
+            <p-multiSelect [options]="categories" [(ngModel)]="selectedCategories" id="vehicleCategory"
               optionLabel="name" class="mt-2 cust_multi_select" placeholder="Select Cities">
             </p-multiSelect>
           </div>
@@ -57,24 +61,37 @@
       @for(category of selectedCategories; track $index) {
       <h3 class="font-sm font-semibold mt-4 mb-1">{{ category.name }}</h3>
       <div class="grid grid-cols-3 gap-x-8 gap-y-4">
-        <div *ngFor="let field of categoryFields; let i = index">
+        @for(field of categoryFields;track field.id;let i =$index ){
+        <div>
           <label [for]="field.id + i" class="required">{{ field.label }}</label>
           <input [id]="field.id + i" pInputText [(ngModel)]="category[field.model]" type="number"
             class="form-input mt-2" [placeholder]="field.placeholder" />
         </div>
+        }
       </div>
       }
-
-
-      <p class="text-right">
-        @if(this.checked){
-        <p-button pRipple class="mr-2 mt-2 " label="Create Clusters" icon="pi pi-plus" severity="success"
-          (click)="showDialog()" />
-
-        }@else{
-        <p-button pRipple class="mr-2 mt-2" label="Save Changes" severity="success" (onClick)="saveChanges()">
-        </p-button>
+      <!-- <div class="grid grid-cols-3 gap-x-8 gap-y-4 mt-4">
+        @for(field of singleTimeFields; track field.id;let i=$index){
+        <div>
+          <label [for]="field.id + i" class="required">{{ field.label }}</label>
+          <input [id]="field.id + i" pInputText [(ngModel)]="field.model" type="number"
+            class="form-input mt-2" [placeholder]="field.placeholder" />
+        </div>
         }
+      </div> -->
+
+      <div class="grid grid-cols-1 gap-x-8 gap-y-4">
+        <p class="text-right mt-4">
+          @if(this.checked){
+          <p-button pRipple class="mr-2 mt-2 " label="Create Clusters" icon="pi pi-plus" severity="success"
+            (click)="showDialog()" />
+
+          }@else{
+          <p-button pRipple class="mr-2 mt-2" label="Save Changes" severity="success" (onClick)="saveChanges()">
+          </p-button>
+          }
+        </p>
+      </div>
     </p-accordionTab>
   </p-accordion>
 
