@@ -6,14 +6,14 @@ import { AccordionModule } from "primeng/accordion";
 import { TableModule } from "primeng/table";
 import { TabViewModule } from 'primeng/tabview';
 import { DropdownModule } from 'primeng/dropdown';
-import { NgClass } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-manage-orders',
   standalone: true,
   imports: [
-    AccordionModule, NgClass, TooltipModule,
+    AccordionModule, NgClass, TooltipModule,CommonModule,
     TableModule, TabViewModule, DropdownModule
   ],
   templateUrl: './manage-orders.component.html',
@@ -35,6 +35,7 @@ export class ManageOrdersComponent implements AfterViewInit {
   @Input() routeId!: string;
   order!: Order;
   orderDetails: boolean = false;
+  batchInfo:any=[]
   constructor(private graphqlService: GraphqlService) {
   }
 
@@ -92,7 +93,14 @@ export class ManageOrdersComponent implements AfterViewInit {
     }`
 
     const res = await this.graphqlService.runQuery(query, { equal: this.routeId })
-    console.log(res);
     this.order = res.list_order[0];
+    this.batchInfo = this.order?.batches.map(batch => [
+      { label: 'Batch ID', value: batch.id },
+      { label: 'Order Volume', value: batch.volume || 'N/A' },
+      { label: 'Category', value: batch.category_name || 'N/A' },
+      { label: 'Total Distance', value: batch.distance + ' Km' },
+      { label: 'Estimated Time', value: (batch.duration||0 / 60).toFixed(2) + ' Hrs' }
+    ]);  
+    console.log(this.batchInfo,'122')
   }
 }

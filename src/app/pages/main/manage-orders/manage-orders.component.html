@@ -2,16 +2,20 @@
 <p-tabView>
   <p-tabPanel header="Cluster 1">
     <p class="font-sm mb-3.5">Total Vehicles: <span class="font-semibold mr-8"> 10</span> Vehicles Required in Cluster
-      <span class="font-semibold  mr-8"> 1: 2</span> Zone: <span class="font-semibold"> Zone 1 - Dubai</span></p>
+      <span class="font-semibold  mr-8"> 1: 2</span> Zone: <span class="font-semibold"> Zone 1 - Dubai</span>
+    </p>
     <div class="h-[56vh] overflow-y-auto custom_scrollbar">
       <p-accordion [activeIndex]="1">
-        <p-accordionTab>
+        @if(order?.batches){
+
+          @for(batch of order.batches; let batchIndex = $index; track batchIndex) {
+            <p-accordionTab>
           <ng-template pTemplate="header">
             <span class="flex align-items-center justify-between gap-2 w-full text-sm ">
-              <span class="font-semibold">Batch 1</span>
+              <span class="font-semibold">Batch {{batch.sequence_id}}</span>
               <span class="flex align-items-center gap-2">
-                <span class="font-semibold ml-2"> <span class="before:[content:'\2022'] before:mr-1.5">30
-                    Orders</span></span>
+                <span class="font-semibold ml-2"> <span
+                    class="before:[content:'\2022'] before:mr-1.5">{{order.batches.length }}orders</span></span>
               </span>
             </span>
           </ng-template>
@@ -19,26 +23,12 @@
             <table class="table-auto w-full cursor-pointer" (click)="showOrders()">
               <tbody>
                 <tr class="font-sm">
-                  <td>
-                    <p class="text-[#878682]">Batch ID</p>
-                    <p>00-01</p>
+                  @for(item of batchInfo[batchIndex]; let i = $index; track  i) {
+                    <td >
+                    <p class="text-[#878682]">{{ item.label }}</p>
+                    <p>{{ item.value }}</p>
                   </td>
-                  <td>
-                    <p class="text-[#878682]">Order Volume</p>
-                    <p>30</p>
-                  </td>
-                  <td>
-                    <p class="text-[#878682]">Category</p>
-                    <p>Truck</p>
-                  </td>
-                  <td>
-                    <p class="text-[#878682]">Total Distance</p>
-                    <p>98.00 Km</p>
-                  </td>
-                  <td>
-                    <p class="text-[#878682]">Estimated Time</p>
-                    <p>2.00 Hrs</p>
-                  </td>
+                  }
                   <td class="w-[200px]">
                     <p class="text-[#878682]">Assigned Driver</p>
                     <p-dropdown optionLabel="name" placeholder="Select Assigned Driverd" [options]="assignDriver" />
@@ -61,47 +51,11 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td class="border border-slate-300 p-3">1.</td>
-                    <td class="border border-slate-300 p-3">Indianapolis</td>
-                    <td class="border border-slate-300 p-3">John Doe</td>
-                    <td class="border border-slate-300 p-3">123 Main St, Indianapolis</td>
-                    <td class="border border-slate-300 p-3 text-center">
-                      <div class="flex items-center gap-2">
-                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
-                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="border border-slate-300 p-3">2.</td>
-                    <td class="border border-slate-300 p-3">Columbus</td>
-                    <td class="border border-slate-300 p-3">Jane Smith</td>
-                    <td class="border border-slate-300 p-3">456 Elm St, Columbus</td>
-                    <td class="border border-slate-300 p-3 text-center">
-                      <div class="flex items-center gap-2">
-                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
-                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="border border-slate-300 p-3">3.</td>
-                    <td class="border border-slate-300 p-3">Detroit</td>
-                    <td class="border border-slate-300 p-3">Mike Johnson</td>
-                    <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
-                    <td class="border border-slate-300 p-3 text-center">
-                      <div class="flex items-center gap-2">
-                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
-                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="border border-slate-300 p-3">4.</td>
-                    <td class="border border-slate-300 p-3">Detroit</td>
-                    <td class="border border-slate-300 p-3">Mike Johnson</td>
-                    <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
+                  <tr *ngFor="let tp of batch.touch_points; let i = index">
+                    <td class="border border-slate-300 p-3">{{ i + 1 }}.</td>
+                    <td class="border border-slate-300 p-3">{{ tp.touch_point?.id }}</td>
+                    <td class="border border-slate-300 p-3">{{ tp.touch_point?.category_type }}</td>
+                    <td class="border border-slate-300 p-3">{{ tp.touch_point?.address }}</td>
                     <td class="border border-slate-300 p-3 text-center">
                       <div class="flex items-center gap-2">
                         <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
@@ -118,232 +72,8 @@
             </div>
           </div>}
         </p-accordionTab>
-        <p-accordionTab>
-          <ng-template pTemplate="header">
-            <span class="flex align-items-center justify-between gap-2 w-full text-sm ">
-              <span class="font-semibold">Batch 1</span>
-              <span class="flex align-items-center gap-2">
-                <span class="font-semibold ml-2"> <span class="before:[content:'\2022'] before:mr-1.5">30
-                    Orders</span></span>
-              </span>
-            </span>
-          </ng-template>
-          <div class="bg-[#EBF6F4] p-[1.25rem]  border-[#E5E7EB]" [ngClass]="{'border-b': orderDetails}">
-            <table class="table-auto w-full cursor-pointer" (click)="showOrders()">
-              <tbody>
-                <tr class="font-sm">
-                  <td>
-                    <p class="text-[#878682]">Batch ID</p>
-                    <p>00-01</p>
-                  </td>
-                  <td>
-                    <p class="text-[#878682]">Order Volume</p>
-                    <p>30</p>
-                  </td>
-                  <td>
-                    <p class="text-[#878682]">Category</p>
-                    <p>Truck</p>
-                  </td>
-                  <td>
-                    <p class="text-[#878682]">Total Distance</p>
-                    <p>98.00 Km</p>
-                  </td>
-                  <td>
-                    <p class="text-[#878682]">Estimated Time</p>
-                    <p>2.00 Hrs</p>
-                  </td>
-                  <td class="w-[200px]">
-                    <p class="text-[#878682]">Assigned Driver</p>
-                    <p-dropdown optionLabel="name" placeholder="Select Assigned Driverd" [options]="assignDriver" />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          @if (!orderDetails) {
-          <div class="grid grid-cols-2 gap-4  p-[1.25rem]">
-            <div>
-              <table class="border-collapse border border-slate-400 w-full table-striped">
-                <thead>
-                  <tr class="bg-[#F4F3F3]">
-                    <th class="border border-[#C5C7D0BF] p-3 text-left">#</th>
-                    <th class="border border-[#C5C7D0BF] p-3 text-left">Order ID</th>
-                    <th class="border border-[#C5C7D0BF] p-3 text-left">Customer</th>
-                    <th class="border border-[#C5C7D0BF] p-3 text-left">Delivery Address</th>
-                    <th class="border border-[#C5C7D0BF] p-3 text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="border border-slate-300 p-3">1.</td>
-                    <td class="border border-slate-300 p-3">Indianapolis</td>
-                    <td class="border border-slate-300 p-3">John Doe</td>
-                    <td class="border border-slate-300 p-3">123 Main St, Indianapolis</td>
-                    <td class="border border-slate-300 p-3 text-center">
-                      <div class="flex items-center gap-2">
-                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
-                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="border border-slate-300 p-3">2.</td>
-                    <td class="border border-slate-300 p-3">Columbus</td>
-                    <td class="border border-slate-300 p-3">Jane Smith</td>
-                    <td class="border border-slate-300 p-3">456 Elm St, Columbus</td>
-                    <td class="border border-slate-300 p-3 text-center">
-                      <div class="flex items-center gap-2">
-                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
-                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="border border-slate-300 p-3">3.</td>
-                    <td class="border border-slate-300 p-3">Detroit</td>
-                    <td class="border border-slate-300 p-3">Mike Johnson</td>
-                    <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
-                    <td class="border border-slate-300 p-3 text-center">
-                      <div class="flex items-center gap-2">
-                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
-                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="border border-slate-300 p-3">4.</td>
-                    <td class="border border-slate-300 p-3">Detroit</td>
-                    <td class="border border-slate-300 p-3">Mike Johnson</td>
-                    <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
-                    <td class="border border-slate-300 p-3 text-center">
-                      <div class="flex items-center gap-2">
-                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
-                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
-            </div>
-            <div class="h-full w-full bg-white rounded-lg  border border-[#E5E7EB]">
-              <img src="../../../../assets/map-demo.png" alt="">
-            </div>
-          </div>}
-        </p-accordionTab>
-        <p-accordionTab>
-          <ng-template pTemplate="header">
-            <span class="flex align-items-center justify-between gap-2 w-full text-sm ">
-              <span class="font-semibold">Batch 1</span>
-              <span class="flex align-items-center gap-2">
-                <span class="font-semibold ml-2"> <span class="before:[content:'\2022'] before:mr-1.5">30
-                    Orders</span></span>
-              </span>
-            </span>
-          </ng-template>
-          <div class="bg-[#EBF6F4] p-[1.25rem]  border-[#E5E7EB]" [ngClass]="{'border-b': orderDetails}">
-            <table class="table-auto w-full cursor-pointer" (click)="showOrders()">
-              <tbody>
-                <tr class="font-sm">
-                  <td>
-                    <p class="text-[#878682]">Batch ID</p>
-                    <p>00-01</p>
-                  </td>
-                  <td>
-                    <p class="text-[#878682]">Order Volume</p>
-                    <p>30</p>
-                  </td>
-                  <td>
-                    <p class="text-[#878682]">Category</p>
-                    <p>Truck</p>
-                  </td>
-                  <td>
-                    <p class="text-[#878682]">Total Distance</p>
-                    <p>98.00 Km</p>
-                  </td>
-                  <td>
-                    <p class="text-[#878682]">Estimated Time</p>
-                    <p>2.00 Hrs</p>
-                  </td>
-                  <td class="w-[200px]">
-                    <p class="text-[#878682]">Assigned Driver</p>
-                    <p-dropdown optionLabel="name" placeholder="Select Assigned Driverd" [options]="assignDriver" />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          @if (!orderDetails) {
-          <div class="grid grid-cols-2 gap-4  p-[1.25rem]">
-            <div>
-              <table class="border-collapse border border-slate-400 w-full table-striped">
-                <thead>
-                  <tr class="bg-[#F4F3F3]">
-                    <th class="border border-[#C5C7D0BF] p-3 text-left">#</th>
-                    <th class="border border-[#C5C7D0BF] p-3 text-left">Order ID</th>
-                    <th class="border border-[#C5C7D0BF] p-3 text-left">Customer</th>
-                    <th class="border border-[#C5C7D0BF] p-3 text-left">Delivery Address</th>
-                    <th class="border border-[#C5C7D0BF] p-3 text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="border border-slate-300 p-3">1.</td>
-                    <td class="border border-slate-300 p-3">Indianapolis</td>
-                    <td class="border border-slate-300 p-3">John Doe</td>
-                    <td class="border border-slate-300 p-3">123 Main St, Indianapolis</td>
-                    <td class="border border-slate-300 p-3 text-center">
-                      <div class="flex items-center gap-2">
-                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
-                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="border border-slate-300 p-3">2.</td>
-                    <td class="border border-slate-300 p-3">Columbus</td>
-                    <td class="border border-slate-300 p-3">Jane Smith</td>
-                    <td class="border border-slate-300 p-3">456 Elm St, Columbus</td>
-                    <td class="border border-slate-300 p-3 text-center">
-                      <div class="flex items-center gap-2">
-                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
-                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="border border-slate-300 p-3">3.</td>
-                    <td class="border border-slate-300 p-3">Detroit</td>
-                    <td class="border border-slate-300 p-3">Mike Johnson</td>
-                    <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
-                    <td class="border border-slate-300 p-3 text-center">
-                      <div class="flex items-center gap-2">
-                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
-                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="border border-slate-300 p-3">4.</td>
-                    <td class="border border-slate-300 p-3">Detroit</td>
-                    <td class="border border-slate-300 p-3">Mike Johnson</td>
-                    <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
-                    <td class="border border-slate-300 p-3 text-center">
-                      <div class="flex items-center gap-2">
-                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
-                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
-            </div>
-            <div class="h-full w-full bg-white rounded-lg  border border-[#E5E7EB]">
-              <img src="../../../../assets/map-demo.png" alt="">
-            </div>
-          </div>}
-        </p-accordionTab>
+        }
+        }
         <p-accordionTab>
           <ng-template pTemplate="header">
             <span class="flex align-items-center justify-between gap-2 w-full text-sm ">
@@ -459,33 +189,6 @@
 
 
 
-
-@if(order?.id){
-<p-accordion [activeIndex]="0">
-  @for(batch of order?.batches; track $index) {
-  <p-accordionTab [header]="'Batch ' + batch.sequence_id">
-    <p-table [value]="batch.touch_points" [tableStyle]="{ 'min-width': '50rem' }">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Shipment</th>
-          <th>Customer</th>
-          <th>Address</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-tp>
-        <tr>
-          <td>{{ tp.touch_point.shipment_id }}</td>
-          <td>{{ tp.touch_point.customer_name }}</td>
-          <td>{{ tp.touch_point.address }}</td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-accordionTab>
-  }
-
-</p-accordion>
-
-}
 <div class="flex justify-between items-center mt-4">
   <button (click)="onCancel()"
     class="mt-4 bg-white border-2 border-grey text-grey text-sm font-normal px-4 h-9 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400">
