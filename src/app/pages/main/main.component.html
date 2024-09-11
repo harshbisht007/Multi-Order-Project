@@ -1,8 +1,8 @@
 <div class="rounded-md border-[0.5px] border-[#C5C7D0] min-h-[96vh] bg-white text-white px-8 py-6">
   <div class="custom-stepper">
-    <p-stepper [activeStep]="activeIndex">
-      <p-stepperPanel header="Order Data">
-        <ng-template pTemplate="content" let-nextCallback="nextCallback" let-index="index">
+    <p-stepper [linear]="true" [activeStep]="activeIndex" (activeStepChange)="activeStepChange($event)"  >
+      <p-stepperPanel header="Order Data"  >
+        <ng-template pTemplate="content" let-nextCallback="nextCallback" let-index="index" >
           <div class="">
             <div class="">
             <app-load-data (goToConfiguration)="setRouteId($event)"></app-load-data>
@@ -15,7 +15,7 @@
         <ng-template pTemplate="content" let-prevCallback="prevCallback" let-nextCallback="nextCallback" let-index="index">
           <div class="">
             <div class="">
-              <app-set-configuration (manageOrders)="activeIndex=2" [routeId]="routeId"></app-set-configuration>
+              <app-set-configuration  (goToFirstStep)="prevCallback.emit()"  (goToPreviousStep)="prevCallback.emit()" (manageOrders)="activeIndex=2" [routeId]="routeId"></app-set-configuration>
             </div>
           </div>
   
@@ -25,7 +25,7 @@
         <ng-template pTemplate="content" let-prevCallback="prevCallback" let-index="index">
           <div class="">
             <div class="">
-              <app-manage-orders [routeId]="routeId"></app-manage-orders>
+              <app-manage-orders (goToFirstStep)="activeIndex=1" (goToPreviousStep)="prevCallback.emit()" [routeId]="routeId"></app-manage-orders>
             </div>
           </div>
         </ng-template>

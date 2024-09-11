@@ -47,7 +47,12 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label for="routeStartTime" class="required">Route Start Time</label>
-            <input id="routeStartTime" pInputText type="date" class="mt-2" [(ngModel)]="startTime" />
+            <p-calendar [(ngModel)]="startTime" [iconDisplay]="'input'" [showIcon]="true" [timeOnly]="true"
+              inputId="templatedisplay">
+              <ng-template pTemplate="inputicon" let-clickCallBack="clickCallBack">
+                <i class="pi pi-user pointer-events-none" (click)="clickCallBack($event)"></i>
+              </ng-template>
+            </p-calendar>
           </div>
 
           <div>
@@ -82,18 +87,35 @@
 
       <div class="grid grid-cols-1 gap-x-8 gap-y-4">
         <p class="text-right mt-4">
-          @if(this.checked){
+          <!-- @if(this.checked){
           <p-button pRipple class="mr-2 mt-2 " label="Create Clusters" icon="pi pi-plus" severity="success"
             (click)="showDialog()" />
 
-          }@else{
+          }@else{ -->
           <p-button pRipple class="mr-2 mt-2" label="Save Changes" severity="success" (onClick)="saveChanges()">
           </p-button>
-          }
+          <!-- } -->
         </p>
       </div>
     </p-accordionTab>
   </p-accordion>
+
+  <div class="flex justify-between items-center mt-4">
+    <button (click)="onCancel()"
+      class="mt-4 bg-white border-2 border-grey text-grey text-sm font-normal px-4 h-9 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400">
+      Cancel
+    </button>
+
+    <div class="flex space-x-2">
+      <button (click)="goBack()">
+        Back
+      </button>
+      <button (click)="runRouting()" [disabled]="!runRoute"
+        class="bg-[--baseColor] text-white text-sm font-normal px-4 h-9 rounded-md w-[120px] disabled:cursor-not-allowed disabled:bg-gray-400">
+        Run Routing
+      </button>
+    </div>
+  </div>
 
 </div>
 

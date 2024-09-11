@@ -23,10 +23,17 @@ export class MainComponent {
 
   activeIndex: number = 0;
   routeId: string = '832f49ed-2e96-464e-b80d-00fcb92aeec3'
-active: any;
+  active: any;
 
   setRouteId(ev: string) {
     this.routeId = ev
     this.activeIndex = 1;
+  }
+  activeStepChange(event:any){
+    this.activeIndex=event
+  }
+  goToFirstStep(event:any) {
+    console.log(event)
+    this.activeIndex=0;
   }
 }

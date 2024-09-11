@@ -1,9 +1,9 @@
-import {AfterViewInit, Component, Input} from '@angular/core';
-import {GraphqlService} from "../../../core/services/graphql.service";
-import {gql} from "apollo-angular";
-import {Order} from "../../../graphql/generated";
-import {AccordionModule} from "primeng/accordion";
-import {TableModule} from "primeng/table";
+import { AfterViewInit, Component, EventEmitter, Input, Output } from '@angular/core';
+import { GraphqlService } from "../../../core/services/graphql.service";
+import { gql } from "apollo-angular";
+import { Order } from "../../../graphql/generated";
+import { AccordionModule } from "primeng/accordion";
+import { TableModule } from "primeng/table";
 import { TabViewModule } from 'primeng/tabview';
 import { DropdownModule } from 'primeng/dropdown';
 import { NgClass } from '@angular/common';
@@ -13,13 +13,24 @@ import { TooltipModule } from 'primeng/tooltip';
   selector: 'app-manage-orders',
   standalone: true,
   imports: [
-    AccordionModule,NgClass,TooltipModule,
-    TableModule, TabViewModule,DropdownModule 
+    AccordionModule, NgClass, TooltipModule,
+    TableModule, TabViewModule, DropdownModule
   ],
   templateUrl: './manage-orders.component.html',
   styleUrl: './manage-orders.component.scss'
 })
 export class ManageOrdersComponent implements AfterViewInit {
+  @Output() goToPreviousStep: EventEmitter<any> = new EventEmitter<any>();
+  @Output() goToFirstStep: EventEmitter<any> = new EventEmitter<any>();
+
+  onCancel() {
+    this.goToFirstStep.emit(true)
+  }
+  goBack() {
+    this.goToPreviousStep.emit(true);
+  }
+  createOrder() {
+  }
   assignDriver: { name: string, code: string }[] = [];
   @Input() routeId!: string;
   order!: Order;
@@ -39,12 +50,12 @@ export class ManageOrdersComponent implements AfterViewInit {
     this.getOrder().then();
   }
 
-  showOrders(){
+  showOrders() {
     this.orderDetails = !this.orderDetails;
   }
 
   async getOrder() {
-    const query =gql`query List_order($equal: String) {
+    const query = gql`query List_order($equal: String) {
       list_order {
         batches {
           touch_points {
@@ -80,7 +91,7 @@ export class ManageOrdersComponent implements AfterViewInit {
       }
     }`
 
-    const res = await this.graphqlService.runQuery(query, {equal: this.routeId})
+    const res = await this.graphqlService.runQuery(query, { equal: this.routeId })
     console.log(res);
     this.order = res.list_order[0];
   }

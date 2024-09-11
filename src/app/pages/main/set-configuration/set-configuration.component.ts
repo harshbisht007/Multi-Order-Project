@@ -3,7 +3,7 @@ import { DropdownModule } from "primeng/dropdown";
 import { FormsModule } from "@angular/forms";
 import { MultiSelectModule } from "primeng/multiselect";
 import { InputSwitchModule } from 'primeng/inputswitch';
-
+import { CalendarModule } from 'primeng/calendar';
 import { CategoryService } from "../../../core/services/category.service";
 import { Category } from "../../../graphql/generated";
 import { ToggleButtonModule } from "primeng/togglebutton";
@@ -33,6 +33,7 @@ export interface ExtendedCategory extends Category {
     DropdownModule, ButtonModule,
     NgClass, InputTextModule,
     FormsModule,
+    CalendarModule,
     AccordionModule, TooltipModule,
     InputSwitchModule,
     AccordionModule,
@@ -47,7 +48,7 @@ export class SetConfigurationComponent {
   startFromHub: boolean = true;
   endAtHub: boolean = true;
   overWriteDuplicate: boolean = true;
-  
+
   startTime: string = '00:45';
 
   categoryFields: Array<{ label: string; model: keyof ExtendedCategory; placeholder: string; id: string }> = [
@@ -74,6 +75,9 @@ export class SetConfigurationComponent {
   
   @Input() routeId!: string;
   @Output() manageOrders: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() goToPreviousStep: EventEmitter<any> = new EventEmitter<any>();
+  @Output() goToFirstStep: EventEmitter<void> = new EventEmitter<void>();
+
   categories: Category[] = [];
   selectedCategories: ExtendedCategory[] = [];
   visible: boolean = false;
@@ -94,6 +98,7 @@ export class SetConfigurationComponent {
       tooltip: 'Minimum Orders in each cluster'
     }
   ];
+  runRoute: boolean=false;
 
 
 
@@ -108,7 +113,21 @@ export class SetConfigurationComponent {
     });
   }
 
+  goBack(){
+    this.goToPreviousStep.emit(true)
+  }
+
+  runRouting(){
+    this.manageOrders.emit(true);
+
+  }
+
+  onCancel(){
+      this.goToFirstStep.emit();
+  }
+
   async saveChanges() {
+    this.runRoute=true
     console.log(this.checkboxOptions,'122')
     const mutation = gql`mutation updateRoute($id: UUID!, $change: RouteInput!) {
       update_route(id: $id, change: $change) {
@@ -136,7 +155,6 @@ export class SetConfigurationComponent {
         })
       }
     });
-    this.manageOrders.emit(true);
   }
 
 
