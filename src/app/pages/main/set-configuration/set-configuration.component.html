@@ -30,7 +30,7 @@
 
 
       <div class="grid grid-cols-2 gap-4 mt-4">
-        <div class="grid grid-cols-3 gap-4 items-center">
+        <div class="grid grid-cols-2 gap-4 items-center">
           @for( option of checkboxOptions; track $index){
           <div class="flex items-center">
             <input type="checkbox" [id]="option.id" class="h-4 w-4 rounded accent-[--baseColor] mr-1"
@@ -102,16 +102,16 @@
 
   <div class="flex justify-between items-center mt-4">
     <button (click)="onCancel()"
-      class="mt-4 bg-white border-2 border-grey text-grey text-sm font-normal px-4 h-9 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400">
+      class="mt-4 bg-white border border-grey text-grey text-sm font-normal px-4 h-9 rounded-md">
       Cancel
     </button>
 
     <div class="flex space-x-2">
-      <button (click)="goBack()">
+      <button (click)="goBack()" class="text-black text-sm font-normal px-4 h-9 w-[120px]">
         Back
       </button>
       <button (click)="runRouting()" [disabled]="!runRoute"
-        class="bg-[--baseColor] text-white text-sm font-normal px-4 h-9 rounded-md w-[120px] disabled:cursor-not-allowed disabled:bg-gray-400">
+        class="bg-[--baseColor] text-white text-sm font-normal px-4 h-9 rounded-md w-[120px] disabled:cursor-not-allowed disabled:bg-[#BFDFDC]">
         Run Routing
       </button>
     </div>
