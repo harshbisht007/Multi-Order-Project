@@ -37,8 +37,8 @@ export class MapComponent implements OnInit {
 
     // Initialize the map with the options
     this.map = L.map('map', options);
-    setTimeout(() => {
+    setInterval(() => {
       this.map.invalidateSize()
-    }, 2000);
+    }, 20);
   }
 }

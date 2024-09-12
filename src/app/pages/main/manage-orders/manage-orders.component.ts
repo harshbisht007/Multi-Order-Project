@@ -8,14 +8,16 @@ import { TabViewModule } from 'primeng/tabview';
 import { DropdownModule } from 'primeng/dropdown';
 import { CommonModule, NgClass } from '@angular/common';
 import { TooltipModule } from 'primeng/tooltip';
+import { MapComponent } from "../../map/map.component";
 
 @Component({
   selector: 'app-manage-orders',
   standalone: true,
   imports: [
-    AccordionModule, NgClass, TooltipModule,CommonModule,
-    TableModule, TabViewModule, DropdownModule
-  ],
+    AccordionModule, NgClass, TooltipModule, CommonModule,
+    TableModule, TabViewModule, DropdownModule,
+    MapComponent
+],
   templateUrl: './manage-orders.component.html',
   styleUrl: './manage-orders.component.scss'
 })
