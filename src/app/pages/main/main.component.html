@@ -1,37 +1,29 @@
-<div class="rounded-md border-[0.5px] border-[#C5C7D0] min-h-[96vh] bg-white text-white px-8 py-6">
+<div class="rounded-md border min-h-[96vh] bg-white text-white px-8 py-6">
   <div class="custom-stepper">
-    <p-stepper  [activeStep]="activeIndex" (activeStepChange)="activeStepChange($event)"  >
-      <p-stepperPanel header="Order Data"  >
-        <ng-template pTemplate="content" let-nextCallback="nextCallback" let-index="index" >
-          <div class="">
-            <div class="">
-            <app-load-data (goToConfiguration)="setRouteId($event)" (dataForMarker)="getData($event)"></app-load-data>
-            </div>
-          </div>
-  
+    <p-stepper [activeStep]="activeIndex" (activeStepChange)="activeStepChange($event)">
+      <p-stepperPanel header="Order Data">
+        <ng-template pTemplate="content" let-nextCallback="nextCallback" let-index="index">
+          <app-load-data (goToConfiguration)="setRouteId($event)" (dataForMarker)="getData($event)"></app-load-data>
         </ng-template>
       </p-stepperPanel>
+
       <p-stepperPanel header="Zone Configuration">
-        <ng-template pTemplate="content" let-prevCallback="prevCallback" let-nextCallback="nextCallback" let-index="index">
-          <div class="">
-            <div class="">
-              <app-set-configuration  (goToFirstStep)="prevCallback.emit()"  (goToPreviousStep)="prevCallback.emit()" (manageOrders)="activeIndex=2" [routeId]="routeId" [dataForMarker]="dataForMarker"></app-set-configuration>
-            </div>
-          </div>
-  
+        <ng-template pTemplate="content" let-prevCallback="prevCallback" let-nextCallback="nextCallback"
+          let-index="index">
+          <app-set-configuration (goToFirstStep)="prevCallback.emit()" (goToPreviousStep)="prevCallback.emit()"
+            (manageOrders)="activeIndex = 2" [routeId]="routeId" [dataForMarker]="dataForMarker">
+          </app-set-configuration>
         </ng-template>
       </p-stepperPanel>
+
       <p-stepperPanel header="Review">
         <ng-template pTemplate="content" let-prevCallback="prevCallback" let-index="index">
-          <div class="">
-            <div class="">
-              <app-manage-orders (goToFirstStep)="activeIndex=1" (goToPreviousStep)="prevCallback.emit()" [routeId]="routeId"></app-manage-orders>
-            </div>
-          </div>
+          <app-manage-orders (goToFirstStep)="activeIndex = 1" (goToPreviousStep)="prevCallback.emit()"
+            [routeId]="routeId">
+          </app-manage-orders>
         </ng-template>
       </p-stepperPanel>
+
     </p-stepper>
   </div>
 </div>
-
-

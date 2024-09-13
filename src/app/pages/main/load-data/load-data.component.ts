@@ -185,11 +185,10 @@ export class LoadDataComponent {
     this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
 
   }
-  onHeaderCheckboxToggle(arg0: any) {
-    console.log(arg0, '122')
-    if (arg0.checked == true) {
+  onHeaderCheckboxToggle(headCheckBox: any) {
+    if (headCheckBox.checked == true) {
       this.showActions = false;
-    } else if (arg0.checked == false) {
+    } else if (headCheckBox.checked == false) {
       this.showActions = true;
     }
   }
@@ -316,10 +315,8 @@ export class LoadDataComponent {
   async submitData(rows: any[]) {
     const sanitizedRows = rows.reduce((acc, col) => {
       if (col['status']) {
-        // Destructure and remove status
         const { status, latitude, longitude, weight, ...rest } = col;
 
-        // Convert latitude, longitude, and weight to integers if they are strings
         const sanitizedRow = {
           ...rest,
           latitude: typeof latitude === 'string' ? parseInt(latitude, 10) : latitude,
@@ -356,10 +353,8 @@ export class LoadDataComponent {
       styleClass: 'data_upload',
     });
 
-    // Subscribe to the closing event of the dialog
     this.dialogRef.onClose.subscribe((file: File) => {
       if (file) {
-        // Handle the file in the parent component (process or trigger reading logic)
         this.onFileChange({ target: { files: [file] } });
       } else {
         console.log('Dialog was closed without file upload');

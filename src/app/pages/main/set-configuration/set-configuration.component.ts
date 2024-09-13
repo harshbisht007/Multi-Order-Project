@@ -75,7 +75,7 @@ export class SetConfigurationComponent  {
   ];
   
   @Input() routeId!: string;
-  @Input() dataForMarker!:[];
+  @Input() dataForMarker!:any[];
   @Output() manageOrders: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() goToPreviousStep: EventEmitter<any> = new EventEmitter<any>();
   @Output() goToFirstStep: EventEmitter<void> = new EventEmitter<void>();
