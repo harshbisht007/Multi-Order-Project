@@ -65,6 +65,8 @@ export class LoadDataComponent {
   rows!: CustomTouchPoint[];
   @ViewChild('fileInput') fileInput!: any;
   @Output() goToConfiguration: EventEmitter<string> = new EventEmitter();
+  @Output() dataForMarker: EventEmitter<any> = new EventEmitter();
+
   loading: boolean = false;
   headers: string[] = [];
   activityValues: number[] = [0, 100];
@@ -340,6 +342,7 @@ export class LoadDataComponent {
       const res = await this.graphqlService.runMutation(mutation, { data: sanitizedRows });
       console.log(res);
       this.goToConfiguration.emit(res.create_shipments);
+      this.dataForMarker.emit(rows);
     } catch (error) {
       console.error('GraphQL Error:', error);
     }

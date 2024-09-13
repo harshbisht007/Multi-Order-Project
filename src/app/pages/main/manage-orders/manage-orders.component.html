@@ -26,7 +26,13 @@
                   @for(item of batchInfo[batchIndex]; let i = $index; track  i) {
                     <td >
                     <p class="text-[#878682]">{{ item.label }}</p>
-                    <p>{{ item.value }}</p>
+                    @if(item.label==='Batch ID'){
+                      #{{ item.value.toString().slice(-5) }}
+                    }@else{
+                      <p>
+                        {{ item.value }}
+                      </p>
+                    }
                   </td>
                   }
                   <td class="w-[200px]">
@@ -53,7 +59,7 @@
                 <tbody>
                   <tr *ngFor="let tp of batch.touch_points; let i = index">
                     <td class="border border-slate-300 p-3">{{ i + 1 }}.</td>
-                    <td class="border border-slate-300 p-3">{{ tp.touch_point?.id }}</td>
+                    <td class="border border-slate-300 p-3">#{{ tp.touch_point?.id?.slice(-5) }}</td>
                     <td class="border border-slate-300 p-3">{{ tp.touch_point?.category_type }}</td>
                     <td class="border border-slate-300 p-3">{{ tp.touch_point?.address }}</td>
                     <td class="border border-slate-300 p-3 text-center">
@@ -67,9 +73,9 @@
               </table>
 
             </div>
-            <div class="h-full w-full bg-white rounded-lg  border border-[#E5E7EB]">
-              <img src="../../../../assets/map-demo.png" alt="">
-            </div>
+            <div class="h-[350px] w-full bg-white rounded-lg overflow-hidden border border-[#E5E7EB]">
+              <app-map></app-map>
+          </div>
           </div>}
         </p-accordionTab>
         }
@@ -168,7 +174,7 @@
               </table>
 
             </div>
-            <div class="h-[350px] w-full bg-white rounded-lg  border border-[#E5E7EB]">
+            <div class="h-[350px] w-full bg-white rounded-lg overflow-hidden border border-[#E5E7EB]">
                 <app-map></app-map>
             </div>
           </div>

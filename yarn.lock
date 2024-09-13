@@ -156,7 +156,7 @@
     "symbol-observable" "4.0.0"
     "yargs" "17.7.2"
 
-"@angular/common@^17.0.0 || ^18.0.0", "@angular/common@^17.1.0", "@angular/common@17.3.12":
+"@angular/common@^17.0.0 || ^18.0.0", "@angular/common@^17.1.0", "@angular/common@17.3.12", "@angular/common@18":
   "integrity" "sha512-vabJzvrx76XXFrm1RJZ6o/CyG32piTB/1sfFfKHdlH1QrmArb8It4gyk9oEjZ1IkAD0HvBWlfWmn+T6Vx3pdUw=="
   "resolved" "https://registry.npmjs.org/@angular/common/-/common-17.3.12.tgz"
   "version" "17.3.12"
@@ -184,7 +184,7 @@
   dependencies:
     "tslib" "^2.3.0"
 
-"@angular/core@^17.0.0 || ^18.0.0", "@angular/core@^17.1.0", "@angular/core@17.3.12":
+"@angular/core@^17.0.0 || ^18.0.0", "@angular/core@^17.1.0", "@angular/core@17.3.12", "@angular/core@18":
   "integrity" "sha512-MuFt5yKi161JmauUta4Dh0m8ofwoq6Ino+KoOtkYMBGsSx+A7dSm+DUxxNwdj7+DNyg3LjVGCFgBFnq4g8z06A=="
   "resolved" "https://registry.npmjs.org/@angular/core/-/core-17.3.12.tgz"
   "version" "17.3.12"
@@ -268,6 +268,13 @@
   "version" "0.0.1"
   dependencies:
     "node-fetch" "^2.6.1"
+
+"@asymmetrik/ngx-leaflet@^18.0.1":
+  "integrity" "sha512-x1KFH+qUCB4H6GWJik0r+8k10/WZXgWcqq2Iu7GpcpESxBFan+bHtiWJt6urqvMOroObEWfMKmVND83CB7AjlQ=="
+  "resolved" "https://registry.npmjs.org/@asymmetrik/ngx-leaflet/-/ngx-leaflet-18.0.1.tgz"
+  "version" "18.0.1"
+  dependencies:
+    "tslib" "^2.3.0"
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.23.5", "@babel/code-frame@^7.24.7":
   "integrity" "sha512-BcYH1CVJBO9tvyIZ2jVeXgSIMvGZ2FDRvDdOIVQyuklNKSsx+eppDEBq/g47Ayw+RqNFE+URvOShmf+f/qwAlA=="
@@ -5245,7 +5252,7 @@
     "picocolors" "^1.0.0"
     "shell-quote" "^1.8.1"
 
-"leaflet@^1.9.4":
+"leaflet@^1.9.4", "leaflet@1":
   "integrity" "sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA=="
   "resolved" "https://registry.npmjs.org/leaflet/-/leaflet-1.9.4.tgz"
   "version" "1.9.4"

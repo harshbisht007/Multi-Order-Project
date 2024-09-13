@@ -5,7 +5,7 @@
         <ng-template pTemplate="content" let-nextCallback="nextCallback" let-index="index" >
           <div class="">
             <div class="">
-            <app-load-data (goToConfiguration)="setRouteId($event)"></app-load-data>
+            <app-load-data (goToConfiguration)="setRouteId($event)" (dataForMarker)="getData($event)"></app-load-data>
             </div>
           </div>
   
@@ -15,7 +15,7 @@
         <ng-template pTemplate="content" let-prevCallback="prevCallback" let-nextCallback="nextCallback" let-index="index">
           <div class="">
             <div class="">
-              <app-set-configuration  (goToFirstStep)="prevCallback.emit()"  (goToPreviousStep)="prevCallback.emit()" (manageOrders)="activeIndex=2" [routeId]="routeId"></app-set-configuration>
+              <app-set-configuration  (goToFirstStep)="prevCallback.emit()"  (goToPreviousStep)="prevCallback.emit()" (manageOrders)="activeIndex=2" [routeId]="routeId" [dataForMarker]="dataForMarker"></app-set-configuration>
             </div>
           </div>
   

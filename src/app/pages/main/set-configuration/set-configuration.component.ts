@@ -1,4 +1,4 @@
-import { Component, effect, EventEmitter, Input, Output } from '@angular/core';
+import { Component, effect, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { DropdownModule } from "primeng/dropdown";
 import { FormsModule } from "@angular/forms";
 import { MultiSelectModule } from "primeng/multiselect";
@@ -45,7 +45,7 @@ export interface ExtendedCategory extends Category {
   templateUrl: './set-configuration.component.html',
   styleUrl: './set-configuration.component.scss'
 })
-export class SetConfigurationComponent {
+export class SetConfigurationComponent  {
   startFromHub: boolean = true;
   endAtHub: boolean = true;
   overWriteDuplicate: boolean = true;
@@ -75,6 +75,7 @@ export class SetConfigurationComponent {
   ];
   
   @Input() routeId!: string;
+  @Input() dataForMarker!:[];
   @Output() manageOrders: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() goToPreviousStep: EventEmitter<any> = new EventEmitter<any>();
   @Output() goToFirstStep: EventEmitter<void> = new EventEmitter<void>();
@@ -113,6 +114,7 @@ export class SetConfigurationComponent {
       }
     });
   }
+ 
 
   goBack(){
     this.goToPreviousStep.emit(true)

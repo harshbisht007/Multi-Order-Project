@@ -58,7 +58,7 @@
           <div>
             <label for="vehicleCategory">Vehicle Category</label>
             <p-multiSelect [options]="categories" [(ngModel)]="selectedCategories" id="vehicleCategory"
-              optionLabel="name" class="mt-2 cust_multi_select" placeholder="Select Cities">
+              optionLabel="name" class="mt-2 cust_multi_select" placeholder="Select Categories">
             </p-multiSelect>
           </div>
         </div>
@@ -116,8 +116,8 @@
       </button>
     </div>
   </div>
-  <div class="mt-4 h-[500px] w-[100%] border rounded-md overflow-hidden">
-      <app-map></app-map>
+  <div class="mt-4 h-[400px] w-[100%] border rounded-md overflow-hidden">
+      <app-map [dataForMarker]="dataForMarker"></app-map>
   </div>
 
 
