@@ -49,7 +49,7 @@ export type Batch = {
   rider_id?: Maybe<Scalars['UUID']['output']>;
   rider_name?: Maybe<Scalars['String']['output']>;
   rider_phone?: Maybe<Scalars['String']['output']>;
-  sequence_id?: Maybe<Scalars['Int']['output']>;
+  sequence_id: Scalars['Int']['output'];
   touch_points: Array<BatchTouchPoint>;
   updated_on: Scalars['Datetime']['output'];
   volume?: Maybe<Scalars['Int']['output']>;
@@ -369,7 +369,7 @@ export type Mutation = {
   create_route: Route;
   create_route_template: RouteTemplate;
   create_route_vehicle_config: RouteVehicleConfig;
-  create_shipments: Scalars['UUID']['output'];
+  create_shipments: Scalars['Int']['output'];
   create_touch_point: TouchPoint;
   creates_batch: Array<Maybe<Batch>>;
   creates_batch_touch_point: Array<Maybe<BatchTouchPoint>>;
@@ -386,6 +386,7 @@ export type Mutation = {
   delete_route_vehicle_config: RouteVehicleConfig;
   delete_touch_point: TouchPoint;
   ping: Ping;
+  run_routing: Scalars['UUID']['output'];
   update_batch: Batch;
   update_batch_touch_point: BatchTouchPoint;
   update_order: Order;
@@ -513,6 +514,11 @@ export type MutationDelete_Touch_PointArgs = {
 };
 
 
+export type MutationRun_RoutingArgs = {
+  route_id: Scalars['Int']['input'];
+};
+
+
 export type MutationUpdate_BatchArgs = {
   change: BatchInput;
   id: Scalars['UUID']['input'];
@@ -596,7 +602,6 @@ export type Order = {
   created_on: Scalars['Datetime']['output'];
   id: Scalars['Int']['output'];
   route_id?: Maybe<Scalars['Int']['output']>;
-  sequence_id?: Maybe<Scalars['Int']['output']>;
   updated_on: Scalars['Datetime']['output'];
 };
 
@@ -647,19 +652,6 @@ export type OrderRoute_IdArgs = {
 };
 
 
-export type OrderSequence_IdArgs = {
-  equal?: InputMaybe<Scalars['Float']['input']>;
-  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
-  greaterThan?: InputMaybe<Scalars['Float']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
-  isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
-  lesserThan?: InputMaybe<Scalars['Float']['input']>;
-  notEqual?: InputMaybe<Scalars['Float']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
-};
-
-
 export type OrderUpdated_OnArgs = {
   greaterEqual?: InputMaybe<Scalars['Datetime']['input']>;
   greaterThan?: InputMaybe<Scalars['Datetime']['input']>;
@@ -673,7 +665,6 @@ export type OrderInput = {
   created_on?: InputMaybe<Scalars['Datetime']['input']>;
   id?: InputMaybe<Scalars['Int']['input']>;
   route_id?: InputMaybe<Scalars['Int']['input']>;
-  sequence_id?: InputMaybe<Scalars['Int']['input']>;
   updated_on?: InputMaybe<Scalars['Datetime']['input']>;
 };
 
