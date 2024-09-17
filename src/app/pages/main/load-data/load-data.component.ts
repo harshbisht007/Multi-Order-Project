@@ -1,5 +1,5 @@
-import { Component, effect, EventEmitter, Output, ViewChild, viewChild } from '@angular/core';
-import { TouchPoint } from "../../../graphql/generated";
+import {Component, effect, EventEmitter, OnInit, Output, ViewChild, viewChild} from '@angular/core';
+import {TouchPoint, Zone} from "../../../graphql/generated";
 import { Table, TableModule, TableRowSelectEvent, TableRowUnSelectEvent } from "primeng/table";
 import { Button } from "primeng/button";
 import { FormsModule } from "@angular/forms";
@@ -32,6 +32,13 @@ export interface CustomTouchPoint extends TouchPoint {
 
 }
 
+export interface CustomValidObject {
+  classes: { [key: string]: boolean };
+  message: string;
+  imageSrc: string;
+}
+
+
 @Component({
   selector: 'app-load-data',
   standalone: true,
@@ -61,42 +68,35 @@ export interface CustomTouchPoint extends TouchPoint {
   templateUrl: './load-data.component.html',
   styleUrl: './load-data.component.scss'
 })
-export class LoadDataComponent {
-  rows!: CustomTouchPoint[];
+export class LoadDataComponent implements OnInit {
+  rows: CustomTouchPoint[] = [];
   @ViewChild('fileInput') fileInput!: any;
   @Output() goToConfiguration: EventEmitter<string> = new EventEmitter();
   @Output() dataForMarker: EventEmitter<any> = new EventEmitter();
 
   loading: boolean = false;
   headers: string[] = [];
-  activityValues: number[] = [0, 100];
   showActions: any = true;
-  searchValue: string | undefined;
   selectedSource: any = 'upload';
   sources: any;
   isEditable: boolean = false
-  zones: any;
-  selectedZone: any;
+  zones = this.zoneService.zones;
+  selectedZone!: Zone;
   selectedItems: any;
   totalInvalid: number = 0;
   showToastForValidCheck: boolean = false;
-  validColumnObject = {
+  validColumnObject: CustomValidObject = {
     classes: {},
     message: '',
     imageSrc: ''
   }
   currentEditingRow: any = null;
-  globalFilterFields: string[] = [];
   dialogRef: DynamicDialogRef | undefined;
 
 
-  constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService, public dialogService: DialogService,) {
-    effect(() => {
-      this.zones = this.zoneService.zones();
-      if (this.zones && this.zones.length > 0) {
-        console.log('Zones available: ', this.zones);
-      }
-    });
+  constructor(private zoneService: ZoneService, private graphqlService: GraphqlService,
+              private confirmationService: ConfirmationService, private messageService: MessageService,
+              public dialogService: DialogService,) {
   }
 
   ngOnInit() {
@@ -107,7 +107,6 @@ export class LoadDataComponent {
   }
 
   onZoneChange(event: DropdownChangeEvent) {
-    console.log(event, this.selectedZone, '122')
   }
 
 
@@ -126,8 +125,6 @@ export class LoadDataComponent {
         this.totalInvalid += 1;
       }
     })
-
-
 
     this.validColumnObject = {
       classes: {
@@ -171,6 +168,7 @@ export class LoadDataComponent {
   onRowEditInit(row: any) {
     this.isEditable = true
     this.currentEditingRow = row;
+    console.log(row);
   }
 
   onRowEditSave(row: any) {

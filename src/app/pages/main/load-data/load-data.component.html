@@ -4,10 +4,10 @@
     <p class="text-[#676879] font-normal text-[13px]">How would you like to import your order data?</p>
     <div class="grid grid-cols-5 gap-8 my-4">
       <div>
-        <label for="" class="flex"><span class="required mr-2.5 ">Zone </span>
-          <img src="../../../../assets/icons/icons-info.svg" alt=""></label>
-        <p-dropdown [options]="zones" [(ngModel)]="selectedZone" optionLabel="name" placeholder="Select Zone"
-          (onChange)="onZoneChange($event)" class="custom-dropdown mt-2.5 " />
+        <label class="flex"><span class="required mr-2.5 ">Zone </span>
+          <img alt="" src="../../../../assets/icons/icons-info.svg"></label>
+        <p-dropdown (onChange)="onZoneChange($event)" [(ngModel)]="selectedZone" [options]="zones()" class="custom-dropdown mt-2.5 "
+                    optionLabel="name" placeholder="Select Zone"/>
       </div>
       <!-- <div>
         <label for="" class="mb-2.5 required">Data Source</label><p-dropdown [options]="sources"
@@ -16,10 +16,11 @@
       </div> -->
     </div>
   </div>
-  <p-table #dt1 [columns]="headers" [value]="rows" editMode="row" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]"
-    [(selection)]="selectedItems" (onRowSelect)="onRowSelect($event)"
-    (onHeaderCheckboxToggle)="onHeaderCheckboxToggle($event)" (onRowUnselect)="onRowUnselect($event)"
-    [loading]="loading" [paginator]="true" styleClass="p-datatable-striped" [globalFilterFields]="headers">
+  <p-table #dt1 (onHeaderCheckboxToggle)="onHeaderCheckboxToggle($event)" (onRowSelect)="onRowSelect($event)" (onRowUnselect)="onRowUnselect($event)"
+           [(selection)]="selectedItems" [columns]="headers"
+           [globalFilterFields]="headers" [loading]="loading"
+           [paginator]="true" [rowsPerPageOptions]="[10, 25, 50]"
+           [rows]="10" [value]="rows" editMode="row" styleClass="p-datatable-striped">
     <ng-template pTemplate="caption">
       <!-- @if(selectedSource=='upload'){ -->
       <!-- <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" /> -->
@@ -27,36 +28,36 @@
       <div class="grid gap-4 grid-cols-2 mb-2">
         <div>
           <!-- @if(selectedSource=='fetch'){ -->
-          <p-button pRipple class="mr-2" (onClick)="uploadData()" severity="success" icon="pi pi-download" label="Upload file" />
+          <p-button (onClick)="uploadData()" class="mr-2" icon="pi pi-download" label="Upload file" pRipple severity="success"/>
 
-          <p-button pRipple class="mr-2" label="Fetch Data" icon="pi pi-refresh" severity="success"
-            (onClick)="fetchDataFromDB()" />
+          <p-button (onClick)="fetchDataFromDB()" class="mr-2" icon="pi pi-refresh" label="Fetch Data" pRipple
+                    severity="success"/>
           <!-- } -->
-          <p-button pRipple class="mr-2" label="Download Report" icon="pi pi-upload" [outlined]="true"
-            (onClick)="downloadSample()" severity="success" />
-          <p-button [disabled]="!rows?.length || !selectedItems?.length" pRipple class="" label="Delete"
-            [outlined]="true" icon="pi pi-trash" severity="danger" (onClick)="confirmDelete()" />
+          <p-button (onClick)="downloadSample()" [outlined]="true" class="mr-2" icon="pi pi-upload" label="Download Report"
+                    pRipple severity="success"/>
+          <p-button (onClick)="confirmDelete()" [disabled]="!rows.length || !selectedItems?.length" [outlined]="true" class=""
+                    icon="pi pi-trash" label="Delete" pRipple severity="danger"/>
         </div>
         <div class="flex flex-row-reverse relative">
 
           <div>
             <span class="p-input-icon-left">
               <i class="pi pi-search"></i>
-              <input type="text" pInputText class="text-sm font-normal" style="padding-left: 40px !important;"
-                [placeholder]="'Search here'" (input)="dt1.filterGlobal($any($event.target).value, 'contains')" />
+              <input (input)="dt1.filterGlobal($any($event.target).value, 'contains')" [placeholder]="'Search here'" class="text-sm font-normal" pInputText
+                     style="padding-left: 40px !important;" type="text"/>
             </span>
           </div>
           @if (showToastForValidCheck) {
-          <div class="" [ngClass]="validColumnObject?.classes">
-            <img class="h-4 w-4" [src]="validColumnObject?.imageSrc" class="mr-3">
-            <span>{{ validColumnObject?.message }}</span>
-          </div>
+            <div class="" [ngClass]="validColumnObject.classes">
+              <img class="h-4 w-4 mr-3" [src]="validColumnObject.imageSrc" alt="no image">
+              <span>{{ validColumnObject.message }}</span>
+            </div>
           }
         </div>
       </div>
 
     </ng-template>
-    <ng-template pTemplate="header" let-columns>
+    <ng-template let-columns pTemplate="header">
       <tr>
         <th style="width: 1rem">
           <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
@@ -67,14 +68,14 @@
             <p-sortIcon field="{{col}}"></p-sortIcon>
           </span>
         </th>
-        @if(showActions){
-        <th>Actions</th>
+        @if (showActions) {
+          <th>Actions</th>
         }
 
       </tr>
     </ng-template>
-    <ng-template pTemplate="body" let-row let-index="rowIndex" let-editing="editing" let-columns="columns">
-      <tr [pEditableRow]="row" [pSelectableRow]="row" [pSelectableRowIndex]="index">
+    <ng-template let-columns="columns" let-editing="editing" let-index="rowIndex" let-row pTemplate="body">
+      <tr [pEditableRow]="row" [pSelectableRowIndex]="index" [pSelectableRow]="row">
         <td>
           <p-tableCheckbox [value]="row"></p-tableCheckbox>
         </td>
@@ -83,8 +84,8 @@
           <ng-container *ngIf="currentEditingRow === row; else displayCell">
             <p-cellEditor>
               <ng-template pTemplate="input">
-                <input [disabled]="col=='status'" [(ngModel)]="row[col]" class="border border-grey rounded-md px-1 py-1"
-                  type="text" pInputText />
+                <input [(ngModel)]="row[col]" [disabled]="col=='status'" class="border border-grey rounded-md px-1 py-1"
+                       pInputText type="text"/>
               </ng-template>
 
               <ng-template pTemplate="output">
@@ -101,28 +102,28 @@
           </ng-template>
         </td>
 
-        @if(currentEditingRow === row) {
-        <td>
-          <div class="flex align-items-center justify-content-center gap-1">
-            @if(currentEditingRow === row) {
-            <span pButton pRipple type="button" pSaveEditableRow icon="pi pi-check" (click)="onRowEditSave(row)"
-              class="p-button-rounded p-button-text p-button-success"></span>
-            <span pButton type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancel(row, index)"
-              class="p-button-rounded p-button-text p-button-danger"></span>
-            }
-          </div>
-        </td>
+        @if (currentEditingRow === row) {
+          <td>
+            <div class="flex align-items-center justify-content-center gap-1">
+              @if (currentEditingRow === row) {
+                <span pButton pRipple type="button" pSaveEditableRow icon="pi pi-check" (click)="onRowEditSave(row)"
+                      class="p-button-rounded p-button-text p-button-success"></span>
+                <span pButton type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancel(row, index)"
+                      class="p-button-rounded p-button-text p-button-danger"></span>
+              }
+            </div>
+          </td>
         }
-        @if(currentEditingRow !== row) {
-        <td>
-          <div class="flex align-items-center justify-content-center gap-1">
+        @if (currentEditingRow !== row) {
+          <td>
+            <div class="flex align-items-center justify-content-center gap-1">
             <span *ngIf="currentEditingRow !== row" pButton pRipple
-              class="p-button-rounded p-button-text p-button-success" type="button" pInitEditableRow icon="pi pi-pencil"
-              (click)="onRowEditInit(row)" class="p-button-rounded p-button-text"></span>
-            <span pButton pRipple class="p-button-rounded p-button-text p-button-danger" (click)="deleteOrder(row)"><i
+                  class="p-button-rounded p-button-text p-button-success" type="button" pInitEditableRow icon="pi pi-pencil"
+                  (click)="onRowEditInit(row)" class="p-button-rounded p-button-text"></span>
+              <span pButton pRipple class="p-button-rounded p-button-text p-button-danger" (click)="deleteOrder(row)"><i
                 class="pi pi-trash"></i></span>
-          </div>
-        </td>
+            </div>
+          </td>
         }
       </tr>
     </ng-template>
@@ -133,27 +134,26 @@
     </ng-template>
 
 
-
   </p-table>
 
 </div>
 
-@if(rows?.length){
-<div class="flex justify-between items-center mt-4">
-  <button (click)="onCancel()"
-    class="mt-4 bg-white border-2 border-grey text-grey text-sm font-normal px-4 h-9 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400">
-    Cancel
-  </button>
-
-  <div class="flex space-x-2">
-
-    <button (click)="onSubmit()" [disabled]="rows.length === 0" [disabled]="totalInvalid>0"
-      class="bg-[--baseColor] text-white text-sm font-normal px-4 h-9 rounded-md w-[120px] disabled:cursor-not-allowed disabled:bg-[#BFDFDC]">
-      Continue
+@if (rows.length) {
+  <div class="flex justify-between items-center mt-4">
+    <button (click)="onCancel()"
+            class="mt-4 bg-white border-2 border-grey text-grey text-sm font-normal px-4 h-9 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400">
+      Cancel
     </button>
+
+    <div class="flex space-x-2">
+
+      <button (click)="onSubmit()" [disabled]="totalInvalid>0 && rows.length === 0"
+              class="bg-[--baseColor] text-white text-sm font-normal px-4 h-9 rounded-md w-[120px] disabled:cursor-not-allowed disabled:bg-[#BFDFDC]">
+        Continue
+      </button>
+    </div>
   </div>
-</div>
 
 }
-<p-toast />
-<p-confirmDialog />
+<p-toast/>
+<p-confirmDialog/>

@@ -6,7 +6,7 @@
     </p>
     <div class="h-[56vh] overflow-y-auto custom_scrollbar">
       <p-accordion [activeIndex]="1">
-        @if(order?.batches){
+        @if(order.batches){
 
           @for(batch of order.batches; let batchIndex = $index; track batchIndex) {
             <p-accordionTab>
@@ -59,7 +59,7 @@
                 <tbody>
                   <tr *ngFor="let tp of batch.touch_points; let i = index">
                     <td class="border border-slate-300 p-3">{{ i + 1 }}.</td>
-                    <td class="border border-slate-300 p-3">#{{ tp.touch_point?.id?.slice(-5) }}</td>
+                    <td class="border border-slate-300 p-3">#{{ tp.touch_point?.id }}</td>
                     <td class="border border-slate-300 p-3">{{ tp.touch_point?.category_type }}</td>
                     <td class="border border-slate-300 p-3">{{ tp.touch_point?.address }}</td>
                     <td class="border border-slate-300 p-3 text-center">

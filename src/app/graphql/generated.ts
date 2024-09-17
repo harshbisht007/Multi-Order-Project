@@ -43,9 +43,9 @@ export type Batch = {
   created_on: Scalars['Datetime']['output'];
   distance?: Maybe<Scalars['Int']['output']>;
   duration?: Maybe<Scalars['Int']['output']>;
-  id: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
   order?: Maybe<Order>;
-  order_id?: Maybe<Scalars['String']['output']>;
+  order_id?: Maybe<Scalars['Int']['output']>;
   rider_id?: Maybe<Scalars['UUID']['output']>;
   rider_name?: Maybe<Scalars['String']['output']>;
   rider_phone?: Maybe<Scalars['String']['output']>;
@@ -127,26 +127,28 @@ export type BatchDurationArgs = {
 
 
 export type BatchIdArgs = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equal?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  notEqual?: InputMaybe<Scalars['String']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
 export type BatchOrder_IdArgs = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equal?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  notEqual?: InputMaybe<Scalars['String']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
@@ -226,9 +228,9 @@ export type BatchInput = {
   created_on?: InputMaybe<Scalars['Datetime']['input']>;
   distance?: InputMaybe<Scalars['Int']['input']>;
   duration?: InputMaybe<Scalars['Int']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['Int']['input']>;
   order?: InputMaybe<OrderInput>;
-  order_id?: InputMaybe<Scalars['String']['input']>;
+  order_id?: InputMaybe<Scalars['Int']['input']>;
   rider_id?: InputMaybe<Scalars['UUID']['input']>;
   rider_name?: InputMaybe<Scalars['String']['input']>;
   rider_phone?: InputMaybe<Scalars['String']['input']>;
@@ -241,25 +243,26 @@ export type BatchInput = {
 export type BatchTouchPoint = {
   __typename?: 'BatchTouchPoint';
   batch?: Maybe<Batch>;
-  batch_id?: Maybe<Scalars['String']['output']>;
+  batch_id?: Maybe<Scalars['Int']['output']>;
   company_id: Scalars['String']['output'];
   created_on: Scalars['Datetime']['output'];
-  id: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
   touch_point?: Maybe<TouchPoint>;
-  touch_point_id?: Maybe<Scalars['String']['output']>;
+  touch_point_id?: Maybe<Scalars['Int']['output']>;
   updated_on: Scalars['Datetime']['output'];
 };
 
 
 export type BatchTouchPointBatch_IdArgs = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equal?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  notEqual?: InputMaybe<Scalars['String']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
@@ -284,26 +287,28 @@ export type BatchTouchPointCreated_OnArgs = {
 
 
 export type BatchTouchPointIdArgs = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equal?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  notEqual?: InputMaybe<Scalars['String']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
 export type BatchTouchPointTouch_Point_IdArgs = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equal?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  notEqual?: InputMaybe<Scalars['String']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
@@ -316,12 +321,12 @@ export type BatchTouchPointUpdated_OnArgs = {
 
 export type BatchTouchPointInput = {
   batch?: InputMaybe<BatchInput>;
-  batch_id?: InputMaybe<Scalars['String']['input']>;
+  batch_id?: InputMaybe<Scalars['Int']['input']>;
   company_id?: InputMaybe<Scalars['String']['input']>;
   created_on?: InputMaybe<Scalars['Datetime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['Int']['input']>;
   touch_point?: InputMaybe<TouchPointInput>;
-  touch_point_id?: InputMaybe<Scalars['String']['input']>;
+  touch_point_id?: InputMaybe<Scalars['Int']['input']>;
   updated_on?: InputMaybe<Scalars['Datetime']['input']>;
 };
 
@@ -589,8 +594,8 @@ export type Order = {
   batches: Array<Batch>;
   company_id: Scalars['String']['output'];
   created_on: Scalars['Datetime']['output'];
-  id: Scalars['String']['output'];
-  route_id?: Maybe<Scalars['String']['output']>;
+  id: Scalars['Int']['output'];
+  route_id?: Maybe<Scalars['Int']['output']>;
   sequence_id?: Maybe<Scalars['Int']['output']>;
   updated_on: Scalars['Datetime']['output'];
 };
@@ -617,26 +622,28 @@ export type OrderCreated_OnArgs = {
 
 
 export type OrderIdArgs = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equal?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  notEqual?: InputMaybe<Scalars['String']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
 export type OrderRoute_IdArgs = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equal?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  notEqual?: InputMaybe<Scalars['String']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
@@ -664,8 +671,8 @@ export type OrderInput = {
   batches?: InputMaybe<Array<InputMaybe<BatchInput>>>;
   company_id?: InputMaybe<Scalars['String']['input']>;
   created_on?: InputMaybe<Scalars['Datetime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  route_id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['Int']['input']>;
+  route_id?: InputMaybe<Scalars['Int']['input']>;
   sequence_id?: InputMaybe<Scalars['Int']['input']>;
   updated_on?: InputMaybe<Scalars['Datetime']['input']>;
 };
@@ -817,7 +824,8 @@ export type Route = {
   company_id: Scalars['String']['output'];
   created_on: Scalars['Datetime']['output'];
   end_at_hub?: Maybe<Scalars['Boolean']['output']>;
-  id: Scalars['String']['output'];
+  hub_location?: Maybe<Geom>;
+  id: Scalars['Int']['output'];
   overwrite_duplicate?: Maybe<Scalars['Boolean']['output']>;
   riders?: Maybe<Scalars['Int']['output']>;
   sequence_id: Scalars['Int']['output'];
@@ -868,14 +876,15 @@ export type RouteEnd_At_HubArgs = {
 
 
 export type RouteIdArgs = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equal?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  notEqual?: InputMaybe<Scalars['String']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
@@ -940,7 +949,8 @@ export type RouteInput = {
   company_id?: InputMaybe<Scalars['String']['input']>;
   created_on?: InputMaybe<Scalars['Datetime']['input']>;
   end_at_hub?: InputMaybe<Scalars['Boolean']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  hub_location?: InputMaybe<GeomInput>;
+  id?: InputMaybe<Scalars['Int']['input']>;
   overwrite_duplicate?: InputMaybe<Scalars['Boolean']['input']>;
   riders?: InputMaybe<Scalars['Int']['input']>;
   sequence_id?: InputMaybe<Scalars['Int']['input']>;
@@ -957,7 +967,7 @@ export type RouteTemplate = {
   avg_speed: Scalars['Int']['output'];
   company_id: Scalars['String']['output'];
   created_on: Scalars['Datetime']['output'];
-  id: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
   is_first_stop_hub?: Maybe<Scalars['Boolean']['output']>;
   is_last_stop_hub?: Maybe<Scalars['Boolean']['output']>;
   max_time_minute: Scalars['Int']['output'];
@@ -1010,14 +1020,15 @@ export type RouteTemplateCreated_OnArgs = {
 
 
 export type RouteTemplateIdArgs = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equal?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  notEqual?: InputMaybe<Scalars['String']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
@@ -1129,7 +1140,7 @@ export type RouteTemplateInput = {
   avg_speed?: InputMaybe<Scalars['Int']['input']>;
   company_id?: InputMaybe<Scalars['String']['input']>;
   created_on?: InputMaybe<Scalars['Datetime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['Int']['input']>;
   is_first_stop_hub?: InputMaybe<Scalars['Boolean']['input']>;
   is_last_stop_hub?: InputMaybe<Scalars['Boolean']['input']>;
   max_time_minute?: InputMaybe<Scalars['Int']['input']>;
@@ -1150,10 +1161,10 @@ export type RouteVehicleConfig = {
   company_id: Scalars['String']['output'];
   count: Scalars['Int']['output'];
   created_on: Scalars['Datetime']['output'];
-  id: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
   range: Scalars['Int']['output'];
   route: Route;
-  route_id: Scalars['String']['output'];
+  route_id: Scalars['Int']['output'];
   updated_on: Scalars['Datetime']['output'];
 };
 
@@ -1229,14 +1240,15 @@ export type RouteVehicleConfigCreated_OnArgs = {
 
 
 export type RouteVehicleConfigIdArgs = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equal?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  notEqual?: InputMaybe<Scalars['String']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
@@ -1254,14 +1266,15 @@ export type RouteVehicleConfigRangeArgs = {
 
 
 export type RouteVehicleConfigRoute_IdArgs = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equal?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  notEqual?: InputMaybe<Scalars['String']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
@@ -1279,10 +1292,10 @@ export type RouteVehicleConfigInput = {
   company_id?: InputMaybe<Scalars['String']['input']>;
   count?: InputMaybe<Scalars['Int']['input']>;
   created_on?: InputMaybe<Scalars['Datetime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['Int']['input']>;
   range?: InputMaybe<Scalars['Int']['input']>;
   route?: InputMaybe<RouteInput>;
-  route_id?: InputMaybe<Scalars['String']['input']>;
+  route_id?: InputMaybe<Scalars['Int']['input']>;
   updated_on?: InputMaybe<Scalars['Datetime']['input']>;
 };
 
@@ -1304,10 +1317,10 @@ export type TouchPoint = {
   customer_phone?: Maybe<Scalars['String']['output']>;
   external_id?: Maybe<Scalars['String']['output']>;
   geom?: Maybe<Geom>;
-  id: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
   opening_time?: Maybe<Scalars['Time']['output']>;
   pincode?: Maybe<Scalars['String']['output']>;
-  routing_id: Scalars['String']['output'];
+  routing_id: Scalars['Int']['output'];
   shipment_id?: Maybe<Scalars['String']['output']>;
   touch_point_status: TouchPointStatus;
   touch_point_type: TouchPointType;
@@ -1405,14 +1418,15 @@ export type TouchPointExternal_IdArgs = {
 
 
 export type TouchPointIdArgs = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equal?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  notEqual?: InputMaybe<Scalars['String']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
@@ -1437,14 +1451,15 @@ export type TouchPointPincodeArgs = {
 
 
 export type TouchPointRouting_IdArgs = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equal?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  notEqual?: InputMaybe<Scalars['String']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
@@ -1490,10 +1505,10 @@ export type TouchPointInput = {
   customer_phone?: InputMaybe<Scalars['String']['input']>;
   external_id?: InputMaybe<Scalars['String']['input']>;
   geom?: InputMaybe<GeomInput>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['Int']['input']>;
   opening_time?: InputMaybe<Scalars['Time']['input']>;
   pincode?: InputMaybe<Scalars['String']['input']>;
-  routing_id?: InputMaybe<Scalars['String']['input']>;
+  routing_id?: InputMaybe<Scalars['Int']['input']>;
   shipment_id?: InputMaybe<Scalars['String']['input']>;
   touch_point_status?: InputMaybe<TouchPointStatus>;
   touch_point_type?: InputMaybe<TouchPointType>;
