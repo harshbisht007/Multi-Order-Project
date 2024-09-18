@@ -24,7 +24,6 @@ import { ValidateColumnPipe } from '../../../core/pipes/validate-column.pipe';
 import { DialogModule } from 'primeng/dialog';
 import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { UploadDataFileComponent } from '../../upload-data-file/upload-data-file.component';
-import { Subscription } from 'rxjs';
 
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
@@ -317,7 +316,6 @@ export class LoadDataComponent implements OnInit {
     this.validateData()
   }
   async onFileChange(event: any) {
-    console.log(event, '122')
     const target: DataTransfer = <DataTransfer>(event.target);
     if (target.files.length !== 1) {
       throw new Error('Cannot use multiple files');
@@ -331,10 +329,8 @@ export class LoadDataComponent implements OnInit {
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
       const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
-      console.log(rows, '122')
       this.headers = rows[0];
       this.headers = [...this.headers, 'status']
-      console.log(this.headers, '122')
       this.rows = rows.slice(1).map((row: any) => {
         const obj: any = {};
         row.forEach((cell: any, index: number) => {
@@ -398,7 +394,6 @@ export class LoadDataComponent implements OnInit {
 
     this.dialogRef.onClose.subscribe((file: File) => {
       if (file) {
-        console.log(file, '122')
         this.onFileChange({ target: { files: [file] } });
       } else {
         console.log('Dialog was closed without file upload');

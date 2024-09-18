@@ -76,7 +76,7 @@ export class SetConfigurationComponent implements AfterViewInit {
     { id: 'overwrite', label: 'Overwrite Duplicate Data', model: this.overWriteDuplicate, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'Overwrite any duplicate data found.' },
     { id: 'endHub', label: 'End at Hub', model: this.endAtHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'End the route at the hub.' },
   ];
-
+  
   @Input() routeId!: string;
   @Input() dataForMarker!: any[];
   @Output() manageOrders: EventEmitter<boolean> = new EventEmitter<boolean>();

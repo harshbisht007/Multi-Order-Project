@@ -40,7 +40,6 @@ export class MainComponent {
 
   activeStepChange(stepIndex: number): void {
     this.activeIndex = stepIndex;
-    console.log(this.dataForMarker,'122')
   }
   dataForSecondStepper(event:any){
     this.retrieveSecondStepData=event;
