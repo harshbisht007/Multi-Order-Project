@@ -24,7 +24,7 @@ export class MainComponent {
   @Input() dataForMarker:any[]=[];  
   @Input()readyZone:any;
   activeIndex: number = 0;
-  routeId: any = '832f49ed-2e96-464e-b80d-00fcb92aeec3';
+  routeId: any ;
   @Input()retrieveSecondStepData:any
   setRouteId(routeId: string): void {
     this.routeId = routeId;
