@@ -77,7 +77,7 @@ export class SetConfigurationComponent implements AfterViewInit {
     { id: 'endHub', label: 'End at Hub', model: this.endAtHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'End the route at the hub.' },
   ];
   
-  @Input() routeId!: string;
+  @Input() routeId!: any;
   @Input() dataForMarker!: any[];
   @Output() manageOrders: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() goToPreviousStep: EventEmitter<any> = new EventEmitter<any>();
@@ -156,7 +156,19 @@ export class SetConfigurationComponent implements AfterViewInit {
     this.goToPreviousStep.emit(true)
   }
 
-  runRouting() {
+  async runRouting() {
+    this.routeId=parseInt(this.routeId)
+    const mutation = gql`
+      mutation run_routing($id: Int!) {  
+        run_routing(route_id: $id)
+      }
+    `;
+  
+    const res = await this.graphqlService.runMutation(mutation, {
+      id: this.routeId  // Ensure this is a UUID string
+    });
+  
+    console.log(res, '122');
     this.manageOrders.emit(true);
 
   }
@@ -199,6 +211,7 @@ export class SetConfigurationComponent implements AfterViewInit {
       })
     }
     this.dataForSecondStepper.emit(payload)
+    console.log(this.routeId,'122')
     const res = await this.graphqlService.runMutation(mutation, {
       id: this.routeId,
       change: payload

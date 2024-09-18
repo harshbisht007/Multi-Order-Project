@@ -304,16 +304,18 @@ export class LoadDataComponent implements OnInit {
     try {
 
       const res = await this.graphqlService.runQuery(query)
+      if(res){
+        this.appendDataToTable()
+      }
       console.log(res, '122')
     } catch (error) {
       console.error(error, '122')
     }
 
-    this.appendDataToTable()
   }
   async appendDataToTable() {
 
-    this.validateData()
+    this.validateData() 
   }
   async onFileChange(event: any) {
     const target: DataTransfer = <DataTransfer>(event.target);
@@ -354,13 +356,14 @@ export class LoadDataComponent implements OnInit {
   async submitData(rows: any[]) {
     const sanitizedRows = rows.reduce((acc, col) => {
       if (col['status']) {
-        const { status, latitude, longitude, weight, ...rest } = col;
+        const { status, latitude, longitude, weight,pincode, ...rest } = col;
 
         const sanitizedRow = {
           ...rest,
           latitude: typeof latitude === 'string' ? parseInt(latitude, 10) : latitude,
           longitude: typeof longitude === 'string' ? parseInt(longitude, 10) : longitude,
-          weight: typeof weight === 'string' ? parseInt(weight, 10) : weight
+          weight: typeof weight === 'string' ? parseInt(weight, 10) : weight,
+          pincode: typeof pincode === 'number' ? pincode.toString() : pincode 
         };
 
         acc.push(sanitizedRow);
