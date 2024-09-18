@@ -1,5 +1,5 @@
-import {Component, effect, EventEmitter, OnInit, Output, ViewChild, viewChild} from '@angular/core';
-import {TouchPoint, Zone} from "../../../graphql/generated";
+import { Component, effect, EventEmitter, input, Input, OnChanges, OnInit, output, Output, SimpleChanges, ViewChild, viewChild } from '@angular/core';
+import { TouchPoint, Zone } from "../../../graphql/generated";
 import { Table, TableModule, TableRowSelectEvent, TableRowUnSelectEvent } from "primeng/table";
 import { Button } from "primeng/button";
 import { FormsModule } from "@angular/forms";
@@ -24,6 +24,7 @@ import { ValidateColumnPipe } from '../../../core/pipes/validate-column.pipe';
 import { DialogModule } from 'primeng/dialog';
 import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { UploadDataFileComponent } from '../../upload-data-file/upload-data-file.component';
+import { Subscription } from 'rxjs';
 
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
@@ -73,7 +74,9 @@ export class LoadDataComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: any;
   @Output() goToConfiguration: EventEmitter<string> = new EventEmitter();
   @Output() dataForMarker: EventEmitter<any> = new EventEmitter();
-
+  @Output() zoneForRouting: EventEmitter<any> = new EventEmitter()
+  @Input() valueForTable: any[] = []
+  @Input() readyZone: any;
   loading: boolean = false;
   headers: string[] = [];
   showActions: any = true;
@@ -92,14 +95,21 @@ export class LoadDataComponent implements OnInit {
   }
   currentEditingRow: any = null;
   dialogRef: DynamicDialogRef | undefined;
-
-
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService,
-              private confirmationService: ConfirmationService, private messageService: MessageService,
-              public dialogService: DialogService,) {
+    private confirmationService: ConfirmationService, private messageService: MessageService,
+    public dialogService: DialogService,) {
+
   }
 
   ngOnInit() {
+    if (this.readyZone) {
+      this.selectedZone = this.readyZone.value;
+    }
+    if (this.valueForTable.length) {
+      this.headers = Object.keys(this.valueForTable[0]);
+      console.log(this.headers, '122')
+      this.rows = this.valueForTable;
+    }
     this.sources = [
       { name: 'Upload File', value: 'upload' },
       { name: 'Fetch from Database', value: 'fetch' }
@@ -107,6 +117,7 @@ export class LoadDataComponent implements OnInit {
   }
 
   onZoneChange(event: DropdownChangeEvent) {
+    this.zoneForRouting.emit(event);
   }
 
 
@@ -267,6 +278,37 @@ export class LoadDataComponent implements OnInit {
   }
 
   async fetchDataFromDB() {
+    const query = gql`
+    query List_shipment {
+    list_touch_point {
+      id
+      routing_id(isNull: true)
+      customer_name
+      customer_phone
+      geom {
+        latitude
+        longitude
+      }
+      shipment_id
+      touch_point_status
+      touch_point_type
+      address
+      external_id
+      weight
+      pincode
+      opening_time
+      closing_time
+      category_type
+    }
+  }
+  `;
+    try {
+
+      const res = await this.graphqlService.runQuery(query)
+      console.log(res, '122')
+    } catch (error) {
+      console.error(error, '122')
+    }
 
     this.appendDataToTable()
   }
@@ -275,6 +317,7 @@ export class LoadDataComponent implements OnInit {
     this.validateData()
   }
   async onFileChange(event: any) {
+    console.log(event, '122')
     const target: DataTransfer = <DataTransfer>(event.target);
     if (target.files.length !== 1) {
       throw new Error('Cannot use multiple files');
@@ -288,8 +331,10 @@ export class LoadDataComponent implements OnInit {
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
       const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      console.log(rows, '122')
       this.headers = rows[0];
       this.headers = [...this.headers, 'status']
+      console.log(this.headers, '122')
       this.rows = rows.slice(1).map((row: any) => {
         const obj: any = {};
         row.forEach((cell: any, index: number) => {
@@ -335,9 +380,9 @@ export class LoadDataComponent implements OnInit {
 
     try {
       const res = await this.graphqlService.runMutation(mutation, { data: sanitizedRows });
+      this.dataForMarker.emit(rows);
       console.log(res);
       this.goToConfiguration.emit(res.create_shipments);
-      this.dataForMarker.emit(rows);
     } catch (error) {
       console.error('GraphQL Error:', error);
     }
@@ -353,6 +398,7 @@ export class LoadDataComponent implements OnInit {
 
     this.dialogRef.onClose.subscribe((file: File) => {
       if (file) {
+        console.log(file, '122')
         this.onFileChange({ target: { files: [file] } });
       } else {
         console.log('Dialog was closed without file upload');

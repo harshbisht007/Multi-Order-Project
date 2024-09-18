@@ -6,7 +6,7 @@
     </p>
     <div class="h-[56vh] overflow-y-auto custom_scrollbar">
       <p-accordion [activeIndex]="1">
-        @if(order.batches){
+        @if(order?.batches){
 
           @for(batch of order.batches; let batchIndex = $index; track batchIndex) {
             <p-accordionTab>

@@ -1,4 +1,4 @@
-import { Component, effect, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { AfterViewInit, Component, effect, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { DropdownModule } from "primeng/dropdown";
 import { FormsModule } from "@angular/forms";
 import { MultiSelectModule } from "primeng/multiselect";
@@ -16,9 +16,11 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { MapComponent } from '../../map/map.component';
+import { ZoneService } from '../../../core/services/zone.service';
 export interface ExtendedCategory extends Category {
   vehiclesCount: number;
   capacity: number;
+  count:number;
   range: number;
   waitTime: number;
   shiftTime: number;
@@ -45,15 +47,16 @@ export interface ExtendedCategory extends Category {
   templateUrl: './set-configuration.component.html',
   styleUrl: './set-configuration.component.scss'
 })
-export class SetConfigurationComponent  {
+export class SetConfigurationComponent implements AfterViewInit {
   startFromHub: boolean = true;
   endAtHub: boolean = true;
   overWriteDuplicate: boolean = true;
-
+  @Input() retrieveSecondStepData: any;
+  @Output() dataForSecondStepper: EventEmitter<any> = new EventEmitter()
   startTime: string = '00:45';
 
   categoryFields: Array<{ label: string; model: keyof ExtendedCategory; placeholder: string; id: string }> = [
-    { label: 'No. of Vehicles', model: 'vehiclesCount', placeholder: 'Enter number of vehicles', id: 'noOfVehicles' },
+    { label: 'No. of Vehicles', model: 'count', placeholder: 'Enter number of vehicles', id: 'noOfVehicles' },
     { label: 'Capacity of Each Vehicle', model: 'capacity', placeholder: 'Enter vehicle capacity', id: 'capacityOfVehicle' },
     { label: 'Max Range of Each Vehicle', model: 'range', placeholder: 'Enter max range', id: 'maxRange' },
     { label: 'Wait Time per Stop', model: 'waitTime', placeholder: 'Enter wait time', id: 'waitTime' },
@@ -73,9 +76,9 @@ export class SetConfigurationComponent  {
     { id: 'overwrite', label: 'Overwrite Duplicate Data', model: this.overWriteDuplicate, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'Overwrite any duplicate data found.' },
     { id: 'endHub', label: 'End at Hub', model: this.endAtHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'End the route at the hub.' },
   ];
-  
+
   @Input() routeId!: string;
-  @Input() dataForMarker!:any[];
+  @Input() dataForMarker!: any[];
   @Output() manageOrders: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() goToPreviousStep: EventEmitter<any> = new EventEmitter<any>();
   @Output() goToFirstStep: EventEmitter<void> = new EventEmitter<void>();
@@ -100,11 +103,11 @@ export class SetConfigurationComponent  {
       tooltip: 'Minimum Orders in each cluster'
     }
   ];
-  runRoute: boolean=false;
+  runRoute: boolean = false;
 
 
 
-  constructor(private categoryService: CategoryService, private graphqlService: GraphqlService) {
+  constructor(private zoneServcie: ZoneService, private categoryService: CategoryService, private graphqlService: GraphqlService) {
     effect(() => {
       this.categories = this.categoryService.categories();
       if (this.categories && this.categories.length > 0) {
@@ -114,49 +117,91 @@ export class SetConfigurationComponent  {
       }
     });
   }
- 
+  ngAfterViewInit(): void {
+    if (this.retrieveSecondStepData) {
+      console.log(this.retrieveSecondStepData, '122')
+      this.startFromHub = this.retrieveSecondStepData.start_from_hub;
+      this.endAtHub = this.retrieveSecondStepData.end_at_hub;
+      this.checked = !this.retrieveSecondStepData.single_batch;
+      this.overWriteDuplicate = this.retrieveSecondStepData.overwrite_duplicate;
+      this.startTime = this.retrieveSecondStepData.start_time;
+      this.maxMinInput[0].value = this.retrieveSecondStepData.max_orders_in_cluster;
+      this.maxMinInput[1].value = this.retrieveSecondStepData.min_orders_in_cluster;
 
-  goBack(){
+      this.selectedCategories = this.retrieveSecondStepData.vehicle_config.map((config: any) => {
+        return {
+          name: config.category_name,
+          id: config.category_id,
+          count: config.count,
+          capacity: config.capacity,
+          range: config.range,
+          company_id: config.company_id,
+          waitTime: config.wait_time_per_stop,
+          shiftTime: config.shift_time,
+        };
+      });
+    }
+
+    console.log(this.checkboxOptions, '122')
+
+    this.checkboxOptions = [
+      { id: 'startHub', label: 'Start from Hub', model: this.startFromHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'Start the route from the hub.' },
+      { id: 'overwrite', label: 'Overwrite Duplicate Data', model: this.overWriteDuplicate, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'Overwrite any duplicate data found.' },
+      { id: 'endHub', label: 'End at Hub', model: this.endAtHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'End the route at the hub.' },
+    ]
+  }
+
+
+  goBack() {
     this.goToPreviousStep.emit(true)
   }
 
-  runRouting(){
+  runRouting() {
     this.manageOrders.emit(true);
 
   }
 
-  onCancel(){
-      this.goToFirstStep.emit();
+  onCancel() {
+    this.goToFirstStep.emit();
+  }
+  ngOnInit() {
+
   }
 
   async saveChanges() {
-    this.runRoute=true
-    console.log(this.checkboxOptions,'122')
+    this.runRoute = true
+    console.log(this.checkboxOptions, '122')
     const mutation = gql`mutation updateRoute($id: UUID!, $change: RouteInput!) {
       update_route(id: $id, change: $change) {
         id
       }
     }`
-
+    const payload = {
+      start_from_hub: this.checkboxOptions.find(option => option.id === 'startHub')?.model,
+      end_at_hub: this.checkboxOptions.find(option => option.id === 'endHub')?.model,
+      single_batch: !this.checked,
+      overwrite_duplicate: this.checkboxOptions.find(option => option.id === 'overwrite')?.model,
+      start_time: this.startTime,
+      max_orders_in_cluster: this.maxMinInput[0].value,
+      min_orders_in_cluster: this.maxMinInput[1].value,
+      vehicle_config: this.selectedCategories.map(category => {
+        return {
+          category_name: category.name,
+          category_id: category.id,
+          count: category.count,
+          capacity: category.capacity,
+          range: category.range,
+          wait_time_per_stop:category.waitTime,
+          shift_time:category.shiftTime,
+          company_id: 'b4bea57e-a6f9-446a-81fa-cc202db705dc'
+        
+        }
+      })
+    }
+    this.dataForSecondStepper.emit(payload)
     const res = await this.graphqlService.runMutation(mutation, {
       id: this.routeId,
-      change: {
-        start_from_hub: this.checkboxOptions.find(option => option.id === 'startHub')?.model,
-        end_at_hub: this.checkboxOptions.find(option => option.id === 'endHub')?.model,
-        single_batch: !this.checked,
-        overwrite_duplicate: this.checkboxOptions.find(option => option.id === 'overwrite')?.model,
-        start_time: this.startTime,
-        vehicle_config: this.selectedCategories.map(category => {
-          return {
-            category_name: category.name,
-            category_id: category.id,
-            count: category.vehiclesCount,
-            capacity: category.capacity,
-            range: category.range,
-            company_id: 'b4bea57e-a6f9-446a-81fa-cc202db705dc'
-          }
-        })
-      }
+      change: payload
     });
   }
 

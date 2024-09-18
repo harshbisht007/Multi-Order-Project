@@ -22,9 +22,10 @@ import { NgClass } from '@angular/common';
 })
 export class MainComponent {
   @Input() dataForMarker:any[]=[];  
+  @Input()readyZone:any;
   activeIndex: number = 0;
   routeId: string = '832f49ed-2e96-464e-b80d-00fcb92aeec3';
-  
+  @Input()retrieveSecondStepData:any
   setRouteId(routeId: string): void {
     this.routeId = routeId;
     this.activeIndex = 1;
@@ -33,11 +34,17 @@ export class MainComponent {
   getData(data: any[]): void {
     this.dataForMarker = data;
   }
+  zoneForRouting(event:any){
+    this.readyZone=event;
+  }
 
   activeStepChange(stepIndex: number): void {
     this.activeIndex = stepIndex;
+    console.log(this.dataForMarker,'122')
   }
-
+  dataForSecondStepper(event:any){
+    this.retrieveSecondStepData=event;
+  }
   goToFirstStep(): void {
     this.activeIndex = 0;
   }
