@@ -47,7 +47,7 @@ export interface ExtendedCategory extends Category {
   templateUrl: './set-configuration.component.html',
   styleUrl: './set-configuration.component.scss'
 })
-export class SetConfigurationComponent implements AfterViewInit {
+export class SetConfigurationComponent implements OnInit {
   startFromHub: boolean = true;
   endAtHub: boolean = true;
   overWriteDuplicate: boolean = true;
@@ -104,6 +104,7 @@ export class SetConfigurationComponent implements AfterViewInit {
     }
   ];
   runRoute: boolean = false;
+  @Output()orderId: EventEmitter<any> = new EventEmitter<any>();
 
 
 
@@ -117,7 +118,7 @@ export class SetConfigurationComponent implements AfterViewInit {
       }
     });
   }
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     if (this.retrieveSecondStepData) {
       console.log(this.retrieveSecondStepData, '122')
       this.startFromHub = this.retrieveSecondStepData.start_from_hub;
@@ -157,7 +158,6 @@ export class SetConfigurationComponent implements AfterViewInit {
   }
 
   async runRouting() {
-    this.routeId=parseInt(this.routeId)
     const mutation = gql`
       mutation run_routing($id: Int!) {  
         run_routing(route_id: $id)
@@ -165,9 +165,9 @@ export class SetConfigurationComponent implements AfterViewInit {
     `;
   
     const res = await this.graphqlService.runMutation(mutation, {
-      id: this.routeId  // Ensure this is a UUID string
+      id: this.routeId  
     });
-  
+    this.orderId.emit(res?.run_routing);
     console.log(res, '122');
     this.manageOrders.emit(true);
 
@@ -176,9 +176,7 @@ export class SetConfigurationComponent implements AfterViewInit {
   onCancel() {
     this.goToFirstStep.emit();
   }
-  ngOnInit() {
-
-  }
+  
 
   async saveChanges() {
     this.runRoute = true
@@ -211,11 +209,11 @@ export class SetConfigurationComponent implements AfterViewInit {
       })
     }
     this.dataForSecondStepper.emit(payload)
-    console.log(this.routeId,'122')
     const res = await this.graphqlService.runMutation(mutation, {
       id: this.routeId,
       change: payload
     });
+    this.routeId=res.update_route.id;
   }
 
 

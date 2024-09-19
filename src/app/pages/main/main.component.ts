@@ -23,12 +23,17 @@ import { NgClass } from '@angular/common';
 export class MainComponent {
   @Input() dataForMarker:any[]=[];  
   @Input()readyZone:any;
+  @Input() orderId!:number;
   activeIndex: number = 0;
   routeId: any ;
   @Input()retrieveSecondStepData:any
   setRouteId(routeId: string): void {
     this.routeId = routeId;
     this.activeIndex = 1;
+  }
+
+  reqOrderId(event:any){
+    this.orderId=event;
   }
 
   getData(data: any[]): void {
