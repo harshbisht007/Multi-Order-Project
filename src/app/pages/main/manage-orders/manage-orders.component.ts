@@ -59,104 +59,54 @@ export class ManageOrdersComponent implements AfterViewInit {
   }
 
   async getOrder() {
-    const query = gql`query Get_order($id: UUID!) {
-      get_order(id: $id) {
+    const query = gql`query Get_order($getOrderId: Int!) {
+  get_order(id: $getOrderId) {
+    route {
+      vehicle_config {
+        category_id
+        category_name
+        count
+        capacity
+        range
+        wait_time_per_stop
+        shift_time
         route_id
         id
         created_on
         updated_on
         company_id
-        route {
-          vehicle_config {
-            category_id
-            category_name
-            count
-            capacity
-            range
-            wait_time_per_stop
-            shift_time
-            route_id
-            id
-            created_on
-            updated_on
-            company_id
-          }
+      }
+      sequence_id
+      start_time
+      riders
+      avg_speed
+      start_from_hub
+      end_at_hub
+      single_batch
+      overwrite_duplicate
+      hub_location {
+        latitude
+        longitude
+      }
+      max_orders_in_cluster
+      min_orders_in_cluster
+      id
+      created_on
+      updated_on
+      company_id
+    }
+    clusters {
+      batches {
+        cluster {
           sequence_id
-          start_time
-          riders
-          avg_speed
-          start_from_hub
-          end_at_hub
-          single_batch
-          overwrite_duplicate
-          hub_location {
-            latitude
-            longitude
-          }
-          max_orders_in_cluster
-          min_orders_in_cluster
+          order_id
           id
           created_on
           updated_on
           company_id
         }
-        cluster {
-          order {
-            route_id
-            id
-            created_on
-            updated_on
-            company_id
-          }
-          batches {
-            touch_points {
-              batch {
-                sequence_id
-                volume
-                category_id
-                category_name
-                distance
-                duration
-                rider_id
-                rider_name
-                rider_phone
-                cluster_id
-                id
-                created_on
-                updated_on
-                company_id
-              }
-              touch_point {
-                weight
-                shipment_id
-                category_type
-                customer_name
-                customer_phone
-                cluster_number
-                routing_id
-                address
-                pincode
-                geom {
-                  latitude
-                  longitude
-                }
-                external_id
-                opening_time
-                closing_time
-                touch_point_type
-                touch_point_status
-                id
-                created_on
-                updated_on
-                company_id
-              }
-              batch_id
-              touch_point_id
-              id
-              created_on
-              updated_on
-              company_id
-            }
+        touch_points {
+          batch {
             sequence_id
             volume
             category_id
@@ -172,18 +122,70 @@ export class ManageOrdersComponent implements AfterViewInit {
             updated_on
             company_id
           }
-          sequence_id
-          order_id
+          touch_point {
+            weight
+            shipment_id
+            category_type
+            customer_name
+            customer_phone
+            cluster_number
+            routing_id
+            address
+            pincode
+            geom {
+              latitude
+              longitude
+            }
+            external_id
+            opening_time
+            closing_time
+            touch_point_type
+            touch_point_status
+            id
+            created_on
+            updated_on
+            company_id
+          }
+          batch_id
+          touch_point_id
           id
           created_on
           updated_on
           company_id
         }
+        sequence_id
+        volume
+        category_id
+        category_name
+        distance
+        duration
+        rider_id
+        rider_name
+        rider_phone
+        cluster_id
+        id
+        created_on
+        updated_on
+        company_id
       }
+      sequence_id
+      order_id
+      id
+      created_on
+      updated_on
+      company_id
     }
+    route_id
+    id
+    created_on
+    updated_on
+    company_id
+  }
+}
+ 
     `
 
-    const res = await this.graphqlService.runQuery(query, { id  : this.orderId })
+    const res = await this.graphqlService.runQuery(query, { getOrderId  : this.orderId })
     this.order = res.list_order[0];
     this.batchInfo = this.order?.batches.map(batch => [
       { label: 'Batch ID', value: batch.id },

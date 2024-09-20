@@ -20,7 +20,7 @@ import { ZoneService } from '../../../core/services/zone.service';
 export interface ExtendedCategory extends Category {
   vehiclesCount: number;
   capacity: number;
-  count:number;
+  count: number;
   range: number;
   waitTime: number;
   shiftTime: number;
@@ -104,7 +104,8 @@ export class SetConfigurationComponent implements OnInit {
     }
   ];
   runRoute: boolean = false;
-  @Output()orderId: EventEmitter<any> = new EventEmitter<any>();
+  @Output() orderId: EventEmitter<any> = new EventEmitter<any>();
+  additionalFields: any;
 
 
 
@@ -118,7 +119,9 @@ export class SetConfigurationComponent implements OnInit {
       }
     });
   }
+
   ngOnInit(): void {
+    this.additionalFields = this.selectedCategories;
     if (this.retrieveSecondStepData) {
       console.log(this.retrieveSecondStepData, '122')
       this.startFromHub = this.retrieveSecondStepData.start_from_hub;
@@ -133,17 +136,20 @@ export class SetConfigurationComponent implements OnInit {
         return {
           name: config.category_name,
           id: config.category_id,
+        };
+      });
+      this.additionalFields = this.retrieveSecondStepData.vehicle_config.map((config: any) => {
+        return {
+          name: config.category_name,
           count: config.count,
           capacity: config.capacity,
           range: config.range,
-          company_id: config.company_id,
           waitTime: config.wait_time_per_stop,
-          shiftTime: config.shift_time,
+          shiftTime: config.shift_time
         };
       });
     }
 
-    console.log(this.checkboxOptions, '122')
 
     this.checkboxOptions = [
       { id: 'startHub', label: 'Start from Hub', model: this.startFromHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'Start the route from the hub.' },
@@ -152,6 +158,18 @@ export class SetConfigurationComponent implements OnInit {
     ]
   }
 
+  selectedCategory(event: any) {
+    this.additionalFields = event.value.map((category: any) => {
+      return {
+        name: category.category_name,
+        count: category ? category.count : null,
+        capacity: category ? category.capacity : null,
+        range: category ? category.range : null,
+        waitTime: category ? category.wait_time_per_stop : null,
+        shiftTime: category ? category.shift_time : null
+      };
+    });
+  }
 
   goBack() {
     this.goToPreviousStep.emit(true)
@@ -181,7 +199,7 @@ export class SetConfigurationComponent implements OnInit {
   async saveChanges() {
     this.runRoute = true
     console.log(this.checkboxOptions, '122')
-    const mutation = gql`mutation updateRoute($id: UUID!, $change: RouteInput!) {
+    const mutation = gql`mutation updateRoute($id: Int!, $change: RouteInput!) {
       update_route(id: $id, change: $change) {
         id
       }
@@ -194,18 +212,18 @@ export class SetConfigurationComponent implements OnInit {
       start_time: this.startTime,
       max_orders_in_cluster: this.maxMinInput[0].value,
       min_orders_in_cluster: this.maxMinInput[1].value,
-      vehicle_config: this.selectedCategories.map(category => {
+      vehicle_config: this.selectedCategories.map((category, index) => {
+        const additionalField = this.additionalFields[index]; 
         return {
           category_name: category.name,
           category_id: category.id,
-          count: category.count,
-          capacity: category.capacity,
-          range: category.range,
-          wait_time_per_stop:category.waitTime,
-          shift_time:category.shiftTime,
-          company_id: 'b4bea57e-a6f9-446a-81fa-cc202db705dc'
-        
-        }
+          count: additionalField?.count ?? null,
+          capacity: additionalField?.capacity ?? null,
+          range: additionalField?.range ?? null,
+          wait_time_per_stop: additionalField?.waitTime ?? null,
+          shift_time: additionalField?.shiftTime ?? null,
+          company_id: 'b4bea57e-a6f9-446a-81fa-cc202db705dc' 
+        };
       })
     }
     this.dataForSecondStepper.emit(payload)
@@ -213,7 +231,7 @@ export class SetConfigurationComponent implements OnInit {
       id: this.routeId,
       change: payload
     });
-    this.routeId=res.update_route.id;
+    this.routeId = res.update_route.id;
   }
 
 

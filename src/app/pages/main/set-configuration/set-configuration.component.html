@@ -58,12 +58,13 @@
           <div>
             <label for="vehicleCategory">Vehicle Category</label>
             <p-multiSelect [options]="categories" [(ngModel)]="selectedCategories" id="vehicleCategory"
-              optionLabel="name" class="mt-2 cust_multi_select" placeholder="Select Categories">
+              (onChange)="selectedCategory($event)" optionLabel="name" class="mt-2 cust_multi_select"
+              placeholder="Select Categories">
             </p-multiSelect>
           </div>
         </div>
       </div>
-      @for(category of selectedCategories; track $index) {
+      @for(category of additionalFields; track $index) {
       <h3 class="font-sm font-semibold mt-4 mb-1">{{ category.name }}</h3>
       <div class="grid grid-cols-3 gap-x-8 gap-y-4">
         @for(field of categoryFields;track field.id;let i =$index ){
@@ -117,7 +118,7 @@
     </div>
   </div>
   <div class="mt-4 h-[400px] w-[100%] border rounded-md overflow-hidden">
-      <app-map [dataForMarker]="dataForMarker"></app-map>
+    <app-map [dataForMarker]="dataForMarker"></app-map>
   </div>
 
 
