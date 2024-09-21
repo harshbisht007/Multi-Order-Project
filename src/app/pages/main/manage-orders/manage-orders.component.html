@@ -2,14 +2,14 @@
 <p-tabView>
   <p-tabPanel header="Cluster 1">
     <p class="font-sm mb-3.5">Total Vehicles: <span class="font-semibold mr-8"> 10</span> Vehicles Required in Cluster
-      <span class="font-semibold  mr-8"> 1: 2</span> Zone: <span class="font-semibold"> Zone 1 - Dubai</span>
+      <span class="font-semibold  mr-8"> 1: 2</span> Zone: <span class="font-semibold">{{readyZone.event.value.name}}</span>
     </p>
     <div class="h-[56vh] overflow-y-auto custom_scrollbar">
       <p-accordion [activeIndex]="1">
         @if(order?.batches){
 
-          @for(batch of order.batches; let batchIndex = $index; track batchIndex) {
-            <p-accordionTab>
+        @for(batch of order.batches; let batchIndex = $index; track batchIndex) {
+        <p-accordionTab>
           <ng-template pTemplate="header">
             <span class="flex align-items-center justify-between gap-2 w-full text-sm ">
               <span class="font-semibold">Batch {{batch.sequence_id}}</span>
@@ -23,15 +23,15 @@
             <table class="table-auto w-full cursor-pointer" (click)="showOrders()">
               <tbody>
                 <tr class="font-sm">
-                  @for(item of batchInfo[batchIndex]; let i = $index; track  i) {
-                    <td >
+                  @for(item of batchInfo[batchIndex]; let i = $index; track i) {
+                  <td>
                     <p class="text-[#878682]">{{ item.label }}</p>
                     @if(item.label==='Batch ID'){
-                      #{{ item.value.toString().slice(-5) }}
+                    #{{ item.value.toString().slice(-5) }}
                     }@else{
-                      <p>
-                        {{ item.value }}
-                      </p>
+                    <p>
+                      {{ item.value }}
+                    </p>
                     }
                   </td>
                   }
@@ -75,7 +75,7 @@
             </div>
             <div class="h-[350px] w-full bg-white rounded-lg overflow-hidden border border-[#E5E7EB]">
               <app-map></app-map>
-          </div>
+            </div>
           </div>}
         </p-accordionTab>
         }
@@ -175,7 +175,7 @@
 
             </div>
             <div class="h-[350px] w-full bg-white rounded-lg overflow-hidden border border-[#E5E7EB]">
-                <app-map></app-map>
+              <app-map></app-map>
             </div>
           </div>
         </p-accordionTab>

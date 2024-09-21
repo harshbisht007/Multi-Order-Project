@@ -16,7 +16,6 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { MapComponent } from '../../map/map.component';
-import { ZoneService } from '../../../core/services/zone.service';
 export interface ExtendedCategory extends Category {
   vehiclesCount: number;
   capacity: number;
@@ -76,7 +75,7 @@ export class SetConfigurationComponent implements OnInit {
     { id: 'overwrite', label: 'Overwrite Duplicate Data', model: this.overWriteDuplicate, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'Overwrite any duplicate data found.' },
     { id: 'endHub', label: 'End at Hub', model: this.endAtHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'End the route at the hub.' },
   ];
-  
+
   @Input() routeId!: any;
   @Input() dataForMarker!: any[];
   @Output() manageOrders: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -84,7 +83,7 @@ export class SetConfigurationComponent implements OnInit {
   @Output() goToFirstStep: EventEmitter<void> = new EventEmitter<void>();
 
   categories: Category[] = [];
-  selectedCategories: ExtendedCategory[] = [];
+  selectedCategories: any[] = [];
   visible: boolean = false;
   checked: boolean = false;
   maxMinInput: Array<{ label: string, placeholder: string, value: number, src: string, tooltip: string }> = [
@@ -107,9 +106,17 @@ export class SetConfigurationComponent implements OnInit {
   @Output() orderId: EventEmitter<any> = new EventEmitter<any>();
   additionalFields: any;
 
+  categoriesFromSynco: any;
 
-
-  constructor(private zoneServcie: ZoneService, private categoryService: CategoryService, private graphqlService: GraphqlService) {
+  constructor(private categoryService: CategoryService, private graphqlService: GraphqlService) {
+    this.categoryService.getCategories().subscribe(
+      (data) => {
+        this.categoriesFromSynco = data.data;
+      },
+      (error) => {
+        console.error('Error fetching categories:', error);
+      }
+    );
     effect(() => {
       this.categories = this.categoryService.categories();
       if (this.categories && this.categories.length > 0) {
@@ -121,24 +128,25 @@ export class SetConfigurationComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.additionalFields = this.selectedCategories;
     if (this.retrieveSecondStepData) {
       console.log(this.retrieveSecondStepData, '122')
-      this.startFromHub = this.retrieveSecondStepData.start_from_hub;
-      this.endAtHub = this.retrieveSecondStepData.end_at_hub;
-      this.checked = !this.retrieveSecondStepData.single_batch;
-      this.overWriteDuplicate = this.retrieveSecondStepData.overwrite_duplicate;
-      this.startTime = this.retrieveSecondStepData.start_time;
-      this.maxMinInput[0].value = this.retrieveSecondStepData.max_orders_in_cluster;
-      this.maxMinInput[1].value = this.retrieveSecondStepData.min_orders_in_cluster;
+      this.startFromHub = this.retrieveSecondStepData.payload.start_from_hub;
+      this.endAtHub = this.retrieveSecondStepData.payload.end_at_hub;
+      this.checked = !this.retrieveSecondStepData.payload.single_batch;
+      this.overWriteDuplicate = this.retrieveSecondStepData.payload.overwrite_duplicate;
+      this.startTime = this.retrieveSecondStepData.payload.start_time;
+      this.maxMinInput[0].value = this.retrieveSecondStepData.payload.max_orders_in_cluster;
+      this.maxMinInput[1].value = this.retrieveSecondStepData.payload.min_orders_in_cluster;
 
-      this.selectedCategories = this.retrieveSecondStepData.vehicle_config.map((config: any) => {
-        return {
-          name: config.category_name,
-          id: config.category_id,
-        };
-      });
-      this.additionalFields = this.retrieveSecondStepData.vehicle_config.map((config: any) => {
+      // this.selectedCategories = this.retrieveSecondStepData.vehicle_config.map((config: any) => {
+      //   return {
+      //     name: config.category_name,
+      //     id: config.category_id,
+
+      //   };
+      // });
+      this.selectedCategories = this.retrieveSecondStepData.selectedCategories
+      this.additionalFields = this.retrieveSecondStepData.payload.vehicle_config.map((config: any) => {
         return {
           name: config.category_name,
           count: config.count,
@@ -161,10 +169,10 @@ export class SetConfigurationComponent implements OnInit {
   selectedCategory(event: any) {
     this.additionalFields = event.value.map((category: any) => {
       return {
-        name: category.category_name,
+        name: category.name,
         count: category ? category.count : null,
-        capacity: category ? category.capacity : null,
-        range: category ? category.range : null,
+        capacity: category ? category.weight : null,
+        range: category ? category.range_km : null,
         waitTime: category ? category.wait_time_per_stop : null,
         shiftTime: category ? category.shift_time : null
       };
@@ -181,9 +189,9 @@ export class SetConfigurationComponent implements OnInit {
         run_routing(route_id: $id)
       }
     `;
-  
+
     const res = await this.graphqlService.runMutation(mutation, {
-      id: this.routeId  
+      id: this.routeId
     });
     this.orderId.emit(res?.run_routing);
     console.log(res, '122');
@@ -194,7 +202,7 @@ export class SetConfigurationComponent implements OnInit {
   onCancel() {
     this.goToFirstStep.emit();
   }
-  
+
 
   async saveChanges() {
     this.runRoute = true
@@ -213,7 +221,7 @@ export class SetConfigurationComponent implements OnInit {
       max_orders_in_cluster: this.maxMinInput[0].value,
       min_orders_in_cluster: this.maxMinInput[1].value,
       vehicle_config: this.selectedCategories.map((category, index) => {
-        const additionalField = this.additionalFields[index]; 
+        const additionalField = this.additionalFields[index];
         return {
           category_name: category.name,
           category_id: category.id,
@@ -222,11 +230,11 @@ export class SetConfigurationComponent implements OnInit {
           range: additionalField?.range ?? null,
           wait_time_per_stop: additionalField?.waitTime ?? null,
           shift_time: additionalField?.shiftTime ?? null,
-          company_id: 'b4bea57e-a6f9-446a-81fa-cc202db705dc' 
+          company_id: category.company_id
         };
       })
     }
-    this.dataForSecondStepper.emit(payload)
+    this.dataForSecondStepper.emit({ payload, selectedCategories: this.selectedCategories })
     const res = await this.graphqlService.runMutation(mutation, {
       id: this.routeId,
       change: payload

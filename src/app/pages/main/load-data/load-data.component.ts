@@ -83,6 +83,7 @@ export class LoadDataComponent implements OnInit {
   sources: any;
   isEditable: boolean = false
   zones = this.zoneService.zones;
+  zoneFromSynco: any;
   selectedZone!: Zone;
   selectedItems: any;
   totalInvalid: number = 0;
@@ -94,6 +95,7 @@ export class LoadDataComponent implements OnInit {
   }
   currentEditingRow: any = null;
   dialogRef: DynamicDialogRef | undefined;
+  referencePoint: any[]=[]
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService,
     private confirmationService: ConfirmationService, private messageService: MessageService,
     public dialogService: DialogService,) {
@@ -101,6 +103,15 @@ export class LoadDataComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.zoneService.getZones().subscribe(
+      (data) => {
+        this.zoneFromSynco = data.data; // Handle the API response here
+      },
+      (error) => {
+        console.error('Error fetching zones:', error); // Handle errors here
+      }
+    );
+
     if (this.readyZone) {
       this.selectedZone = this.readyZone.value;
     }
@@ -115,15 +126,98 @@ export class LoadDataComponent implements OnInit {
     ];
   }
 
-  onZoneChange(event: DropdownChangeEvent) {
-    this.zoneForRouting.emit(event);
+  async onZoneChange(event: DropdownChangeEvent) {
+    console.log(this.selectedZone,'122')
+    await this.removeFarOrders(event.value.geom.coordinates[0]);
+    this.zoneForRouting.emit({ event, refrencePoint: this.referencePoint });
   }
+
+
+  async removeFarOrders(zonePoints: any) {
+    this.referencePoint=[0,0]
+    this.referencePoint = this.getZoneMeanPoint(zonePoints);
+    console.log(this.referencePoint,'122')
+    const distanceThreshold = 200;
+
+    this.rows = this.rows.filter((order: CustomTouchPoint) => {
+      if (order.latitude && order.longitude) {
+        const distance = this.getStraightDistanceFromLatLonInKm(
+          this.referencePoint[1], this.referencePoint[0],
+          order.latitude, order.longitude
+        );
+
+        return distance <= distanceThreshold;
+      } else {
+        return true;
+      }
+    });
+
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Orders Updated',
+      detail: 'Far orders have been removed.'
+    });
+  }
+
+  getZoneMeanPoint(arr: [number, number][]): [number, number] {
+    let twoTimesSignedArea = 0;
+    let cxTimes6SignedArea = 0;
+    let cyTimes6SignedArea = 0;
+
+    const length = arr.length;
+
+    for (let i = 0; i < length; i++) {
+      const [x0, y0] = arr[i];
+      const [x1, y1] = arr[(i + 1) % length]; // Avoid recalculating the modulus
+
+      const twoSA = x0 * y1 - x1 * y0; // Calculate signed area (two times)
+      twoTimesSignedArea += twoSA;
+      cxTimes6SignedArea += (x0 + x1) * twoSA;
+      cyTimes6SignedArea += (y0 + y1) * twoSA;
+    }
+
+    const sixSignedArea = 3 * twoTimesSignedArea; // Final signed area calculation
+    return [
+      cxTimes6SignedArea / sixSignedArea,
+      cyTimes6SignedArea / sixSignedArea,
+    ];
+  }
+
+  deg2rad(deg: any) {
+    return deg * (Math.PI / 180);
+  }
+
+  getStraightDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371; // Radius of the Earth in km
+
+    // Convert lat/lon differences to radians in one step
+    const dLat = this.deg2rad(lat2 - lat1);
+    const dLon = this.deg2rad(lon2 - lon1);
+
+    // Precompute cosines and sines
+    const lat1Rad = this.deg2rad(lat1);
+    const lat2Rad = this.deg2rad(lat2);
+
+    const sinDLat = Math.sin(dLat / 2);
+    const sinDLon = Math.sin(dLon / 2);
+
+    const a = sinDLat * sinDLat +
+      Math.cos(lat1Rad) * Math.cos(lat2Rad) * sinDLon * sinDLon;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    // Return distance in kilometers
+    return R * c;
+  }
+
 
 
   validateData() {
     this.totalInvalid = 0;
     this.rows.forEach((obj: any) => {
-      const hasComma = Object.values(obj).some(value => typeof value === 'string' && value.includes(','));
+      const hasComma = Object.keys(obj)
+        .filter(key => key !== 'address')
+        .some(key => typeof obj[key] === 'string' && obj[key].includes(','));
       const invalidTouchPointType = obj.touch_point_type !== 'PICKUP' && obj.touch_point_type !== 'DROP';
       obj.status = hasComma || invalidTouchPointType ? 'INVALID' : 'VALID';
     });
@@ -161,7 +255,7 @@ export class LoadDataComponent implements OnInit {
         ? '../../../../assets/icons/icons_warning.svg'
         : '../../../../assets/icons/icons_check_circle.svg'
     }
-
+    console.log(this.rows, this.totalInvalid, '122')
 
   }
 
@@ -304,7 +398,7 @@ export class LoadDataComponent implements OnInit {
     try {
 
       const res = await this.graphqlService.runQuery(query)
-      if(res){
+      if (res) {
         this.appendDataToTable()
       }
       console.log(res, '122')
@@ -315,7 +409,7 @@ export class LoadDataComponent implements OnInit {
   }
   async appendDataToTable() {
 
-    this.validateData() 
+    this.validateData()
   }
   async onFileChange(event: any) {
     const target: DataTransfer = <DataTransfer>(event.target);
@@ -356,14 +450,14 @@ export class LoadDataComponent implements OnInit {
   async submitData(rows: any[]) {
     const sanitizedRows = rows.reduce((acc, col) => {
       if (col['status']) {
-        const { status, latitude, longitude, weight,pincode, ...rest } = col;
+        const { status, latitude, longitude, weight, pincode, ...rest } = col;
 
         const sanitizedRow = {
           ...rest,
           latitude: typeof latitude === 'string' ? parseInt(latitude, 10) : latitude,
           longitude: typeof longitude === 'string' ? parseInt(longitude, 10) : longitude,
           weight: typeof weight === 'string' ? parseInt(weight, 10) : weight,
-          pincode: typeof pincode === 'number' ? pincode.toString() : pincode 
+          pincode: typeof pincode === 'number' ? pincode.toString() : pincode
         };
 
         acc.push(sanitizedRow);

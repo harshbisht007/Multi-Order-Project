@@ -57,7 +57,11 @@
 
           <div>
             <label for="vehicleCategory">Vehicle Category</label>
-            <p-multiSelect [options]="categories" [(ngModel)]="selectedCategories" id="vehicleCategory"
+            <!-- <p-multiSelect [options]="categories" [(ngModel)]="selectedCategories" id="vehicleCategory"
+              (onChange)="selectedCategory($event)" optionLabel="name" class="mt-2 cust_multi_select"
+              placeholder="Select Categories">
+            </p-multiSelect> -->
+            <p-multiSelect [options]="categoriesFromSynco" [(ngModel)]="selectedCategories" id="vehicleCategory"
               (onChange)="selectedCategory($event)" optionLabel="name" class="mt-2 cust_multi_select"
               placeholder="Select Categories">
             </p-multiSelect>
