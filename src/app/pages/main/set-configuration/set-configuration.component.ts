@@ -167,17 +167,37 @@ export class SetConfigurationComponent implements OnInit {
   }
 
   selectedCategory(event: any) {
-    this.additionalFields = event.value.map((category: any) => {
-      return {
+    console.log(event, 'event');
+    this.additionalFields = this.additionalFields || [];
+  
+    const selectedCategories = event.value;
+  
+    // Get the names of the fields that are currently selected in the dropdown
+    const selectedFieldNames = selectedCategories.map((category: any) => category.name);
+  
+    // Remove fields from additionalFields that are no longer selected
+    this.additionalFields = this.additionalFields.filter((field: any) =>
+      selectedFieldNames.includes(field.name)
+    );
+  
+    // Add new fields that have been selected but are not yet in additionalFields
+    const newFields = selectedCategories
+      .filter((category: any) => !this.additionalFields.some((field: any) => field.name === category.name))
+      .map((category: any) => ({
         name: category.name,
-        count: category ? category.count : null,
-        capacity: category ? category.weight : null,
-        range: category ? category.range_km : null,
-        waitTime: category ? category.wait_time_per_stop : null,
-        shiftTime: category ? category.shift_time : null
-      };
-    });
+        count: category.count || null,
+        capacity: category.weight || null,
+        range: category.range_km || null,
+        waitTime: category.wait_time_per_stop || null,
+        shiftTime: category.shift_time || null
+      }));
+  
+    // Update additionalFields with the new fields
+    this.additionalFields = [...this.additionalFields, ...newFields];
   }
+  
+  
+  
 
   goBack() {
     this.goToPreviousStep.emit(true)

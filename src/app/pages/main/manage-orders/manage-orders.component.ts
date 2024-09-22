@@ -33,11 +33,12 @@ export class ManageOrdersComponent implements AfterViewInit {
   }
   createOrder() {
   }
+  activeTabIndex: number | null = null;
+
   assignDriver: { name: string, code: string }[] = [];
   @Input() routeId!: string;
   @Input() orderId!: number;
-  order!: Order;
-  orderDetails: boolean = false;
+  order!: any;
   batchInfo: any = []
   constructor(private graphqlService: GraphqlService) {
   }
@@ -54,9 +55,8 @@ export class ManageOrdersComponent implements AfterViewInit {
   ngAfterViewInit() {
     this.getOrder().then();
   }
-
-  showOrders() {
-    this.orderDetails = !this.orderDetails;
+  onTabChange(event: any) {
+    this.activeTabIndex = event === this.activeTabIndex ? null : event;
   }
 
   async getOrder() {
@@ -159,14 +159,17 @@ export class ManageOrdersComponent implements AfterViewInit {
 
     const res = await this.graphqlService.runQuery(query, { getOrderId: this.orderId })
     console.log(res, '122')
-    this.order = res.get_order.clusters[0];
-    this.batchInfo = this.order?.batches.map(batch => [
-      { label: 'Batch ID', value: batch.id },
-      { label: 'Order Volume', value: batch.volume || 'N/A' },
-      { label: 'Category', value: batch.category_name || 'N/A' },
-      { label: 'Total Distance', value: batch.distance + ' Km' },
-      { label: 'Estimated Time', value: (batch.duration || 0 / 60).toFixed(2) + ' Hrs' }
-    ]);
+    this.order = res.get_order;
+    this.batchInfo = this.order?.clusters.flatMap((cluster: any) =>
+      cluster.batches.map((batch: any) => [
+        { label: 'Batch ID', value: batch.id },
+        { label: 'Order Volume', value: batch.volume || 'N/A' },
+        { label: 'Category', value: batch.category_name || 'N/A' },
+        { label: 'Total Distance', value: (batch.distance || 0) + ' Km' },
+        { label: 'Estimated Time', value: (batch.duration ? (batch.duration / 60).toFixed(2) : '0.00') + ' Hrs' }
+      ])
+    );
+    
     console.log(this.batchInfo, '122')
   }
 }
