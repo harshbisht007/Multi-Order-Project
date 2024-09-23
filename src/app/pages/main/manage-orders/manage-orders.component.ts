@@ -9,15 +9,19 @@ import { DropdownModule } from 'primeng/dropdown';
 import { CommonModule, NgClass } from '@angular/common';
 import { TooltipModule } from 'primeng/tooltip';
 import { MapComponent } from "../../map/map.component";
+import { ConfirmationService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-manage-orders',
   standalone: true,
   imports: [
-    AccordionModule, NgClass, TooltipModule, CommonModule,
+    AccordionModule, NgClass, TooltipModule, CommonModule,ConfirmDialogModule,
     TableModule, TabViewModule, DropdownModule,
     MapComponent
   ],
+  providers:[ConfirmationService,MessageService],
   templateUrl: './manage-orders.component.html',
   styleUrl: './manage-orders.component.scss'
 })
@@ -35,21 +39,21 @@ export class ManageOrdersComponent implements AfterViewInit {
   }
   activeTabIndex: number | null = null;
 
-  assignDriver: { name: string, code: string }[] = [];
+  // assignDriver: { name: string, code: string }[] = [];
   @Input() routeId!: string;
   @Input() orderId!: number;
   order!: any;
   batchInfo: any = []
-  constructor(private graphqlService: GraphqlService) {
+  constructor(private graphqlService: GraphqlService,private confirmationService: ConfirmationService, private messageService: MessageService) {
   }
 
   ngOnInit() {
     console.log(this.readyZone,'122 ')
-    this.assignDriver = [
-      { name: 'Assigned', code: 'assigned' },
-      { name: 'Unassigned', code: 'unassigned' },
-      { name: 'In Progress', code: 'inProgress' },
-    ];
+    // this.assignDriver = [
+    //   { name: 'Assigned', code: 'assigned' },
+    //   { name: 'Unassigned', code: 'unassigned' },
+    //   { name: 'In Progress', code: 'inProgress' },
+    // ];
   }
 
   ngAfterViewInit() {
@@ -58,6 +62,34 @@ export class ManageOrdersComponent implements AfterViewInit {
   onTabChange(event: any) {
     this.activeTabIndex = event === this.activeTabIndex ? null : event;
   }
+
+  confirmDelete(touchPoint: any) {
+    console.log(touchPoint,'122')
+    this.confirmationService.confirm({
+      message: `Are you sure you want to delete Order ${touchPoint.id} from batch? This order will be moved to Missed Orders`,
+      header: 'Are You Sure?',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        // Code to delete the item
+        this.deleteTouchPoint(touchPoint);
+        
+        // Optionally show a success message
+        this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: 'Touch point deleted' });
+      },
+      reject: () => {
+        // Optionally show a cancel message
+        this.messageService.add({ severity: 'info', summary: 'Cancelled', detail: 'Delete action cancelled' });
+      }
+    });
+  }
+  
+  deleteTouchPoint(touchPoint: any) {
+    // Logic to remove the touchPoint from the batch
+    //Update Batch
+    console.log(touchPoint,'122')
+    // this.batch.touch_points = this.batch.touch_points.filter(tp => tp !== touchPoint);
+  }
+  
 
   async getOrder() {
     const query = gql`query Get_order($getOrderId: Int!) {

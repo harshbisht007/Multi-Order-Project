@@ -14,11 +14,11 @@ export class MapComponent implements OnChanges, AfterViewInit {
   @Input() dataForMarker: any;
   @Input() thirdStepDataForMarker: any;
   @Input() pickupLocation: any;
-  
+  @Input() isMissed: any;
   private map!: L.Map;
   private markersLayer = L.layerGroup();
   private touchPointMarkers: L.Marker[] = [];
-  
+
   private readonly options = {
     zoom: 5,
     center: L.latLng(28.7040795, 77.1591007),
@@ -31,7 +31,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
     shadowUrl: 'assets/images/marker-shadow.png',
   };
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.map) {
@@ -39,14 +39,14 @@ export class MapComponent implements OnChanges, AfterViewInit {
         this.plotMarkers(changes['dataForMarker'].currentValue);
       }
       if (changes['thirdStepDataForMarker']?.currentValue) {
-        this.plotMarkerForThirdStep(changes['thirdStepDataForMarker'].currentValue);
+        this.plotMarkerForThirdStep(changes['thirdStepDataForMarker'].currentValue, this.isMissed);
       }
     }
   }
 
   ngAfterViewInit(): void {
     setTimeout(() => {
-      
+
       this.initializeMap();
       this.handleInitialData();
     }, 500);
@@ -73,7 +73,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
     if (this.dataForMarker) {
       this.plotMarkers(this.dataForMarker);
     } else if (this.thirdStepDataForMarker) {
-      this.plotMarkerForThirdStep(this.thirdStepDataForMarker);
+      this.plotMarkerForThirdStep(this.thirdStepDataForMarker, this.isMissed);
     }
 
     this.map.invalidateSize({ debounceMoveend: true });
@@ -84,7 +84,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
     const markers = data
       .filter(row => row.latitude && row.longitude)
       .map(row => this.createMarker(row.latitude, row.longitude, row.shipment_id, 'assets/images/map-marker.png', [15, 31]));
-    
+
     markers.forEach(marker => this.markersLayer.addLayer(marker));
 
     if (markers.length) {
@@ -92,42 +92,60 @@ export class MapComponent implements OnChanges, AfterViewInit {
     }
   }
 
-  private async plotMarkerForThirdStep(data: any[]): Promise<void> {
+  private async plotMarkerForThirdStep(data: any[], isMissed: any): Promise<void> {
     this.clearMarkers();
 
     // Plot pickup location marker
-    this.touchPointMarkers.push(this.createMarker(this.pickupLocation[1], this.pickupLocation[0], 'Hub', 'assets/images/merchant.png', [30, 30]));
+    if (!this.isMissed) {
+      this.touchPointMarkers.push(this.createMarker(this.pickupLocation[1], this.pickupLocation[0], 'Hub', 'assets/images/merchant.png', [30, 30]));
+      // Prepare coordinates for route
+      const coordinates = [
+        [this.pickupLocation[0], this.pickupLocation[1]],
+        ...data.map(point => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]),
+      ];
 
-    // Prepare coordinates for route
-    const coordinates = [
-      [this.pickupLocation[0], this.pickupLocation[1]],
-      ...data.map(point => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]),
-    ];
+      // Fetch and plot the route
+      const route = await this.fetchRoute(coordinates);
+      this.plotRoute(route);
+    }
 
-    // Fetch and plot the route
-    const route = await this.fetchRoute(coordinates);
-    this.plotRoute(route);
 
     // Plot touchpoint markers
     data.forEach((point, index) => this.createSpecialMarker(point, index + 1));
   }
 
   private createSpecialMarker(point: any, index: number): void {
+    console.log(point,'122')
+    const isMissed = this.isMissed;
+
+    const iconOptions: L.IconOptions = {
+      iconSize: [30, 42] as L.PointTuple,
+      iconAnchor: [15, 42] as L.PointTuple,
+      iconUrl: 'assets/icons/red-marker.svg'
+    };
+    const iconHtml = isMissed
+      ? L.icon({
+        iconUrl: iconOptions.iconUrl,
+        iconSize: iconOptions.iconSize,
+        iconAnchor: iconOptions.iconAnchor,
+      })
+      : L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div style='background-color:blue;' class='marker-pin'></div><i>${index}</i>`,
+        iconSize: iconOptions.iconSize,
+        iconAnchor: iconOptions.iconAnchor,
+      });
     const marker = L.marker(
       [point.touch_point.geom.latitude, point.touch_point.geom.longitude],
       {
-        icon: L.divIcon({
-          className: 'custom-div-icon',
-          html: `<div style='background-color:blue;' class='marker-pin'></div><i>${index}</i>`,
-          iconSize: [30, 42],
-          iconAnchor: [15, 42],
-        }),
+        icon: iconHtml,
       }
-    ).bindTooltip(point.name || `Point ${index}`, { direction: 'top' });
+    ).bindTooltip(point.customer_name || `Point ${index}`, { direction: 'top' });
 
     this.touchPointMarkers.push(marker);
     marker.addTo(this.map);
   }
+
 
   private async fetchRoute(coordinates: number[][]): Promise<any> {
     return this.http.post('https://routing.roadcast.co.in/ors/v2/directions/driving-car/geojson', { coordinates }).toPromise();
@@ -148,7 +166,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
     this.markersLayer.clearLayers();
     this.touchPointMarkers = [];
   }
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.map.remove();
     this.clearMarkers()
   }

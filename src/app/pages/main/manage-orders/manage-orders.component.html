@@ -14,7 +14,11 @@
         <p-accordionTab>
           <ng-template pTemplate="header">
             <span class="flex align-items-center justify-between gap-2 w-full text-sm ">
-              <span class="font-semibold">Batch {{batch.sequence_id}}</span>
+              @if(batch.is_missed){
+              <span class="font-semibold">Missed Orders</span>
+              }@else{
+              <span class="font-semibold">Batch {{ batch.sequence_id }}</span>
+              }
               <span class="flex align-items-center gap-2">
                 <span class="font-semibold ml-2"> <span class="before:[content:'\2022'] before:mr-1.5">{{
                     batch.touch_points.length }} orders</span></span>
@@ -37,10 +41,10 @@
                     }
                   </td>
                   }
-                  <td class="w-[200px]">
+                  <!-- <td class="w-[200px]">
                     <p class="text-[#878682]">Assigned Driver</p>
                     <p-dropdown optionLabel="name" placeholder="Select Assigned Driverd" [options]="assignDriver" />
-                  </td>
+                  </td> -->
                 </tr>
               </tbody>
             </table>
@@ -66,16 +70,17 @@
                     <td class="border border-slate-300 p-3 text-center">
                       <div class="flex items-center gap-2">
                         <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
-                        <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                        <span (click)="confirmDelete(tp)"><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
                       </div>
                     </td>
+                    
                   </tr>
                 </tbody>
               </table>
 
             </div>
             <div class="h-[350px] w-full bg-white rounded-lg overflow-hidden border border-[#E5E7EB]">
-              <app-map *ngIf="activeTabIndex === batchIndex" [thirdStepDataForMarker]="batch.touch_points"
+              <app-map *ngIf="activeTabIndex === batchIndex" [thirdStepDataForMarker]="batch.touch_points" [isMissed]="batch.is_missed"
                 [pickupLocation]="readyZone.refrencePoint">
               </app-map>
             </div>
@@ -84,105 +89,7 @@
         </p-accordionTab>
         }
         }
-        <!-- <p-accordionTab>
-            <ng-template pTemplate="header">
-              <span class="flex align-items-center justify-between gap-2 w-full text-sm ">
-                <span class="font-semibold">Missed Orders</span>
-                <span class="flex align-items-center gap-2">
-                  <span class="font-semibold ml-2 text-[--baseColor]"><i class=" pi pi-download  mr-2 font-sm"></i>
-                    Download</span>
-                  <span class="font-semibold ml-2"> <span class="before:[content:'\2022'] before:mr-1.5">30
-                      Orders</span></span>
-                </span>
-              </span>
-            </ng-template>
-  
-            <div class="grid grid-cols-2 gap-4  p-[1.25rem]">
-              <div>
-                <table class="border-collapse border border-slate-400 w-full table-striped">
-                  <thead>
-                    <tr class="bg-[#F4F3F3]">
-                      <th class="border border-[#C5C7D0BF] p-3 text-left">#</th>
-                      <th class="border border-[#C5C7D0BF] p-3 text-left">Order ID</th>
-                      <th class="border border-[#C5C7D0BF] p-3 text-left">Customer</th>
-                      <th class="border border-[#C5C7D0BF] p-3 text-left">Delivery Address</th>
-                      <th class="border border-[#C5C7D0BF] p-3 text-left">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="border border-slate-300 p-3">1.</td>
-                      <td class="border border-slate-300 p-3">Indianapolis</td>
-                      <td class="border border-slate-300 p-3">John Doe</td>
-                      <td class="border border-slate-300 p-3">123 Main St, Indianapolis</td>
-                      <td class="border border-slate-300 p-3 text-center">
-                        <div class="flex items-center gap-5">
-                          <span pTooltip="Synco AI suggests adding this order to Batch 1" hideDelay="3"
-                            tooltipPosition="left"><img src="../../../../assets/icons/Icons_aiAssistant.svg"
-                              alt=""></span>
-                          <span pTooltip="Move Order" hideDelay="3" tooltipPosition="left"><img
-                              src="../../../../assets/icons/icons_move.svg" alt=""></span>
-                          <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="border border-slate-300 p-3">2.</td>
-                      <td class="border border-slate-300 p-3">Columbus</td>
-                      <td class="border border-slate-300 p-3">Jane Smith</td>
-                      <td class="border border-slate-300 p-3">456 Elm St, Columbus</td>
-                      <td class="border border-slate-300 p-3 text-center">
-                        <div class="flex items-center gap-5">
-                          <span pTooltip="Synco AI suggests adding this order to Batch 1" hideDelay="3"
-                            tooltipPosition="left"><img src="../../../../assets/icons/Icons_aiAssistant.svg"
-                              alt=""></span>
-                          <span pTooltip="Move Order" hideDelay="3" tooltipPosition="left"><img
-                              src="../../../../assets/icons/icons_move.svg" alt=""></span>
-                          <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="border border-slate-300 p-3">3.</td>
-                      <td class="border border-slate-300 p-3">Detroit</td>
-                      <td class="border border-slate-300 p-3">Mike Johnson</td>
-                      <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
-                      <td class="border border-slate-300 p-3 text-center">
-                        <div class="flex items-center gap-5">
-                          <span pTooltip="Synco AI suggests adding this order to Batch 1" hideDelay="3"
-                            tooltipPosition="left"><img src="../../../../assets/icons/Icons_aiAssistant.svg"
-                              alt=""></span>
-                          <span pTooltip="Move Order" hideDelay="3" tooltipPosition="left"><img
-                              src="../../../../assets/icons/icons_move.svg" alt=""></span>
-                          <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="border border-slate-300 p-3">4.</td>
-                      <td class="border border-slate-300 p-3">Detroit</td>
-                      <td class="border border-slate-300 p-3">Mike Johnson</td>
-                      <td class="border border-slate-300 p-3">789 Oak St, Detroit</td>
-                      <td class="border border-slate-300 p-3 text-center">
-                        <div class="flex items-center gap-5">
-                          <span pTooltip="Synco AI suggests adding this order to Batch 1" hideDelay="3"
-                            tooltipPosition="left"><img src="../../../../assets/icons/Icons_aiAssistant.svg"
-                              alt=""></span>
-                          <span pTooltip="Move Order" hideDelay="3" tooltipPosition="left"><img
-                              src="../../../../assets/icons/icons_move.svg" alt=""></span>
-                          <span><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-  
-              </div>
-              <div class="h-[350px] w-full bg-white rounded-lg overflow-hidden border border-[#E5E7EB]">
-                <app-map></app-map>
-              </div>
-            </div>
-          </p-accordionTab> -->
+       
       </p-accordion>
     </div>
 
@@ -211,3 +118,5 @@
     </button>
   </div>
 </div>
+
+<p-confirmDialog></p-confirmDialog>

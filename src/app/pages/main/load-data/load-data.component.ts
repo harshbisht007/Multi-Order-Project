@@ -113,7 +113,7 @@ export class LoadDataComponent implements OnInit {
     );
 
     if (this.readyZone) {
-      this.selectedZone = this.readyZone.value;
+      this.selectedZone = this.readyZone.event.value;
     }
     if (this.valueForTable.length) {
       this.headers = Object.keys(this.valueForTable[0]);
