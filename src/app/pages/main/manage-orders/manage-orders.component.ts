@@ -14,6 +14,8 @@ import { MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { BatchMoveDialogComponent } from '../../batch-move-dialog/batch-move-dialog.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 
 @Component({
@@ -22,7 +24,7 @@ import { BatchMoveDialogComponent } from '../../batch-move-dialog/batch-move-dia
   imports: [
     AccordionModule, NgClass, TooltipModule, CommonModule, ConfirmDialogModule,
     TableModule, TabViewModule, DropdownModule, ToastModule,
-    MapComponent, BatchMoveDialogComponent
+    MapComponent, BatchMoveDialogComponent, DragDropModule
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './manage-orders.component.html',
@@ -35,13 +37,25 @@ export class ManageOrdersComponent implements AfterViewInit {
   displayDialog: boolean = false;
   touchPointId!: number;
   cluster = [];
+  reorder: boolean = false;
   onCancel() {
     this.goToFirstStep.emit(true)
   }
   goBack() {
     this.goToPreviousStep.emit(true);
   }
-  createOrder() {
+  async createOrder() {
+    const mutation=gql `
+    mutation Place_order($orderId: Int!) {
+    place_order(order_id: $orderId)
+    }
+    `
+    try {
+      const res = await this.graphqlService.runMutation(mutation, { orderId: this.orderId });
+      console.log(res);
+    } catch (error) {
+      console.error('GraphQL Error:', error);
+    }
   }
   activeTabIndex: number | null = null;
 
@@ -139,6 +153,59 @@ export class ManageOrdersComponent implements AfterViewInit {
 
     }
   }
+
+  drop(event: CdkDragDrop<any[]>, batch: any) {
+    this.reorder = true;
+    moveItemInArray(batch.touch_points, event.previousIndex, event.currentIndex);
+  }
+
+  onUpdateOrder(): void {
+    const updatedTouchPoints = this.getUpdatedTouchPoints();
+    console.log(updatedTouchPoints, '122')
+    this.updateTouchPointOrder(updatedTouchPoints).then(response => {
+      console.log('Order updated successfully', response);
+    }).catch(error => {
+      console.error('Error updating order:', error);
+    });
+  }
+
+  private getUpdatedTouchPoints(): any[] {
+    return this.order.clusters.flatMap((cluster: any) =>
+      cluster.batches.flatMap((batch: any) =>
+        batch.touch_points.map((tp: any) => ({ touch_point_id: tp.touch_point.id, batch_id: tp.batch_id }))
+      )
+    );
+  }
+
+  private async updateTouchPointOrder(touchPoints: any[]): Promise<any> {
+    const mutation = gql`
+      mutation Updates_batch_touch_point($rows: [BatchTouchPointInput!]!) {
+        updates_batch_touch_point(rows: $rows) {
+          priority
+          batch_id
+          touch_point_id
+        }
+      }
+    `;
+
+    // Map the touchPoints array to match the expected input structure
+    const rows = touchPoints.map((tp, index) => ({
+      priority: index + 1, // Update priority based on new order (starting from 1)
+      batch_id: tp.batch_id, // Assuming batch_id is available in each touch point
+      touch_point_id: tp.touch_point_id // Assuming touch_point_id is available
+    }));
+    console.log(rows)
+    return;
+    try {
+      // Execute the mutation with the actual touch points data
+      const response = await this.graphqlService.runMutation(mutation, { rows });
+      return response;
+    } catch (error) {
+      throw new Error('Failed to update touch point order');
+    }
+  }
+
+
 
 
   async getOrder() {

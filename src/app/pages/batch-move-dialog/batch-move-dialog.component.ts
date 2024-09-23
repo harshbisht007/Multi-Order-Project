@@ -30,11 +30,11 @@ export class BatchMoveDialogComponent implements OnInit, OnChanges {
     this.selectedBatch = null
     if (changes['cluster']) {
       const batches = changes['cluster']['currentValue'];
-      const numberOfOptions = Math.max(0, batches.length - 1); // Calculate one less than total
+      const numberOfOptions = Math.max(0, batches.length - 1); 
     
       this.batchOptions = batches.slice(0, numberOfOptions).map((batch: any, index: number) => ({
-        label: `Batch ${index + 1}`, // Labels as "Batch 1", "Batch 2", etc.
-        value: batch.id // Assuming each batch has an `id`
+        label: `Batch ${index + 1}`,
+        value: batch.id
       }));
     }
     
@@ -47,7 +47,7 @@ export class BatchMoveDialogComponent implements OnInit, OnChanges {
 
   onCancel(): void {
     this.display = false;
-    this.displayChange.emit(this.display); // Emit the change here
+    this.displayChange.emit(this.display);  
     this.closeDialog.emit(false);
   }
 
