@@ -130,6 +130,12 @@ export class LoadDataComponent implements OnInit {
     console.log(this.selectedZone,'122')
     await this.removeFarOrders(event.value.geom.coordinates[0]);
     this.zoneForRouting.emit({ event, refrencePoint: this.referencePoint });
+    if(!this.rows.length)
+    this.selectedZone = {
+      __typename: 'Zone',
+      id: '',
+      name: ''
+    };
   }
 
 
@@ -246,7 +252,7 @@ export class LoadDataComponent implements OnInit {
       },
 
       message: this.totalInvalid > 0
-        ? `${this.totalInvalid} Rows invalid. Data will be ignored while routing.`
+        ? `${this.totalInvalid} Rows invalid. Please correct it.`
         : this.totalInvalid === 0
           ? 'Data looks good! You’re all set.'
           : '',
@@ -255,6 +261,7 @@ export class LoadDataComponent implements OnInit {
         ? '../../../../assets/icons/icons_warning.svg'
         : '../../../../assets/icons/icons_check_circle.svg'
     }
+    
     console.log(this.rows, this.totalInvalid, '122')
 
   }

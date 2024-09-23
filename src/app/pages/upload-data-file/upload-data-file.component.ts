@@ -20,6 +20,7 @@ import * as XLSX from 'xlsx';
 })
 
 export class UploadDataFileComponent {
+  validFileFormat = ['address', 'category_type', 'closing_time', 'external_id', 'latitude', 'longitude', 'opening_time', 'pincode', 'shipment_id', 'touch_point_type', 'weight']
   @ViewChild('fileInput') fileInput: ElementRef | undefined;
   fileSelected: boolean = false;
   pizza: string[] = [];
@@ -107,10 +108,29 @@ export class UploadDataFileComponent {
 
   onUpload() {
     if (this.selectedFile) {
-      this.dialogRef.close(this.selectedFile);
-      this.messageService.add({ severity: 'success', summary: 'Data Upload Succesfully'});
-    }
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
 
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        const columns = jsonData[0] as any;
+        console.log(columns);
+
+        if (columns.length !== 11 || !columns.every((col: any) => this.validFileFormat.includes(col))) {
+          this.messageService.add({ severity: 'error', summary: 'Please upload a valid format.' });
+          return;
+        }
+
+        this.dialogRef.close(this.selectedFile);
+        this.messageService.add({ severity: 'success', summary: 'Data Upload Successfully' });
+      };
+
+      reader.readAsArrayBuffer(this.selectedFile);
+    }
   }
 
   onCancel() {

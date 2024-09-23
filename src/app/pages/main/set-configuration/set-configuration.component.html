@@ -74,8 +74,8 @@
         @for(field of categoryFields;track field.id;let i =$index ){
         <div>
           <label [for]="field.id + i" class="required">{{ field.label }}</label>
-          <input [id]="field.id + i" pInputText [(ngModel)]="category[field.model]" type="number"
-            class="form-input mt-2" [placeholder]="field.placeholder" />
+          <input [id]="field.id + i" pInputText [(ngModel)]="category[field.model]" type="number" [min]="0"
+            class="form-input mt-2" [placeholder]="field.placeholder" (ngModelChange)="checkFormValidity()" />
         </div>
         }
       </div>
@@ -97,7 +97,7 @@
             (click)="showDialog()" />
 
           }@else{ -->
-          <p-button pRipple class="mr-2 mt-2" label="Save Changes" severity="success" (onClick)="saveChanges()">
+          <p-button pRipple class="mr-2 mt-2" label="Save Changes" [disabled]="isSaveDisabled" severity="success" (onClick)="saveChanges()">
           </p-button>
           <!-- } -->
         </p>

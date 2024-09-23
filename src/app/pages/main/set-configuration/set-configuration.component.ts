@@ -53,6 +53,7 @@ export class SetConfigurationComponent implements OnInit {
   @Input() retrieveSecondStepData: any;
   @Output() dataForSecondStepper: EventEmitter<any> = new EventEmitter()
   startTime: string = '00:45';
+  isDisable= true;
 
   categoryFields: Array<{ label: string; model: keyof ExtendedCategory; placeholder: string; id: string }> = [
     { label: 'No. of Vehicles', model: 'count', placeholder: 'Enter number of vehicles', id: 'noOfVehicles' },
@@ -77,6 +78,7 @@ export class SetConfigurationComponent implements OnInit {
   ];
 
   @Input() routeId!: any;
+  isSaveDisabled: boolean = true;
   @Input() dataForMarker!: any[];
   @Output() manageOrders: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() goToPreviousStep: EventEmitter<any> = new EventEmitter<any>();
@@ -266,4 +268,11 @@ export class SetConfigurationComponent implements OnInit {
   showDialog() {
     this.visible = true;
   }
+
+  checkFormValidity() {
+    this.isSaveDisabled = this.additionalFields.some((category:any) => {
+      return this.categoryFields.some(field => !category[field.model]);
+    });
+  }
+  
 }
