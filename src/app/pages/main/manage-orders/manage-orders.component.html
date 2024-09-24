@@ -20,11 +20,11 @@
               <span class="font-semibold">Batch {{ batch.sequence_id }}</span>
               }
               <span class="flex align-items-center gap-2">
-                @if(reorder){
+                @if(batch.isReordered){
                   <span class="flex justify-between">
                     <button pButton label="Re-Routing" class="p-button-success" (click)="onUpdateOrder()"></button>
                   </span>
-                }
+                  }
                 <span class="font-semibold ml-2"> <span class="before:[content:'\2022'] before:mr-1.5">{{
                     batch.touch_points.length }} orders</span></span>
               </span>

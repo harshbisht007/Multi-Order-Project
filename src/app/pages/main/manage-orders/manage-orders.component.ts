@@ -45,7 +45,7 @@ export class ManageOrdersComponent implements AfterViewInit {
     this.goToPreviousStep.emit(true);
   }
   async createOrder() {
-    const mutation=gql `
+    const mutation = gql`
     mutation Place_order($orderId: Int!) {
     place_order(order_id: $orderId)
     }
@@ -88,7 +88,7 @@ export class ManageOrdersComponent implements AfterViewInit {
     const isMissed = batch.some((element: any) => element.is_missed === true);
 
     this.confirmationService.confirm({
-      message: `Are you sure you want to delete Order ${touchPoint.id} from batch? This order will be moved to Missed Orders`,
+      message: `Are you sure you want to delete Order ${touchPoint.touch_point_id} from batch? This order will be moved to Missed Orders`,
       header: 'Are You Sure?',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
@@ -100,7 +100,7 @@ export class ManageOrdersComponent implements AfterViewInit {
       },
       reject: () => {
         // Optionally show a cancel message
-        this.messageService.add({ severity: 'error', summary: 'Cancelled'});
+        this.messageService.add({ severity: 'error', summary: 'Cancelled' });
       }
     });
   }
@@ -139,7 +139,7 @@ export class ManageOrdersComponent implements AfterViewInit {
 
   openMoveDialog(touchPoint: any, batch: any) {
     this.cluster = batch
-    this.touchPointId = touchPoint.id;
+    this.touchPointId = touchPoint.touch_point_id;
     this.displayDialog = true;
   }
 
@@ -157,6 +157,7 @@ export class ManageOrdersComponent implements AfterViewInit {
   drop(event: CdkDragDrop<any[]>, batch: any) {
     this.reorder = true;
     moveItemInArray(batch.touch_points, event.previousIndex, event.currentIndex);
+    batch.isReordered = true;
   }
 
   onUpdateOrder(): void {
@@ -172,32 +173,26 @@ export class ManageOrdersComponent implements AfterViewInit {
   private getUpdatedTouchPoints(): any[] {
     return this.order.clusters.flatMap((cluster: any) =>
       cluster.batches.flatMap((batch: any) =>
-        batch.touch_points.map((tp: any) => ({ touch_point_id: tp.touch_point.id, batch_id: tp.batch_id }))
+        batch.touch_points.map((tp: any) => ({ id: tp.id }))
       )
     );
   }
 
   private async updateTouchPointOrder(touchPoints: any[]): Promise<any> {
     const mutation = gql`
-      mutation Updates_batch_touch_point($rows: [BatchTouchPointInput!]!) {
+    mutation Updates_batch_touch_point($rows: [BatchTouchPointInput!]!) {
         updates_batch_touch_point(rows: $rows) {
           priority
-          batch_id
-          touch_point_id
+          id
         }
       }
     `;
 
-    // Map the touchPoints array to match the expected input structure
     const rows = touchPoints.map((tp, index) => ({
-      priority: index + 1, // Update priority based on new order (starting from 1)
-      batch_id: tp.batch_id, // Assuming batch_id is available in each touch point
-      touch_point_id: tp.touch_point_id // Assuming touch_point_id is available
+      priority: index + 1, 
+      id: tp.id, 
     }));
-    console.log(rows)
-    return;
     try {
-      // Execute the mutation with the actual touch points data
       const response = await this.graphqlService.runMutation(mutation, { rows });
       return response;
     } catch (error) {
@@ -272,6 +267,7 @@ export class ManageOrdersComponent implements AfterViewInit {
             company_id
           }
           batch_id
+          priority
           touch_point_id
           id
           created_on
