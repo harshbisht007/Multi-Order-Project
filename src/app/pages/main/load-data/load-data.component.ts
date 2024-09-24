@@ -359,6 +359,7 @@ export class LoadDataComponent implements OnInit {
 
       const res = await this.graphqlService.runQuery(query)
       if (res.list_touch_point.length>0) {
+        this.loading=true;
         this.appendDataToTable(res.list_touch_point)
       }else{
         this.messageService.add({ severity: 'error', summary: 'Database is empty', icon: 'pi pi-info-circle' });
@@ -371,40 +372,33 @@ export class LoadDataComponent implements OnInit {
 
   }
   async appendDataToTable(newData: any) {
-    // If this.rows already contains data, merge it with newData, ensuring no duplicates based on unique keys.
     if (this.rows && this.rows.length > 0) {
-      const uniqueKey = 'external_id'; // Assuming 'external_id' is the unique identifier for merging
+      const uniqueKey = 'external_id'; 
       const existingIds = new Set(this.rows.map((row: any) => row[uniqueKey]));
   
-      // Merge the new data into the existing data, avoiding duplicates
       newData.forEach((newRow: any) => {
         if (!existingIds.has(newRow[uniqueKey])) {
-          this.rows.push(newRow); // Add new row if it's not already in the data
+          this.rows.push(newRow); 
         } else {
-          // If a row with the same unique identifier exists, update the existing row with the new data
           const existingRow = this.rows.find((row: any) => row[uniqueKey] === newRow[uniqueKey]);
   
-          // Ensure existingRow is defined before using Object.assign
           if (existingRow) {
-            Object.assign(existingRow, newRow); // Update existing row with new data
+            Object.assign(existingRow, newRow); 
           }
         }
       });
     } else {
-      // If no data exists, simply set the new data as the rows
       this.rows = [...newData];
     }
   
-    // After merging, validate the data
     this.validateData();
   
-    // Update your table or UI as needed
-    this.loading = false; // Assuming loading indicates data is being processed
     console.log(this.rows, 'Data after merging and validation');
   }
   
   
   async onFileChange(event: any) {
+    this.loading=true;
     const target: DataTransfer = <DataTransfer>(event.target);
     if (target.files.length !== 1) {
       throw new Error('Cannot use multiple files');
@@ -427,7 +421,6 @@ export class LoadDataComponent implements OnInit {
         });
         return obj;
       });
-      this.loading = false;
       this.appendDataToTable(this.rows);
 
     };
@@ -477,6 +470,7 @@ export class LoadDataComponent implements OnInit {
         ? '../../../../assets/icons/icons_warning.svg'
         : '../../../../assets/icons/icons_check_circle.svg'
     }
+    this.loading=false;
     
     console.log(this.rows, this.totalInvalid, '122')
 
