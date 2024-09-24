@@ -17,12 +17,14 @@ import { BatchMoveDialogComponent } from '../../batch-move-dialog/batch-move-dia
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
+import { DialogModule } from 'primeng/dialog';
+
 
 @Component({
   selector: 'app-manage-orders',
   standalone: true,
   imports: [
-    AccordionModule, NgClass, TooltipModule, CommonModule, ConfirmDialogModule,
+    AccordionModule,DialogModule, NgClass, TooltipModule, CommonModule, ConfirmDialogModule,
     TableModule, TabViewModule, DropdownModule, ToastModule,
     MapComponent, BatchMoveDialogComponent, DragDropModule
   ],
@@ -38,6 +40,7 @@ export class ManageOrdersComponent implements AfterViewInit {
   touchPointId!: number;
   cluster = [];
   reorder: boolean = false;
+  visible: boolean =false;
   onCancel() {
     this.goToFirstStep.emit(true)
   }
@@ -91,6 +94,7 @@ export class ManageOrdersComponent implements AfterViewInit {
       message: `Are you sure you want to delete Order ${touchPoint.touch_point_id} from batch? This order will be moved to Missed Orders`,
       header: 'Are You Sure?',
       icon: 'pi pi-exclamation-triangle',
+
       accept: () => {
         // Code to delete the item
         this.deleteTouchPoint(touchPoint, isMissed);
@@ -199,6 +203,11 @@ export class ManageOrdersComponent implements AfterViewInit {
       throw new Error('Failed to update touch point order');
     }
   }
+
+
+  showDialog() {
+    this.visible = true;
+}
 
 
 

@@ -7,7 +7,7 @@
     </div>
 
     <div class="p-dialog-footer">
-        <button pButton label="Move" (click)="onMove()" [disabled]="!selectedBatch"></button>
-        <button pButton label="Cancel" class="ui-button-secondary" (click)="onCancel()"></button>
+        <button (click)="onMove()" [disabled]="!selectedBatch">Move</button>
+        <button class="ui-button-secondary" (click)="onCancel()">Cancel</button>
     </div>
 </p-dialog>
