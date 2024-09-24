@@ -504,4 +504,22 @@ export class LoadDataComponent implements OnInit {
       }
     });
   }
+
+  downloadTable() {
+    if (this.rows.length === 0) {
+      this.messageService.add({ severity: 'error', summary: 'Please upload the data first', icon: 'pi pi-info-circle' });
+    } else {
+      const data = this.rows;
+  
+      const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
+  
+      const workbook: XLSX.WorkBook = {
+        Sheets: { 'data': worksheet },
+        SheetNames: ['data']
+      };
+  
+      XLSX.writeFile(workbook, 'Multi_Order_Report.xlsx');
+    }
+  }  
+    
 }

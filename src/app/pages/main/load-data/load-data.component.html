@@ -35,7 +35,7 @@
           <p-button (onClick)="fetchDataFromDB()" class="mr-2" icon="pi pi-refresh" label="Fetch Data" pRipple
             severity="success" />
           <!-- } -->
-          <p-button (onClick)="downloadSample()" [outlined]="true" class="mr-2" icon="pi pi-upload"
+          <p-button (onClick)="downloadTable()" [outlined]="true" class="mr-2" icon="pi pi-upload"
             label="Download Report" pRipple severity="success" />
           <p-button (onClick)="confirmDelete()" [disabled]="!rows.length || !selectedItems?.length" [outlined]="true"
             class="" icon="pi pi-trash" label="Delete" pRipple severity="danger" />
@@ -146,6 +146,7 @@
     class="mt-4 bg-white border-2 border-grey text-grey text-sm font-normal px-4 h-9 rounded hover:bg-grey hover:text-grey disabled:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400">
     Cancel
   </button>
+
 
   <div class="flex space-x-2">
 
