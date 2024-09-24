@@ -35,12 +35,15 @@ import { DialogModule } from 'primeng/dialog';
 export class ManageOrdersComponent implements AfterViewInit {
   @Output() goToPreviousStep: EventEmitter<any> = new EventEmitter<any>();
   @Output() goToFirstStep: EventEmitter<any> = new EventEmitter<any>();
+  @Output() showSpinner: EventEmitter<any> = new EventEmitter<any>();
+
   @Input() readyZone: any;
   displayDialog: boolean = false;
   touchPointId!: number;
   cluster = [];
   reorder: boolean = false;
   visible: boolean =false;
+  isMissed: boolean=false;;
   onCancel() {
     this.goToFirstStep.emit(true)
   }
@@ -55,9 +58,12 @@ export class ManageOrdersComponent implements AfterViewInit {
     `
     try {
       const res = await this.graphqlService.runMutation(mutation, { orderId: this.orderId });
-      console.log(res);
+      this.messageService.add({ severity: 'success', summary: 'Order Created Successfully', icon: 'pi pi-check'  });
+
     } catch (error) {
       console.error('GraphQL Error:', error);
+      this.messageService.add({ severity: 'error', summary: 'Error', });
+
     }
   }
   activeTabIndex: number | null = null;
@@ -71,7 +77,6 @@ export class ManageOrdersComponent implements AfterViewInit {
   }
 
   ngOnInit() {
-    console.log(this.readyZone, '122 ')
     // this.assignDriver = [
     //   { name: 'Assigned', code: 'assigned' },
     //   { name: 'Unassigned', code: 'unassigned' },
@@ -87,7 +92,6 @@ export class ManageOrdersComponent implements AfterViewInit {
   }
 
   confirmDelete(touchPoint: any, batch: any) {
-    console.log(touchPoint, batch, '122')
     const isMissed = batch.some((element: any) => element.is_missed === true);
 
     this.confirmationService.confirm({
@@ -100,7 +104,7 @@ export class ManageOrdersComponent implements AfterViewInit {
         this.deleteTouchPoint(touchPoint, isMissed);
 
         // Optionally show a success message
-        this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: 'Touch point deleted' });
+        this.messageService.add({ severity: 'success', summary: 'Touch point deleted', icon: 'pi pi-check'  });
       },
       reject: () => {
         // Optionally show a cancel message
@@ -112,7 +116,6 @@ export class ManageOrdersComponent implements AfterViewInit {
 
   async deleteTouchPoint(touchPoint: any, isMissed: boolean) {
 
-    console.log(touchPoint, isMissed, '122')
     if (isMissed) {
 
       const mutation = gql`
@@ -150,7 +153,7 @@ export class ManageOrdersComponent implements AfterViewInit {
   closeDialog(result: boolean) {
     this.displayDialog = false;
     if (result) {
-      this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: 'Touch point successfully moved' });
+      this.messageService.add({ severity: 'success', summary: 'Touch point successfully moved', icon: 'pi pi-check'  });
       this.getOrder()
     } else {
       this.messageService.add({ severity: 'error', summary: 'Cancelled', detail: 'Move operation was cancelled' });
@@ -166,11 +169,13 @@ export class ManageOrdersComponent implements AfterViewInit {
 
   onUpdateOrder(): void {
     const updatedTouchPoints = this.getUpdatedTouchPoints();
-    console.log(updatedTouchPoints, '122')
     this.updateTouchPointOrder(updatedTouchPoints).then(response => {
-      console.log('Order updated successfully', response);
+      this.messageService.add({ severity: 'success', summary: 'TouchPoint Reordered Successfully', icon: 'pi pi-check'  });
+      this.getOrder()
     }).catch(error => {
       console.error('Error updating order:', error);
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error' });
+
     });
   }
 
@@ -206,8 +211,12 @@ export class ManageOrdersComponent implements AfterViewInit {
 
 
   showDialog() {
-    this.visible = true;
-}
+    if(this.isMissed){
+      this.visible = true;
+    }else{
+      this.createOrder()
+    }
+  }
 
 
 
@@ -312,8 +321,8 @@ export class ManageOrdersComponent implements AfterViewInit {
     `
 
     const res = await this.graphqlService.runQuery(query, { getOrderId: this.orderId })
-    console.log(res, '122')
     this.order = res.get_order;
+    this.checkIfMissedOrder(this.order);
     this.batchInfo = this.order?.clusters.flatMap((cluster: any) =>
       cluster.batches.map((batch: any) => [
         { label: 'Batch ID', value: batch.id },
@@ -324,6 +333,18 @@ export class ManageOrdersComponent implements AfterViewInit {
       ])
     );
 
-    console.log(this.batchInfo, '122')
   }
+
+  checkIfMissedOrder(data: any) {
+    this.isMissed = data.clusters.some((cluster: any) => 
+      cluster.batches.some((batch: any) => batch.is_missed === true)
+    );
+  }
+
+  shouldShowSpinner(event:any){
+    this.showSpinner.emit(event);
+
+  }
+
+  
 }

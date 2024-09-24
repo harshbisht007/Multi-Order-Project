@@ -6,8 +6,8 @@
         </p-dropdown>
     </div>
 
-    <div class="p-dialog-footer">
-        <button (click)="onMove()" [disabled]="!selectedBatch">Move</button>
-        <button class="ui-button-secondary" (click)="onCancel()">Cancel</button>
+    <div class="p-dialog-footer flex justify-end gap-2 mt-5">
+        <button class="text-black text-sm font-normal px-4 h-9"  (click)="onCancel()">Cancel</button>
+        <button class="bg-[--baseColor] text-white text-sm font-normal px-4 h-9 rounded-md w-[120px] disabled:cursor-not-allowed disabled:bg-[#BFDFDC]"  (click)="onMove()" [disabled]="!selectedBatch">Move</button>
     </div>
 </p-dialog>

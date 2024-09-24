@@ -14,7 +14,7 @@
           let-index="index">
           <app-set-configuration (goToFirstStep)="prevCallback.emit()" (goToPreviousStep)="prevCallback.emit()"
             (dataForSecondStepper)="dataForSecondStepper($event)" (manageOrders)="activeIndex = 2"
-            (orderId)="reqOrderId($event)" [routeId]="routeId" [dataForMarker]="dataForMarker"
+            (orderId)="reqOrderId($event)" [routeId]="routeId" [dataForMarker]="dataForMarker" (showSpinner)="showLoader=$event"
             [retrieveSecondStepData]="retrieveSecondStepData">
           </app-set-configuration>
         </ng-template>
@@ -22,7 +22,7 @@
 
       <p-stepperPanel header="Review">
         <ng-template pTemplate="content" let-prevCallback="prevCallback" let-index="index">
-          <app-manage-orders (goToFirstStep)="activeIndex = 1" (goToPreviousStep)="prevCallback.emit()"
+          <app-manage-orders (goToFirstStep)="activeIndex = 1" (goToPreviousStep)="prevCallback.emit()" (showSpinner)="showLoader=$event"
             [orderId]="orderId" [routeId]="routeId" [readyZone]="readyZone">
           </app-manage-orders>
         </ng-template>
@@ -31,3 +31,8 @@
     </p-stepper>
   </div>
 </div>
+@if(showLoader){
+<div class="h-screen w-screen absolute top-0 left-0 flex justify-center items-center backdrop-brightness-50" style="z-index: 9999;">
+    <p-progressSpinner ariaLabel="loading" />
+</div>
+}

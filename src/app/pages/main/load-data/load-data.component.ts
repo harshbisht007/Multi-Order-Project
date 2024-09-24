@@ -114,10 +114,10 @@ export class LoadDataComponent implements OnInit {
 
     if (this.readyZone) {
       this.selectedZone = this.readyZone.event.value;
+      this.referencePoint=this.readyZone.referencePoint
     }
     if (this.valueForTable.length) {
       this.headers = Object.keys(this.valueForTable[0]);
-      console.log(this.headers, '122')
       this.rows = this.valueForTable;
     }
     this.sources = [
@@ -127,7 +127,6 @@ export class LoadDataComponent implements OnInit {
   }
 
   async onZoneChange(event: DropdownChangeEvent) {
-    console.log(this.selectedZone,'122')
     await this.removeFarOrders(event.value.geom.coordinates[0]);
     this.zoneForRouting.emit({ event, refrencePoint: this.referencePoint });
     if(!this.rows.length)
@@ -142,7 +141,6 @@ export class LoadDataComponent implements OnInit {
   async removeFarOrders(zonePoints: any) {
     this.referencePoint=[0,0]
     this.referencePoint = this.getZoneMeanPoint(zonePoints);
-    console.log(this.referencePoint,'122')
     const distanceThreshold = 200;
 
     this.rows = this.rows.filter((order: CustomTouchPoint) => {
@@ -255,13 +253,11 @@ export class LoadDataComponent implements OnInit {
     }
   }
   onRowSelect(event: TableRowSelectEvent) {
-    console.log(event, '122')
     if (this.selectedItems.length === this.rows.length) {
       this.showActions = false;
     }
   }
   onRowUnselect(event: TableRowUnSelectEvent) {
-    console.log(event, '122')
     this.showActions = true;
   }
 
@@ -290,7 +286,6 @@ export class LoadDataComponent implements OnInit {
   }
 
   deleteOrder(event: any) {
-    console.log(event, '122')
     this.confirmationService.confirm({
       message: 'Do you want to delete this row?',
       header: 'Are you sure?',
@@ -320,7 +315,6 @@ export class LoadDataComponent implements OnInit {
   }
 
   onSourceChange(event: DropdownChangeEvent) {
-    console.log(event, this.selectedSource, '122')
     this.headers = []
     this.rows = []
     if (this.selectedSource === 'upload') {
@@ -365,9 +359,8 @@ export class LoadDataComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Database is empty', icon: 'pi pi-info-circle' });
 
       }
-      console.log(res, '122')
     } catch (error) {
-      console.error(error, '122')
+      console.error(error)
     }
 
   }
@@ -472,7 +465,6 @@ export class LoadDataComponent implements OnInit {
     }
     this.loading=false;
     
-    console.log(this.rows, this.totalInvalid, '122')
 
   }
 

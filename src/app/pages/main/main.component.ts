@@ -6,7 +6,7 @@ import { SetConfigurationComponent } from "./set-configuration/set-configuration
 import { ManageOrdersComponent } from "./manage-orders/manage-orders.component";
 import { NgClass } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
-
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 @Component({
   selector: 'app-main',
   standalone: true,
@@ -16,12 +16,14 @@ import { AuthService } from '../../core/services/auth.service';
     NgClass,
     LoadDataComponent,
     SetConfigurationComponent,
-    ManageOrdersComponent
+    ManageOrdersComponent,
+    ProgressSpinnerModule
   ],
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.scss']
 })
 export class MainComponent {
+  @Input() showLoader:boolean=false;
   @Input() dataForMarker: any[] = [];
   @Input() readyZone: any;
   @Input() orderId!: number;

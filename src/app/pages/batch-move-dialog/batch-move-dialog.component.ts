@@ -54,7 +54,6 @@ export class BatchMoveDialogComponent implements OnInit, OnChanges {
 
   onMove(): void {
     if (this.selectedBatch) {
-      console.log(this.selectedBatch,'122')
       this.moveTouchPointToBatch(this.selectedBatch.value, this.touchPointId);
 
     }

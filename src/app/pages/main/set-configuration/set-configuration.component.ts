@@ -54,6 +54,7 @@ export class SetConfigurationComponent implements OnInit {
   endAtHub: boolean = true;
   overWriteDuplicate: boolean = true;
   @Input() retrieveSecondStepData: any;
+  @Output() showSpinner:EventEmitter<any>=new EventEmitter();
   @Output() dataForSecondStepper: EventEmitter<any> = new EventEmitter()
   startTime: string = '00:45';
   isDisable= true;
@@ -134,7 +135,6 @@ export class SetConfigurationComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.retrieveSecondStepData) {
-      console.log(this.retrieveSecondStepData, '122')
       this.startFromHub = this.retrieveSecondStepData.payload.start_from_hub;
       this.endAtHub = this.retrieveSecondStepData.payload.end_at_hub;
       this.checked = !this.retrieveSecondStepData.payload.single_batch;
@@ -161,6 +161,10 @@ export class SetConfigurationComponent implements OnInit {
           shiftTime: config.shift_time
         };
       });
+      if(this.additionalFields.length){
+        
+        this.checkFormValidity()
+      }
     }
 
 
@@ -219,9 +223,13 @@ export class SetConfigurationComponent implements OnInit {
       id: this.routeId
     });
     this.orderId.emit(res?.run_routing);
-    console.log(res, '122');
     this.manageOrders.emit(true);
 
+  }
+
+  shouldShowSpinner(event:any){
+    console.log(event,'12223')
+    this.showSpinner.emit(event);
   }
 
   onCancel() {
@@ -231,7 +239,6 @@ export class SetConfigurationComponent implements OnInit {
 
   async saveChanges() {
     this.runRoute = true
-    console.log(this.checkboxOptions, '122')
     const mutation = gql`mutation updateRoute($id: Int!, $change: RouteInput!) {
       update_route(id: $id, change: $change) {
         id

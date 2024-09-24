@@ -1,4 +1,4 @@
-import { AfterViewChecked, AfterViewInit, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import * as L from 'leaflet';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -15,6 +15,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
   @Input() thirdStepDataForMarker: any;
   @Input() pickupLocation: any;
   @Input() isMissed: any;
+  @Output() showSpinner:EventEmitter<any>=new EventEmitter();
   private map!: L.Map;
   private markersLayer = L.layerGroup();
   private touchPointMarkers: L.Marker[] = [];
@@ -71,17 +72,23 @@ export class MapComponent implements OnChanges, AfterViewInit {
     this.markersLayer.addTo(this.map);
   }
 
-  private handleInitialData(): void {
-    if (this.dataForMarker) {
-      this.plotMarkers(this.dataForMarker);
-    } else if (this.thirdStepDataForMarker) {
-      this.plotMarkerForThirdStep(this.thirdStepDataForMarker, this.isMissed);
-    }
+  private async handleInitialData(): Promise<void> {
+    this.showSpinner.emit(true);
 
-    this.map.invalidateSize({ debounceMoveend: true });
+    setTimeout(async () => {
+      
+      if (this.dataForMarker) {
+        await this.plotMarkers(this.dataForMarker);
+      } else if (this.thirdStepDataForMarker) {
+        await this.plotMarkerForThirdStep(this.thirdStepDataForMarker, this.isMissed);
+      }
+      this.map.invalidateSize({ debounceMoveend: true });
+      this.showSpinner.emit(false)
+    }, 500);
+
   }
 
-  private plotMarkers(data: any[]): void {
+  private async plotMarkers(data: any[]): Promise<void>  {
     this.clearMarkers();
     const markers = data
       .filter(row => row.latitude && row.longitude)
@@ -118,12 +125,10 @@ export class MapComponent implements OnChanges, AfterViewInit {
 
 
 
-    console.log(this.touchPointMarkers, '122')
     data.forEach((point, index) => this.createSpecialMarker(point, index + 1));
   }
 
   private createSpecialMarker(point: any, index: number): void {
-    console.log(point, '122')
 
     const isMissed = this.isMissed;
 
