@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import * as L from 'leaflet';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -18,6 +18,8 @@ export class MapComponent implements OnChanges, AfterViewInit {
   private map!: L.Map;
   private markersLayer = L.layerGroup();
   private touchPointMarkers: L.Marker[] = [];
+  private markerBounds!: L.LatLngBounds
+  private previousRouteLayer: L.GeoJSON | null = null;
 
   private readonly options = {
     zoom: 5,
@@ -93,9 +95,8 @@ export class MapComponent implements OnChanges, AfterViewInit {
   }
 
   private async plotMarkerForThirdStep(data: any[], isMissed: any): Promise<void> {
-    this.clearMarkers();
 
-    // Plot pickup location marker
+    await this.clearMarkers();
     if (!this.isMissed) {
       this.touchPointMarkers.push(this.createMarker(this.pickupLocation[1], this.pickupLocation[0], 'Hub', 'assets/images/merchant.png', [30, 30]));
       // Prepare coordinates for route
@@ -105,23 +106,31 @@ export class MapComponent implements OnChanges, AfterViewInit {
       ];
 
       // Fetch and plot the route
-      const route = await this.fetchRoute(coordinates);
-      this.plotRoute(route);
+      if (coordinates.length > 1) {
+        const route = await this.fetchRoute(coordinates);
+        this.plotRoute(route);
+      } else {
+        if (this.previousRouteLayer) {
+          this.map.removeLayer(this.previousRouteLayer);
+        }
+      }
     }
 
 
-    // Plot touchpoint markers
+
+    console.log(this.touchPointMarkers, '122')
     data.forEach((point, index) => this.createSpecialMarker(point, index + 1));
   }
 
   private createSpecialMarker(point: any, index: number): void {
-    console.log(point,'122')
+    console.log(point, '122')
+
     const isMissed = this.isMissed;
 
     const iconOptions: L.IconOptions = {
       iconSize: [30, 42] as L.PointTuple,
       iconAnchor: [15, 42] as L.PointTuple,
-      iconUrl: 'assets/icons/red-marker.svg'
+      iconUrl: 'assets/images/red-marker.svg'
     };
     const iconHtml = isMissed
       ? L.icon({
@@ -135,6 +144,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
         iconSize: iconOptions.iconSize,
         iconAnchor: iconOptions.iconAnchor,
       });
+
     const marker = L.marker(
       [point.touch_point.geom.latitude, point.touch_point.geom.longitude],
       {
@@ -144,16 +154,35 @@ export class MapComponent implements OnChanges, AfterViewInit {
 
     this.touchPointMarkers.push(marker);
     marker.addTo(this.map);
+
+    if (isMissed) {
+      const latlng: [number, number] = [
+        point.touch_point.geom.latitude,
+        point.touch_point.geom.longitude
+      ];
+  
+      this.markerBounds = this.markerBounds || new L.LatLngBounds(latlng, latlng);
+      this.markerBounds.extend(latlng);
+      this.fitMapToMarkers();
+    }
   }
 
+  public fitMapToMarkers(): void {
+    if (this.markerBounds?.isValid()) {
+      this.map.fitBounds(this.markerBounds, { padding: [20, 20] });
+    }
+  }
 
   private async fetchRoute(coordinates: number[][]): Promise<any> {
     return this.http.post('https://routing.roadcast.co.in/ors/v2/directions/driving-car/geojson', { coordinates }).toPromise();
   }
 
   private plotRoute(route: any): void {
-    const routeGeoJson = L.geoJSON(route, { style: { color: 'blue', weight: 4 } }).addTo(this.map);
-    this.map.fitBounds(routeGeoJson.getBounds());
+    if (this.previousRouteLayer) {
+      this.map.removeLayer(this.previousRouteLayer);
+    }
+    this.previousRouteLayer = L.geoJSON(route, { style: { color: 'blue', weight: 4 } }).addTo(this.map);
+    this.map.fitBounds(this.previousRouteLayer.getBounds());
   }
 
   private createMarker(lat: number, lng: number, tooltipText: string, iconUrl: string, iconSize: [number, number]): L.Marker {
@@ -162,8 +191,11 @@ export class MapComponent implements OnChanges, AfterViewInit {
     }).bindTooltip(tooltipText, { direction: 'top' }).addTo(this.map);
   }
 
-  private clearMarkers(): void {
+  private async clearMarkers(): Promise<void> {
     this.markersLayer.clearLayers();
+    this.touchPointMarkers.forEach((marker: L.Marker) => {
+      this.map.removeLayer(marker); // Removes the marker from the map
+    });
     this.touchPointMarkers = [];
   }
   ngOnDestroy() {

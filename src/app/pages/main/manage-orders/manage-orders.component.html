@@ -20,6 +20,11 @@
               <span class="font-semibold">Batch {{ batch.sequence_id }}</span>
               }
               <span class="flex align-items-center gap-2">
+                @if(reorder){
+                  <span class="flex justify-between">
+                    <button pButton label="Re-Routing" class="p-button-success" (click)="onUpdateOrder()"></button>
+                  </span>
+                }
                 <span class="font-semibold ml-2"> <span class="before:[content:'\2022'] before:mr-1.5">{{
                     batch.touch_points.length }} orders</span></span>
               </span>
@@ -51,7 +56,8 @@
           </div>
           <div class="grid grid-cols-2 gap-4  p-[1.25rem]">
             <div>
-              <table class="border-collapse border border-slate-400 w-full table-striped">
+              <table class="border-collapse border border-slate-400 w-full table-striped" cdkDropList
+                (cdkDropListDropped)="drop($event, batch)">
                 <thead>
                   <tr class="bg-[#F4F3F3]">
                     <th class="border border-[#C5C7D0BF] p-3 text-left">#</th>
@@ -62,26 +68,34 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let tp of batch.touch_points; let i = index">
+                  <tr *ngFor="let tp of batch.touch_points; let i = index" cdkDrag>
                     <td class="border border-slate-300 p-3">{{ i + 1 }}.</td>
                     <td class="border border-slate-300 p-3">#{{ tp.touch_point?.id }}</td>
                     <td class="border border-slate-300 p-3">{{ tp.touch_point?.category_type }}</td>
                     <td class="border border-slate-300 p-3">{{ tp.touch_point?.address }}</td>
                     <td class="border border-slate-300 p-3 text-center">
                       <div class="flex items-center gap-2">
-                        <span><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
-                        <span (click)="confirmDelete(tp)"><img src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                        @if(batch.is_missed){
+                        <span (click)="openMoveDialog(tp,cluster.batches)" pTooltip="Move Order" hideDelay="3" 
+                          tooltipPosition="left"><img src="../../../../assets/icons/icons_move.svg" alt=""></span>
+                        }@else(){
+                        <span pTooltip="ReOrder" hideDelay="3" tooltipPosition="left" cdkDragHandle><img
+                            src="../../../../assets/icons/icons_drag.svg" alt=""></span>
+                        <span pTooltip="Delete Order" hideDelay="3" tooltipPosition="right"
+                          (click)="confirmDelete(tp,cluster.batches)"><img
+                            src="../../../../assets/icons/icons_delete.svg" alt=""></span>
+                        }
                       </div>
                     </td>
-                    
+
                   </tr>
                 </tbody>
               </table>
 
             </div>
             <div class="h-[350px] w-full bg-white rounded-lg overflow-hidden border border-[#E5E7EB]">
-              <app-map *ngIf="activeTabIndex === batchIndex" [thirdStepDataForMarker]="batch.touch_points" [isMissed]="batch.is_missed"
-                [pickupLocation]="readyZone.refrencePoint">
+              <app-map *ngIf="activeTabIndex === batchIndex" [thirdStepDataForMarker]="batch.touch_points"
+                [isMissed]="batch.is_missed" [pickupLocation]="readyZone.refrencePoint">
               </app-map>
             </div>
 
@@ -89,7 +103,7 @@
         </p-accordionTab>
         }
         }
-       
+
       </p-accordion>
     </div>
 
@@ -112,11 +126,16 @@
     <button (click)="goBack()" class=" text-black text-sm font-normal px-4 h-9">
       Back
     </button>
-    <button (click)="createOrder()" [disabled]="true"
+    <button (click)="createOrder()"
       class="bg-[--baseColor] text-white text-sm font-normal px-4 h-9 rounded-md w-[120px] disabled:cursor-not-allowed disabled:bg-[#BFDFDC]">
       Create Order
     </button>
   </div>
 </div>
+
+<app-batch-move-dialog [(display)]="displayDialog" [touchPointId]="touchPointId" [cluster]="cluster"
+  (closeDialog)="closeDialog($event)">
+</app-batch-move-dialog>
+<p-toast />
 
 <p-confirmDialog></p-confirmDialog>
