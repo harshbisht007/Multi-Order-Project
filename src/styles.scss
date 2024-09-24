@@ -103,6 +103,10 @@ body {
   .p-checkbox {
     width: 16px;
     height: 16px;
+    border: 1px solid #C5C7D0;
+    border-radius: 3px;
+    transition: none;
+    outline-color: transparent;
 
     .p-checkbox-box {
       width: 15px;
@@ -111,7 +115,15 @@ body {
       color: #3f3f46;
       transition: none;
       outline-color: transparent;
+
+      
     }
+    .p-checkbox-box.p-highlight {
+        border-color: #5ABFB5 !important;
+        background: #5ABFB5 !important;
+      }
+
+    
   }
 
   .custom-dropdown {
@@ -162,7 +174,7 @@ body {
     }
 
     .pi {
-      font-size: 0.725rem;
+      font-size: 0.925rem;
     }
   }
 
@@ -218,6 +230,9 @@ body {
       border: 1px solid #C5C7D0BF;
       border-width: 1px;
       padding: 1rem 1.5rem;
+    }
+    .p-sortable-column .p-sortable-column-icon {
+      height: 10px !important;
     }
   }
 

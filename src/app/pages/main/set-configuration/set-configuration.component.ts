@@ -16,6 +16,9 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { MapComponent } from '../../map/map.component';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+
 export interface ExtendedCategory extends Category {
   vehiclesCount: number;
   capacity: number;
@@ -30,7 +33,7 @@ export interface ExtendedCategory extends Category {
   selector: 'app-set-configuration',
   standalone: true,
   imports: [
-    CommonModule,
+    CommonModule, IconFieldModule, InputIconModule,
     MapComponent,
     DropdownModule, ButtonModule,
     NgClass, InputTextModule,

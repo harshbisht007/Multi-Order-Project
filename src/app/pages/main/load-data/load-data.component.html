@@ -5,7 +5,7 @@
     <div class="grid grid-cols-5 gap-8 my-4">
       <div>
         <label class="flex"><span class="required mr-2.5 ">Zone </span>
-          <img alt="" src="../../../../assets/icons/icons-info.svg"></label>
+          <img [pTooltip]="'Note: Only orders from the selected zone will be displayed'" alt="" src="../../../../assets/icons/icons-info.svg"></label>
         <!-- <p-dropdown (onChange)="onZoneChange($event)" [(ngModel)]="selectedZone"  [options]="zones()" class="custom-dropdown mt-2.5 "
                     optionLabel="name" placeholder="Select Zone"/> -->
         <p-dropdown [disabled]="this.rows.length==0" (onChange)="onZoneChange($event)" [(ngModel)]="selectedZone" [options]="zoneFromSynco"
@@ -65,8 +65,9 @@
           <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
         </th>
         <th *ngFor="let col of columns" pSortableColumn="{{col}}">
-          <span class="flex">
-            {{ col }}
+          <span class="flex items-center font-semibold"  [ngClass]="col === 'address' ? 'w-[20rem]' : ''">
+            <!-- {{ col }} -->
+            {{ col | titlecase }}
             <p-sortIcon field="{{col}}"></p-sortIcon>
           </span>
         </th>
@@ -109,9 +110,9 @@
           <div class="flex align-items-center justify-content-center gap-1">
             @if (currentEditingRow === row) {
             <span pButton pRipple type="button" pSaveEditableRow icon="pi pi-check" (click)="onRowEditSave(row)"
-              class="p-button-rounded p-button-text p-button-success"></span>
+            class="bg-transparent text-[#2C958C]"></span>
             <span pButton type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancel(row, index)"
-              class="p-button-rounded p-button-text p-button-danger"></span>
+            class="bg-transparent text-[#D83A52]"></span>
             }
           </div>
         </td>
@@ -119,11 +120,9 @@
         @if (currentEditingRow !== row) {
         <td>
           <div class="flex align-items-center justify-content-center gap-1">
-            <span *ngIf="currentEditingRow !== row" pButton pRipple
-              class="p-button-rounded p-button-text p-button-success" type="button" pInitEditableRow icon="pi pi-pencil"
-              (click)="onRowEditInit(row)" class="p-button-rounded p-button-text"></span>
-            <span pButton pRipple class="p-button-rounded p-button-text p-button-danger" (click)="deleteOrder(row)"><i
-                class="pi pi-trash"></i></span>
+            <span *ngIf="currentEditingRow !== row" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil"
+              (click)="onRowEditInit(row)" class="bg-transparent text-[#2C958C]"></span>
+            <span pButton pRipple class="p-0" (click)="deleteOrder(row)" icon="pi pi-trash" class="bg-transparent text-[#D83A52]"></span>
           </div>
         </td>
         }

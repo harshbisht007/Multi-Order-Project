@@ -100,7 +100,7 @@ export class ManageOrdersComponent implements AfterViewInit {
       },
       reject: () => {
         // Optionally show a cancel message
-        this.messageService.add({ severity: 'error', summary: 'Cancelled', detail: 'Delete action cancelled' });
+        this.messageService.add({ severity: 'error', summary: 'Cancelled'});
       }
     });
   }
