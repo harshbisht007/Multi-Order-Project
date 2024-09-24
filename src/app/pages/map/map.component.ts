@@ -18,7 +18,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
   private map!: L.Map;
   private markersLayer = L.layerGroup();
   private touchPointMarkers: L.Marker[] = [];
-  private markerBounds: L.LatLngBounds | null = null; // Initialize as null
+  private markerBounds!: L.LatLngBounds
   private previousRouteLayer: L.GeoJSON | null = null;
 
   private readonly options = {
@@ -96,7 +96,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
 
   private async plotMarkerForThirdStep(data: any[], isMissed: any): Promise<void> {
 
-  await this.clearMarkers();
+    await this.clearMarkers();
     if (!this.isMissed) {
       this.touchPointMarkers.push(this.createMarker(this.pickupLocation[1], this.pickupLocation[0], 'Hub', 'assets/images/merchant.png', [30, 30]));
       // Prepare coordinates for route
@@ -106,10 +106,10 @@ export class MapComponent implements OnChanges, AfterViewInit {
       ];
 
       // Fetch and plot the route
-      if(coordinates.length>1){
+      if (coordinates.length > 1) {
         const route = await this.fetchRoute(coordinates);
         this.plotRoute(route);
-      }else{
+      } else {
         if (this.previousRouteLayer) {
           this.map.removeLayer(this.previousRouteLayer);
         }
@@ -117,14 +117,14 @@ export class MapComponent implements OnChanges, AfterViewInit {
     }
 
 
-  
-    console.log(this.touchPointMarkers,'122')
+
+    console.log(this.touchPointMarkers, '122')
     data.forEach((point, index) => this.createSpecialMarker(point, index + 1));
   }
 
   private createSpecialMarker(point: any, index: number): void {
     console.log(point, '122')
-    
+
     const isMissed = this.isMissed;
 
     const iconOptions: L.IconOptions = {
@@ -154,15 +154,22 @@ export class MapComponent implements OnChanges, AfterViewInit {
 
     this.touchPointMarkers.push(marker);
     marker.addTo(this.map);
-    this.markerBounds?.extend([point.touch_point.geom.latitude, point.touch_point.geom.longitude]);
+
     if (isMissed) {
-      this.fitMapToMarkers()
+      const latlng: [number, number] = [
+        point.touch_point.geom.latitude,
+        point.touch_point.geom.longitude
+      ];
+  
+      this.markerBounds = this.markerBounds || new L.LatLngBounds(latlng, latlng);
+      this.markerBounds.extend(latlng);
+      this.fitMapToMarkers();
     }
   }
 
   public fitMapToMarkers(): void {
-    if (this.markerBounds?.isValid()) { // Check if bounds are valid
-      this.map.fitBounds(this.markerBounds, { padding: [20, 20] }); // Adjust padding as necessary
+    if (this.markerBounds?.isValid()) {
+      this.map.fitBounds(this.markerBounds, { padding: [20, 20] });
     }
   }
 
