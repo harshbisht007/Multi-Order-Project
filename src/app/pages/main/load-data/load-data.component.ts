@@ -218,54 +218,7 @@ export class LoadDataComponent implements OnInit {
 
 
 
-  validateData() {
-    this.totalInvalid = 0;
-    this.rows.forEach((obj: any) => {
-      const hasComma = Object.keys(obj)
-        .filter(key => key !== 'address')
-        .some(key => typeof obj[key] === 'string' && obj[key].includes(','));
-      const invalidTouchPointType = obj.touch_point_type !== 'PICKUP' && obj.touch_point_type !== 'DROP';
-      obj.status = hasComma || invalidTouchPointType ? 'INVALID' : 'VALID';
-    });
-
-    this.showToastForValidCheck = true;
-
-    this.rows.map((obj: any) => {
-      if (obj.status === 'INVALID') {
-        this.totalInvalid += 1;
-      }
-    })
-
-    this.validColumnObject = {
-      classes: {
-        'flex': true,
-        'mr-2': true,
-        'px-3': true,
-        'py-2': true,
-        'text-base': this.totalInvalid > 0,
-        'font-normal': true,
-        'warning_message': this.totalInvalid > 0,
-        'success_message': this.totalInvalid === 0,
-        'ml-1': true,
-        'min-w-[550px]': this.totalInvalid > 0,
-        'min-w-[270px]': this.totalInvalid === 0
-      },
-
-      message: this.totalInvalid > 0
-        ? `${this.totalInvalid} Rows invalid. Please correct it.`
-        : this.totalInvalid === 0
-          ? 'Data looks good! You’re all set.'
-          : '',
-
-      imageSrc: this.totalInvalid === 0
-        ? '../../../../assets/icons/icons_warning.svg'
-        : '../../../../assets/icons/icons_check_circle.svg'
-    }
-    
-    console.log(this.rows, this.totalInvalid, '122')
-
-  }
-
+  
 
 
 
@@ -405,8 +358,11 @@ export class LoadDataComponent implements OnInit {
     try {
 
       const res = await this.graphqlService.runQuery(query)
-      if (res) {
-        this.appendDataToTable()
+      if (res.list_touch_point.length>0) {
+        this.appendDataToTable(res.list_touch_point)
+      }else{
+        this.messageService.add({ severity: 'error', summary: 'Database is empty', icon: 'pi pi-info-circle' });
+
       }
       console.log(res, '122')
     } catch (error) {
@@ -414,10 +370,40 @@ export class LoadDataComponent implements OnInit {
     }
 
   }
-  async appendDataToTable() {
-
-    this.validateData()
+  async appendDataToTable(newData: any) {
+    // If this.rows already contains data, merge it with newData, ensuring no duplicates based on unique keys.
+    if (this.rows && this.rows.length > 0) {
+      const uniqueKey = 'external_id'; // Assuming 'external_id' is the unique identifier for merging
+      const existingIds = new Set(this.rows.map((row: any) => row[uniqueKey]));
+  
+      // Merge the new data into the existing data, avoiding duplicates
+      newData.forEach((newRow: any) => {
+        if (!existingIds.has(newRow[uniqueKey])) {
+          this.rows.push(newRow); // Add new row if it's not already in the data
+        } else {
+          // If a row with the same unique identifier exists, update the existing row with the new data
+          const existingRow = this.rows.find((row: any) => row[uniqueKey] === newRow[uniqueKey]);
+  
+          // Ensure existingRow is defined before using Object.assign
+          if (existingRow) {
+            Object.assign(existingRow, newRow); // Update existing row with new data
+          }
+        }
+      });
+    } else {
+      // If no data exists, simply set the new data as the rows
+      this.rows = [...newData];
+    }
+  
+    // After merging, validate the data
+    this.validateData();
+  
+    // Update your table or UI as needed
+    this.loading = false; // Assuming loading indicates data is being processed
+    console.log(this.rows, 'Data after merging and validation');
   }
+  
+  
   async onFileChange(event: any) {
     const target: DataTransfer = <DataTransfer>(event.target);
     if (target.files.length !== 1) {
@@ -442,11 +428,60 @@ export class LoadDataComponent implements OnInit {
         return obj;
       });
       this.loading = false;
-      this.appendDataToTable();
+      this.appendDataToTable(this.rows);
 
     };
     reader.readAsBinaryString(target.files[0]);
   }
+
+  validateData() {
+    this.totalInvalid = 0;
+    this.rows.forEach((obj: any) => {
+      const hasComma = Object.keys(obj)
+        .filter(key => key !== 'address')
+        .some(key => typeof obj[key] === 'string' && obj[key].includes(','));
+      const invalidTouchPointType = obj.touch_point_type !== 'PICKUP' && obj.touch_point_type !== 'DROP';
+      obj.status = hasComma || invalidTouchPointType ? 'INVALID' : 'VALID';
+    });
+
+    this.showToastForValidCheck = true;
+
+    this.rows.map((obj: any) => {
+      if (obj.status === 'INVALID') {
+        this.totalInvalid += 1;
+      }
+    })
+
+    this.validColumnObject = {
+      classes: {
+        'flex': true,
+        'mr-2': true,
+        'px-3': true,
+        'py-2': true,
+        'text-base': this.totalInvalid > 0,
+        'font-normal': true,
+        'warning_message': this.totalInvalid > 0,
+        'success_message': this.totalInvalid === 0,
+        'ml-1': true,
+        'min-w-[550px]': this.totalInvalid > 0,
+        'min-w-[270px]': this.totalInvalid === 0
+      },
+
+      message: this.totalInvalid > 0
+        ? `${this.totalInvalid} Rows invalid. Please correct it.`
+        : this.totalInvalid === 0
+          ? 'Data looks good! You’re all set.'
+          : '',
+
+      imageSrc: this.totalInvalid === 0
+        ? '../../../../assets/icons/icons_warning.svg'
+        : '../../../../assets/icons/icons_check_circle.svg'
+    }
+    
+    console.log(this.rows, this.totalInvalid, '122')
+
+  }
+
 
   async onSubmit() {
     if (this.rows.length > 0) {
