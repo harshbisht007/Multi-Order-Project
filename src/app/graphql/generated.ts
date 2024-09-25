@@ -39,17 +39,19 @@ export type Batch = {
   __typename?: 'Batch';
   category_id?: Maybe<Scalars['String']['output']>;
   category_name?: Maybe<Scalars['String']['output']>;
+  cluster: Cluster;
+  cluster_id: Scalars['Int']['output'];
   company_id: Scalars['String']['output'];
   created_on: Scalars['Datetime']['output'];
-  distance?: Maybe<Scalars['Int']['output']>;
   duration?: Maybe<Scalars['Int']['output']>;
   id: Scalars['Int']['output'];
-  order?: Maybe<Order>;
-  order_id?: Maybe<Scalars['Int']['output']>;
+  is_missed?: Maybe<Scalars['Boolean']['output']>;
   rider_id?: Maybe<Scalars['UUID']['output']>;
   rider_name?: Maybe<Scalars['String']['output']>;
   rider_phone?: Maybe<Scalars['String']['output']>;
-  sequence_id: Scalars['Int']['output'];
+  sequence_id?: Maybe<Scalars['Int']['output']>;
+  total_km?: Maybe<Scalars['Int']['output']>;
+  total_load?: Maybe<Scalars['Int']['output']>;
   touch_points: Array<BatchTouchPoint>;
   updated_on: Scalars['Datetime']['output'];
   volume?: Maybe<Scalars['Int']['output']>;
@@ -80,6 +82,19 @@ export type BatchCategory_NameArgs = {
 };
 
 
+export type BatchCluster_IdArgs = {
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+};
+
+
 export type BatchCompany_IdArgs = {
   contains?: InputMaybe<Scalars['String']['input']>;
   endsWith?: InputMaybe<Scalars['String']['input']>;
@@ -97,19 +112,6 @@ export type BatchCreated_OnArgs = {
   greaterThan?: InputMaybe<Scalars['Datetime']['input']>;
   lesserEqual?: InputMaybe<Scalars['Datetime']['input']>;
   lesserThan?: InputMaybe<Scalars['Datetime']['input']>;
-};
-
-
-export type BatchDistanceArgs = {
-  equal?: InputMaybe<Scalars['Float']['input']>;
-  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
-  greaterThan?: InputMaybe<Scalars['Float']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
-  isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
-  lesserThan?: InputMaybe<Scalars['Float']['input']>;
-  notEqual?: InputMaybe<Scalars['Float']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
@@ -139,16 +141,8 @@ export type BatchIdArgs = {
 };
 
 
-export type BatchOrder_IdArgs = {
-  equal?: InputMaybe<Scalars['Float']['input']>;
-  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
-  greaterThan?: InputMaybe<Scalars['Float']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
-  isNull?: InputMaybe<Scalars['Boolean']['input']>;
-  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
-  lesserThan?: InputMaybe<Scalars['Float']['input']>;
-  notEqual?: InputMaybe<Scalars['Float']['input']>;
-  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+export type BatchIs_MissedArgs = {
+  bool?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -201,6 +195,32 @@ export type BatchSequence_IdArgs = {
 };
 
 
+export type BatchTotal_KmArgs = {
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+};
+
+
+export type BatchTotal_LoadArgs = {
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+};
+
+
 export type BatchUpdated_OnArgs = {
   greaterEqual?: InputMaybe<Scalars['Datetime']['input']>;
   greaterThan?: InputMaybe<Scalars['Datetime']['input']>;
@@ -224,17 +244,19 @@ export type BatchVolumeArgs = {
 export type BatchInput = {
   category_id?: InputMaybe<Scalars['String']['input']>;
   category_name?: InputMaybe<Scalars['String']['input']>;
+  cluster?: InputMaybe<ClusterInput>;
+  cluster_id?: InputMaybe<Scalars['Int']['input']>;
   company_id?: InputMaybe<Scalars['String']['input']>;
   created_on?: InputMaybe<Scalars['Datetime']['input']>;
-  distance?: InputMaybe<Scalars['Int']['input']>;
   duration?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['Int']['input']>;
-  order?: InputMaybe<OrderInput>;
-  order_id?: InputMaybe<Scalars['Int']['input']>;
+  is_missed?: InputMaybe<Scalars['Boolean']['input']>;
   rider_id?: InputMaybe<Scalars['UUID']['input']>;
   rider_name?: InputMaybe<Scalars['String']['input']>;
   rider_phone?: InputMaybe<Scalars['String']['input']>;
   sequence_id?: InputMaybe<Scalars['Int']['input']>;
+  total_km?: InputMaybe<Scalars['Int']['input']>;
+  total_load?: InputMaybe<Scalars['Int']['input']>;
   touch_points?: InputMaybe<Array<InputMaybe<BatchTouchPointInput>>>;
   updated_on?: InputMaybe<Scalars['Datetime']['input']>;
   volume?: InputMaybe<Scalars['Int']['input']>;
@@ -247,8 +269,11 @@ export type BatchTouchPoint = {
   company_id: Scalars['String']['output'];
   created_on: Scalars['Datetime']['output'];
   id: Scalars['Int']['output'];
-  touch_point?: Maybe<TouchPoint>;
-  touch_point_id?: Maybe<Scalars['Int']['output']>;
+  priority?: Maybe<Scalars['Int']['output']>;
+  total_km?: Maybe<Scalars['Int']['output']>;
+  total_load?: Maybe<Scalars['Int']['output']>;
+  touch_point: TouchPoint;
+  touch_point_id: Scalars['Int']['output'];
   updated_on: Scalars['Datetime']['output'];
 };
 
@@ -299,6 +324,45 @@ export type BatchTouchPointIdArgs = {
 };
 
 
+export type BatchTouchPointPriorityArgs = {
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+};
+
+
+export type BatchTouchPointTotal_KmArgs = {
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+};
+
+
+export type BatchTouchPointTotal_LoadArgs = {
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+};
+
+
 export type BatchTouchPointTouch_Point_IdArgs = {
   equal?: InputMaybe<Scalars['Float']['input']>;
   greaterEqual?: InputMaybe<Scalars['Float']['input']>;
@@ -325,6 +389,9 @@ export type BatchTouchPointInput = {
   company_id?: InputMaybe<Scalars['String']['input']>;
   created_on?: InputMaybe<Scalars['Datetime']['input']>;
   id?: InputMaybe<Scalars['Int']['input']>;
+  priority?: InputMaybe<Scalars['Int']['input']>;
+  total_km?: InputMaybe<Scalars['Int']['input']>;
+  total_load?: InputMaybe<Scalars['Int']['input']>;
   touch_point?: InputMaybe<TouchPointInput>;
   touch_point_id?: InputMaybe<Scalars['Int']['input']>;
   updated_on?: InputMaybe<Scalars['Datetime']['input']>;
@@ -334,6 +401,101 @@ export type Category = {
   __typename?: 'Category';
   id: Scalars['UUID']['output'];
   name: Scalars['String']['output'];
+};
+
+export type Cluster = {
+  __typename?: 'Cluster';
+  batches: Array<Batch>;
+  company_id: Scalars['String']['output'];
+  created_on: Scalars['Datetime']['output'];
+  id: Scalars['Int']['output'];
+  is_missed?: Maybe<Scalars['Boolean']['output']>;
+  order_id: Scalars['Int']['output'];
+  sequence_id?: Maybe<Scalars['Int']['output']>;
+  updated_on: Scalars['Datetime']['output'];
+};
+
+
+export type ClusterCompany_IdArgs = {
+  contains?: InputMaybe<Scalars['String']['input']>;
+  endsWith?: InputMaybe<Scalars['String']['input']>;
+  equal?: InputMaybe<Scalars['String']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  notEqual?: InputMaybe<Scalars['String']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  startsWith?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type ClusterCreated_OnArgs = {
+  greaterEqual?: InputMaybe<Scalars['Datetime']['input']>;
+  greaterThan?: InputMaybe<Scalars['Datetime']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Datetime']['input']>;
+  lesserThan?: InputMaybe<Scalars['Datetime']['input']>;
+};
+
+
+export type ClusterIdArgs = {
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+};
+
+
+export type ClusterIs_MissedArgs = {
+  bool?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type ClusterOrder_IdArgs = {
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+};
+
+
+export type ClusterSequence_IdArgs = {
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+};
+
+
+export type ClusterUpdated_OnArgs = {
+  greaterEqual?: InputMaybe<Scalars['Datetime']['input']>;
+  greaterThan?: InputMaybe<Scalars['Datetime']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Datetime']['input']>;
+  lesserThan?: InputMaybe<Scalars['Datetime']['input']>;
+};
+
+export type ClusterInput = {
+  batches?: InputMaybe<Array<InputMaybe<BatchInput>>>;
+  company_id?: InputMaybe<Scalars['String']['input']>;
+  created_on?: InputMaybe<Scalars['Datetime']['input']>;
+  id?: InputMaybe<Scalars['Int']['input']>;
+  is_missed?: InputMaybe<Scalars['Boolean']['input']>;
+  order_id?: InputMaybe<Scalars['Int']['input']>;
+  sequence_id?: InputMaybe<Scalars['Int']['input']>;
+  updated_on?: InputMaybe<Scalars['Datetime']['input']>;
 };
 
 export type CustomTouchPointInput = {
@@ -363,8 +525,12 @@ export type GeomInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  add_in_missed_batch: Scalars['JSON']['output'];
+  add_new_missed_batch: Scalars['JSON']['output'];
+  change_touch_point_batch: Scalars['JSON']['output'];
   create_batch: Batch;
   create_batch_touch_point: BatchTouchPoint;
+  create_cluster: Cluster;
   create_order: Order;
   create_route: Route;
   create_route_template: RouteTemplate;
@@ -373,6 +539,7 @@ export type Mutation = {
   create_touch_point: TouchPoint;
   creates_batch: Array<Maybe<Batch>>;
   creates_batch_touch_point: Array<Maybe<BatchTouchPoint>>;
+  creates_cluster: Array<Maybe<Cluster>>;
   creates_order: Array<Maybe<Order>>;
   creates_route: Array<Maybe<Route>>;
   creates_route_template: Array<Maybe<RouteTemplate>>;
@@ -380,15 +547,18 @@ export type Mutation = {
   creates_touch_point: Array<Maybe<TouchPoint>>;
   delete_batch: Batch;
   delete_batch_touch_point: BatchTouchPoint;
+  delete_cluster: Cluster;
   delete_order: Order;
   delete_route: Route;
   delete_route_template: RouteTemplate;
   delete_route_vehicle_config: RouteVehicleConfig;
   delete_touch_point: TouchPoint;
   ping: Ping;
-  run_routing: Scalars['UUID']['output'];
+  place_order: Scalars['JSON']['output'];
+  run_routing: Scalars['Int']['output'];
   update_batch: Batch;
   update_batch_touch_point: BatchTouchPoint;
+  update_cluster: Cluster;
   update_order: Order;
   update_route: Route;
   update_route_template: RouteTemplate;
@@ -396,11 +566,28 @@ export type Mutation = {
   update_touch_point: TouchPoint;
   updates_batch: Array<Maybe<Batch>>;
   updates_batch_touch_point: Array<Maybe<BatchTouchPoint>>;
+  updates_cluster: Array<Maybe<Cluster>>;
   updates_order: Array<Maybe<Order>>;
   updates_route: Array<Maybe<Route>>;
   updates_route_template: Array<Maybe<RouteTemplate>>;
   updates_route_vehicle_config: Array<Maybe<RouteVehicleConfig>>;
   updates_touch_point: Array<Maybe<TouchPoint>>;
+};
+
+
+export type MutationAdd_In_Missed_BatchArgs = {
+  touch_point_id: Scalars['Int']['input'];
+};
+
+
+export type MutationAdd_New_Missed_BatchArgs = {
+  touch_point_id: Scalars['Int']['input'];
+};
+
+
+export type MutationChange_Touch_Point_BatchArgs = {
+  to_batch_id: Scalars['Int']['input'];
+  touch_point_id: Scalars['Int']['input'];
 };
 
 
@@ -411,6 +598,11 @@ export type MutationCreate_BatchArgs = {
 
 export type MutationCreate_Batch_Touch_PointArgs = {
   row: BatchTouchPointInput;
+};
+
+
+export type MutationCreate_ClusterArgs = {
+  row: ClusterInput;
 };
 
 
@@ -454,6 +646,11 @@ export type MutationCreates_Batch_Touch_PointArgs = {
 };
 
 
+export type MutationCreates_ClusterArgs = {
+  rows: Array<ClusterInput>;
+};
+
+
 export type MutationCreates_OrderArgs = {
   rows: Array<OrderInput>;
 };
@@ -480,37 +677,47 @@ export type MutationCreates_Touch_PointArgs = {
 
 
 export type MutationDelete_BatchArgs = {
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type MutationDelete_Batch_Touch_PointArgs = {
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationDelete_ClusterArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
 export type MutationDelete_OrderArgs = {
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type MutationDelete_RouteArgs = {
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type MutationDelete_Route_TemplateArgs = {
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type MutationDelete_Route_Vehicle_ConfigArgs = {
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type MutationDelete_Touch_PointArgs = {
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationPlace_OrderArgs = {
+  order_id: Scalars['Int']['input'];
 };
 
 
@@ -521,43 +728,49 @@ export type MutationRun_RoutingArgs = {
 
 export type MutationUpdate_BatchArgs = {
   change: BatchInput;
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type MutationUpdate_Batch_Touch_PointArgs = {
   change: BatchTouchPointInput;
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationUpdate_ClusterArgs = {
+  change: ClusterInput;
+  id: Scalars['Int']['input'];
 };
 
 
 export type MutationUpdate_OrderArgs = {
   change: OrderInput;
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type MutationUpdate_RouteArgs = {
   change: RouteInput;
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type MutationUpdate_Route_TemplateArgs = {
   change: RouteTemplateInput;
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type MutationUpdate_Route_Vehicle_ConfigArgs = {
   change: RouteVehicleConfigInput;
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type MutationUpdate_Touch_PointArgs = {
   change: TouchPointInput;
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
@@ -568,6 +781,11 @@ export type MutationUpdates_BatchArgs = {
 
 export type MutationUpdates_Batch_Touch_PointArgs = {
   rows: Array<BatchTouchPointInput>;
+};
+
+
+export type MutationUpdates_ClusterArgs = {
+  rows: Array<ClusterInput>;
 };
 
 
@@ -597,11 +815,12 @@ export type MutationUpdates_Touch_PointArgs = {
 
 export type Order = {
   __typename?: 'Order';
-  batches: Array<Batch>;
+  clusters: Array<Cluster>;
   company_id: Scalars['String']['output'];
   created_on: Scalars['Datetime']['output'];
   id: Scalars['Int']['output'];
-  route_id?: Maybe<Scalars['Int']['output']>;
+  route: Route;
+  route_id: Scalars['Int']['output'];
   updated_on: Scalars['Datetime']['output'];
 };
 
@@ -660,10 +879,11 @@ export type OrderUpdated_OnArgs = {
 };
 
 export type OrderInput = {
-  batches?: InputMaybe<Array<InputMaybe<BatchInput>>>;
+  clusters?: InputMaybe<Array<InputMaybe<ClusterInput>>>;
   company_id?: InputMaybe<Scalars['String']['input']>;
   created_on?: InputMaybe<Scalars['Datetime']['input']>;
   id?: InputMaybe<Scalars['Int']['input']>;
+  route?: InputMaybe<RouteInput>;
   route_id?: InputMaybe<Scalars['Int']['input']>;
   updated_on?: InputMaybe<Scalars['Datetime']['input']>;
 };
@@ -683,6 +903,7 @@ export type Query = {
   __typename?: 'Query';
   get_batch: Batch;
   get_batch_touch_point: BatchTouchPoint;
+  get_cluster: Cluster;
   get_order: Order;
   get_route: Route;
   get_route_template: RouteTemplate;
@@ -693,6 +914,7 @@ export type Query = {
   list_batch: Array<Maybe<Batch>>;
   list_batch_touch_point: Array<Maybe<BatchTouchPoint>>;
   list_categories: Array<Category>;
+  list_cluster: Array<Maybe<Cluster>>;
   list_order: Array<Maybe<Order>>;
   list_route: Array<Maybe<Route>>;
   list_route_template: Array<Maybe<RouteTemplate>>;
@@ -706,32 +928,37 @@ export type Query = {
 
 
 export type QueryGet_BatchArgs = {
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type QueryGet_Batch_Touch_PointArgs = {
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
+};
+
+
+export type QueryGet_ClusterArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
 export type QueryGet_OrderArgs = {
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type QueryGet_RouteArgs = {
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type QueryGet_Route_TemplateArgs = {
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type QueryGet_Route_Vehicle_ConfigArgs = {
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
@@ -746,7 +973,7 @@ export type QueryGet_Tasks_StatusesArgs = {
 
 
 export type QueryGet_Touch_PointArgs = {
-  id: Scalars['UUID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
@@ -758,6 +985,13 @@ export type QueryList_BatchArgs = {
 
 
 export type QueryList_Batch_Touch_PointArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryList_ClusterArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   page?: InputMaybe<Scalars['Int']['input']>;
@@ -817,12 +1051,15 @@ export type Route = {
   end_at_hub?: Maybe<Scalars['Boolean']['output']>;
   hub_location?: Maybe<Geom>;
   id: Scalars['Int']['output'];
+  max_orders_in_cluster?: Maybe<Scalars['Int']['output']>;
+  min_orders_in_cluster?: Maybe<Scalars['Int']['output']>;
   overwrite_duplicate?: Maybe<Scalars['Boolean']['output']>;
   riders?: Maybe<Scalars['Int']['output']>;
   sequence_id: Scalars['Int']['output'];
   single_batch?: Maybe<Scalars['Boolean']['output']>;
   start_from_hub?: Maybe<Scalars['Boolean']['output']>;
   start_time?: Maybe<Scalars['Time']['output']>;
+  touch_points: Array<TouchPoint>;
   updated_on: Scalars['Datetime']['output'];
   vehicle_config: Array<RouteVehicleConfig>;
 };
@@ -867,6 +1104,32 @@ export type RouteEnd_At_HubArgs = {
 
 
 export type RouteIdArgs = {
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+};
+
+
+export type RouteMax_Orders_In_ClusterArgs = {
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+};
+
+
+export type RouteMin_Orders_In_ClusterArgs = {
   equal?: InputMaybe<Scalars['Float']['input']>;
   greaterEqual?: InputMaybe<Scalars['Float']['input']>;
   greaterThan?: InputMaybe<Scalars['Float']['input']>;
@@ -942,12 +1205,15 @@ export type RouteInput = {
   end_at_hub?: InputMaybe<Scalars['Boolean']['input']>;
   hub_location?: InputMaybe<GeomInput>;
   id?: InputMaybe<Scalars['Int']['input']>;
+  max_orders_in_cluster?: InputMaybe<Scalars['Int']['input']>;
+  min_orders_in_cluster?: InputMaybe<Scalars['Int']['input']>;
   overwrite_duplicate?: InputMaybe<Scalars['Boolean']['input']>;
   riders?: InputMaybe<Scalars['Int']['input']>;
   sequence_id?: InputMaybe<Scalars['Int']['input']>;
   single_batch?: InputMaybe<Scalars['Boolean']['input']>;
   start_from_hub?: InputMaybe<Scalars['Boolean']['input']>;
   start_time?: InputMaybe<Scalars['Time']['input']>;
+  touch_points?: InputMaybe<Array<InputMaybe<TouchPointInput>>>;
   updated_on?: InputMaybe<Scalars['Datetime']['input']>;
   vehicle_config?: InputMaybe<Array<InputMaybe<RouteVehicleConfigInput>>>;
 };
@@ -1156,7 +1422,9 @@ export type RouteVehicleConfig = {
   range: Scalars['Int']['output'];
   route: Route;
   route_id: Scalars['Int']['output'];
+  shift_time?: Maybe<Scalars['Int']['output']>;
   updated_on: Scalars['Datetime']['output'];
+  wait_time_per_stop?: Maybe<Scalars['Int']['output']>;
 };
 
 
@@ -1269,11 +1537,37 @@ export type RouteVehicleConfigRoute_IdArgs = {
 };
 
 
+export type RouteVehicleConfigShift_TimeArgs = {
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+};
+
+
 export type RouteVehicleConfigUpdated_OnArgs = {
   greaterEqual?: InputMaybe<Scalars['Datetime']['input']>;
   greaterThan?: InputMaybe<Scalars['Datetime']['input']>;
   lesserEqual?: InputMaybe<Scalars['Datetime']['input']>;
   lesserThan?: InputMaybe<Scalars['Datetime']['input']>;
+};
+
+
+export type RouteVehicleConfigWait_Time_Per_StopArgs = {
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 export type RouteVehicleConfigInput = {
@@ -1287,7 +1581,9 @@ export type RouteVehicleConfigInput = {
   range?: InputMaybe<Scalars['Int']['input']>;
   route?: InputMaybe<RouteInput>;
   route_id?: InputMaybe<Scalars['Int']['input']>;
+  shift_time?: InputMaybe<Scalars['Int']['input']>;
   updated_on?: InputMaybe<Scalars['Datetime']['input']>;
+  wait_time_per_stop?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type TokenResponse = {
@@ -1302,6 +1598,7 @@ export type TouchPoint = {
   address?: Maybe<Scalars['String']['output']>;
   category_type: Scalars['String']['output'];
   closing_time?: Maybe<Scalars['Time']['output']>;
+  cluster_number: Scalars['Int']['output'];
   company_id: Scalars['String']['output'];
   created_on: Scalars['Datetime']['output'];
   customer_name?: Maybe<Scalars['String']['output']>;
@@ -1311,7 +1608,8 @@ export type TouchPoint = {
   id: Scalars['Int']['output'];
   opening_time?: Maybe<Scalars['Time']['output']>;
   pincode?: Maybe<Scalars['String']['output']>;
-  routing_id: Scalars['Int']['output'];
+  route?: Maybe<Route>;
+  routing_id?: Maybe<Scalars['Int']['output']>;
   shipment_id?: Maybe<Scalars['String']['output']>;
   touch_point_status: TouchPointStatus;
   touch_point_type: TouchPointType;
@@ -1349,6 +1647,19 @@ export type TouchPointClosing_TimeArgs = {
   greaterThan?: InputMaybe<Scalars['Time']['input']>;
   lesserEqual?: InputMaybe<Scalars['Time']['input']>;
   lesserThan?: InputMaybe<Scalars['Time']['input']>;
+};
+
+
+export type TouchPointCluster_NumberArgs = {
+  equal?: InputMaybe<Scalars['Float']['input']>;
+  greaterEqual?: InputMaybe<Scalars['Float']['input']>;
+  greaterThan?: InputMaybe<Scalars['Float']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  lesserEqual?: InputMaybe<Scalars['Float']['input']>;
+  lesserThan?: InputMaybe<Scalars['Float']['input']>;
+  notEqual?: InputMaybe<Scalars['Float']['input']>;
+  notIn?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 
@@ -1490,6 +1801,7 @@ export type TouchPointInput = {
   address?: InputMaybe<Scalars['String']['input']>;
   category_type?: InputMaybe<Scalars['String']['input']>;
   closing_time?: InputMaybe<Scalars['Time']['input']>;
+  cluster_number?: InputMaybe<Scalars['Int']['input']>;
   company_id?: InputMaybe<Scalars['String']['input']>;
   created_on?: InputMaybe<Scalars['Datetime']['input']>;
   customer_name?: InputMaybe<Scalars['String']['input']>;
@@ -1499,6 +1811,7 @@ export type TouchPointInput = {
   id?: InputMaybe<Scalars['Int']['input']>;
   opening_time?: InputMaybe<Scalars['Time']['input']>;
   pincode?: InputMaybe<Scalars['String']['input']>;
+  route?: InputMaybe<RouteInput>;
   routing_id?: InputMaybe<Scalars['Int']['input']>;
   shipment_id?: InputMaybe<Scalars['String']['input']>;
   touch_point_status?: InputMaybe<TouchPointStatus>;
