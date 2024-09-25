@@ -98,7 +98,7 @@ export class LoadDataComponent implements OnInit {
   referencePoint: any[]=[]
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService,
     private confirmationService: ConfirmationService, private messageService: MessageService,
-    public dialogService: DialogService,) {
+    public dialogService: DialogService) {
 
   }
 
@@ -192,13 +192,11 @@ export class LoadDataComponent implements OnInit {
   }
 
   getStraightDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 6371; // Radius of the Earth in km
+    const R = 6371; 
 
-    // Convert lat/lon differences to radians in one step
     const dLat = this.deg2rad(lat2 - lat1);
     const dLon = this.deg2rad(lon2 - lon1);
 
-    // Precompute cosines and sines
     const lat1Rad = this.deg2rad(lat1);
     const lat2Rad = this.deg2rad(lat2);
 
@@ -210,7 +208,6 @@ export class LoadDataComponent implements OnInit {
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    // Return distance in kilometers
     return R * c;
   }
 
@@ -274,6 +271,7 @@ export class LoadDataComponent implements OnInit {
         this.rows = this.rows.filter(row => !this.selectedItems.some((selected: { shipment_id: string; }) => selected.shipment_id === row.shipment_id));
         this.selectedItems = [];
         this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Rows deleted' });
+        this.validateData()
       },
       reject: () => {
         this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
@@ -298,6 +296,7 @@ export class LoadDataComponent implements OnInit {
         this.rows = this.rows.filter(item => item.shipment_id !== event.shipment_id);
 
         this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Row deleted' });
+        this.validateData()   
       },
       reject: () => {
         this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
