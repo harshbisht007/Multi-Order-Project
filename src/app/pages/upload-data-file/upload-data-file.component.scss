@@ -1,0 +1,44 @@
+.beforeUpload::before {
+  content: url(../../../assets/icons/uploads.png);
+  position: absolute;
+  left: -50px;
+}
+
+.beforecomputer::before {
+    content: url(../../../assets/icons/computer.png);
+    position: absolute;
+    left: -20px;
+    top: 5px;
+}
+
+::ng-deep {
+    .p-checkbox {
+      border: 1px solid #C5C7D0 !important;
+      border-radius: 0;
+      width: 19px;
+      height: 19px;
+  
+      .p-checkbox-box {
+        border-radius: 0 !important;
+        height: 17px;
+        width: 17px;
+  
+        &.p-highlight {
+          border-color: var(--baseColor) !important;
+          background: var(--baseColor) !important;
+        }        
+      }
+      
+    }
+    &:not(.p-checkbox-disabled) &.p-focus {
+        box-shadow: none !important;
+      }
+
+      .p-toast .p-toast-message .p-toast-message-content .p-toast-message-icon {
+        font-size: .825rem !important;
+    }
+    .p-button:focus {
+        box-shadow: none !important;
+    }
+  }
+  

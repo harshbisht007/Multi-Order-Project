@@ -1,0 +1,13 @@
+<p-dialog [(visible)]="display" [modal]="true" [closable]="false" header="Move TouchPoint to Batch" width="300"
+    height="500">
+    <div class="p-field">
+        <label for="batch">Select Batch</label>
+        <p-dropdown [options]="batchOptions" [(ngModel)]="selectedBatch" placeholder="Select Batch" optionLabel="label">
+        </p-dropdown>
+    </div>
+
+    <div class="p-dialog-footer flex justify-end gap-2 mt-5">
+        <button class="text-black text-sm font-normal px-4 h-9"  (click)="onCancel()">Cancel</button>
+        <button class="bg-[--baseColor] text-white text-sm font-normal px-4 h-9 rounded-md w-[120px] disabled:cursor-not-allowed disabled:bg-[#BFDFDC]"  (click)="onMove()" [disabled]="!selectedBatch">Move</button>
+    </div>
+</p-dialog>

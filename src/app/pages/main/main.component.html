@@ -1,33 +1,38 @@
-<div class="card flex justify-content-center">
-  <p-stepper [activeStep]="activeIndex">
-    <p-stepperPanel header="Header I">
-      <ng-template pTemplate="content" let-nextCallback="nextCallback" let-index="index">
-        <div class="flex flex-column h-12rem">
-          <div class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
-          <app-load-data (goToConfiguration)="setRouteId($event)"></app-load-data>
-          </div>
-        </div>
+<div class="rounded-md border min-h-[96vh] bg-white text-white px-8 py-6">
+  <div class="custom-stepper">
+    <p-stepper [linear]="true" [activeStep]="activeIndex" (activeStepChange)="activeStepChange($event)">
+      <p-stepperPanel header="Order Data">
+        <ng-template pTemplate="content" let-nextCallback="nextCallback" let-index="index">
+          <app-load-data (goToConfiguration)="setRouteId($event)" (dataForMarker)="getData($event)"
+            (zoneForRouting)="zoneForRouting($event)" [valueForTable]="dataForMarker"
+            [readyZone]="readyZone"></app-load-data>
+        </ng-template>
+      </p-stepperPanel>
 
-      </ng-template>
-    </p-stepperPanel>
-    <p-stepperPanel header="Header II">
-      <ng-template pTemplate="content" let-prevCallback="prevCallback" let-nextCallback="nextCallback" let-index="index">
-        <div class="flex flex-column h-12rem">
-          <div class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
-            <app-set-configuration (manageOrders)="activeIndex=2" [routeId]="routeId"></app-set-configuration>
-          </div>
-        </div>
+      <p-stepperPanel header="Zone Configuration">
+        <ng-template pTemplate="content" let-prevCallback="prevCallback" let-nextCallback="nextCallback"
+          let-index="index">
+          <app-set-configuration (goToFirstStep)="prevCallback.emit()" (goToPreviousStep)="prevCallback.emit()"
+            (dataForSecondStepper)="dataForSecondStepper($event)" (manageOrders)="activeIndex = 2"
+            (orderId)="reqOrderId($event)" [routeId]="routeId" [dataForMarker]="dataForMarker" (showSpinner)="showLoader=$event"
+            [retrieveSecondStepData]="retrieveSecondStepData">
+          </app-set-configuration>
+        </ng-template>
+      </p-stepperPanel>
 
-      </ng-template>
-    </p-stepperPanel>
-    <p-stepperPanel header="Header III">
-      <ng-template pTemplate="content" let-prevCallback="prevCallback" let-index="index">
-        <div class="flex flex-column h-12rem">
-          <div class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
-            <app-manage-orders [routeId]="routeId"></app-manage-orders>
-          </div>
-        </div>
-      </ng-template>
-    </p-stepperPanel>
-  </p-stepper>
+      <p-stepperPanel header="Review">
+        <ng-template pTemplate="content" let-prevCallback="prevCallback" let-index="index">
+          <app-manage-orders (goToFirstStep)="activeIndex = 1" (goToPreviousStep)="prevCallback.emit()" (showSpinner)="showLoader=$event"
+            [orderId]="orderId" [routeId]="routeId" [readyZone]="readyZone">
+          </app-manage-orders>
+        </ng-template>
+      </p-stepperPanel>
+
+    </p-stepper>
+  </div>
 </div>
+@if(showLoader){
+<div class="h-screen w-screen absolute top-0 left-0 flex justify-center items-center backdrop-brightness-50" style="z-index: 9999;">
+    <p-progressSpinner ariaLabel="loading" />
+</div>
+}

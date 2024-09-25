@@ -1,0 +1,43 @@
+{
+    "hosting": {
+      "headers": [
+        {
+          "source": "/service-worker.js",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "no-cache"
+            }
+          ]
+        },
+        {
+          "source": "**/*.@(html)",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "max-age=60"
+            }
+          ]
+        },
+        {
+          "source": "src/index.html",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "max-age=60"
+            }
+          ]
+        }
+      ],
+      "site": "multi-order-test",
+      "public": "dist/multi-order",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  }
+  

@@ -8,7 +8,7 @@ import { Provider } from '@angular/core';
 export class TokenInjectorInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    if (req.url.includes('amazon')) {
+    if (req.url.includes('amazon')|| req.url.includes('/api/v1/auth/zone')||req.url.includes('api/v1/auth/category')) {
       return next.handle(req);
     }
 

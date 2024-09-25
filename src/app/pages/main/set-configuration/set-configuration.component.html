@@ -1,12 +1,155 @@
-<div class="tw-border tw-border-blue-400 tw-p-4 tw-rounded-md">
-  <h2 class="tw-text-2xl tw-font-bold tw-text-green-700 tw-mb-4">Zone Configuration</h2>
-
-  <div class="tw-bg-gray-50 tw-p-4 tw-rounded-md tw-mb-4">
-    <div class="tw-flex tw-items-center tw-justify-between">
-      <div class="tw-flex tw-items-center">
-        <span class="tw-font-bold">Configurations</span>
-        <span class="tw-ml-2 tw-text-red-500 tw-font-bold">Required</span>
+<div>
+  <h2 class="font-semibold text-2xl text-[--baseColor] mb-4">Zone Configuration</h2>
+  <p-accordion [activeIndex]="0">
+    <p-accordionTab header="Configurations">
+      <div class="flex justify-content-center items-center">
+        <p class="flex mr-4 font-sm">Single Batch <img pTooltip="Creater order in single batch" tooltipPosition="right"
+            src="../../../../assets/icons/icons-info.svg" alt="" class="ml-2"></p>
+        <p-inputSwitch [(ngModel)]="checked" />
+        <p class="flex ml-4 font-sm">Multi Batch <img pTooltip="Create Orders In Clusters" tooltipPosition="right"
+            src="../../../../assets/icons/icons-info.svg" alt="" class="ml-2">
+        </p>
       </div>
+
+      @if (checked) {
+      <p class="font-sm font-semibold mt-4 mb-1">Clusters</p>
+      <div class="grid grid-cols-3 gap-8">
+        @for(input of maxMinInput; track $index){
+        <div>
+          <label for="" class="flex font-sm">
+            <span class="required">{{ input.label }}</span>
+            <img [src]="input.src" alt="" class="ml-2" pTooltip="{{ input.tooltip }}">
+          </label>
+          <input type="number" [(ngModel)]="input.value" pInputText class="p-inputText mt-2"
+            [placeholder]="input.placeholder" />
+        </div>
+        }
+      </div>
+
+      }
+
+
+      <div class="grid grid-cols-2 gap-4 mt-4">
+        <div class="grid grid-cols-2 gap-4 items-center">
+          @for( option of checkboxOptions; track $index){
+          <div class="flex items-center">
+            <input type="checkbox" [id]="option.id" class="h-4 w-4 rounded accent-[--baseColor] mr-1"
+              [(ngModel)]="option.model" />
+            <label [for]="option.id" class="flex">
+              <span>{{ option.label }}</span>
+              @if(option.icon){
+              <img [src]="option.icon" alt="" class="ml-2" pTooltip="{{ option.tooltip }}" />
+              }
+            </label>
+          </div>
+          }
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="routeStartTime" class="required">Route Start Time</label>
+            <p-calendar [(ngModel)]="startTime" [iconDisplay]="'input'" [showIcon]="true" [timeOnly]="true"
+              inputId="templatedisplay">
+              <ng-template pTemplate="inputicon" let-clickCallBack="clickCallBack">
+                <i class="pi pi-user pointer-events-none" (click)="clickCallBack($event)"></i>
+              </ng-template>
+            </p-calendar>
+          </div>
+
+          <div>
+            <label for="vehicleCategory">Vehicle Category</label>
+            <!-- <p-multiSelect [options]="categories" [(ngModel)]="selectedCategories" id="vehicleCategory"
+              (onChange)="selectedCategory($event)" optionLabel="name" class="mt-2 cust_multi_select"
+              placeholder="Select Categories">
+            </p-multiSelect> -->
+            <p-multiSelect [options]="categoriesFromSynco" [(ngModel)]="selectedCategories" id="vehicleCategory"
+              (onChange)="selectedCategory($event)" optionLabel="name" class="mt-2 cust_multi_select"
+              placeholder="Select Categories">
+            </p-multiSelect>
+          </div>
+        </div>
+      </div>
+      @for(category of additionalFields; track $index) {
+      <h3 class="font-sm font-semibold mt-4 mb-1">{{ category.name }}</h3>
+      <div class="grid grid-cols-3 gap-x-8 gap-y-4">
+        @for(field of categoryFields;track field.id;let i =$index ){
+        <div>
+          <label [for]="field.id + i" class="required">{{ field.label }}</label>
+          <input [id]="field.id + i" pInputText [(ngModel)]="category[field.model]" type="number" [min]="0"
+            class="form-input mt-2" [placeholder]="field.placeholder" (ngModelChange)="checkFormValidity()" />
+        </div>
+        }
+      </div>
+      }
+      <!-- <div class="grid grid-cols-3 gap-x-8 gap-y-4 mt-4">
+        @for(field of singleTimeFields; track field.id;let i=$index){
+        <div>
+          <label [for]="field.id + i" class="required">{{ field.label }}</label>
+          <input [id]="field.id + i" pInputText [(ngModel)]="field.model" type="number"
+            class="form-input mt-2" [placeholder]="field.placeholder" />
+        </div>
+        }
+      </div> -->
+
+      <div class="grid grid-cols-1 gap-x-8 gap-y-4">
+        <p class="text-right mt-4">
+          <!-- @if(this.checked){
+          <p-button pRipple class="mr-2 mt-2 " label="Create Clusters" icon="pi pi-plus" severity="success"
+            (click)="showDialog()" />
+
+          }@else{ -->
+          <p-button pRipple class="mr-2 mt-2" label="Save Changes" [disabled]="isSaveDisabled" severity="success" (onClick)="saveChanges()">
+          </p-button>
+          <!-- } -->
+        </p>
+      </div>
+    </p-accordionTab>
+  </p-accordion>
+
+  <div class="flex justify-between items-center mt-4">
+    <button (click)="onCancel()"
+      class="mt-4 bg-white border border-grey text-grey text-sm font-normal px-4 h-9 rounded-md">
+      Cancel
+    </button>
+
+    <div class="flex space-x-2">
+      <button (click)="goBack()" class="text-black text-sm font-normal px-4 h-9 w-[120px]">
+        Back
+      </button>
+      <button (click)="runRouting()" [disabled]="!runRoute"
+        class="bg-[--baseColor] text-white text-sm font-normal px-4 h-9 rounded-md w-[120px] disabled:cursor-not-allowed disabled:bg-[#BFDFDC]">
+        Run Routing
+      </button>
+    </div>
+  </div>
+  <div class="flex justify-between items-center mt-4 border-top">
+    <p class="text-sm font-normal text-[#878682]">1391 Orders</p>
+  </div>
+  <div class="h-[400px] w-[100%] border rounded-md overflow-hidden">
+    <app-map [dataForMarker]="dataForMarker" (showSpinner)="shouldShowSpinner($event)"></app-map>
+  </div>
+
+
+</div>
+
+
+
+<p-dialog [modal]="true" [draggable]="false" [(visible)]="visible" class="progess_popUp" [style]="{ width: '25rem' }">
+  <p class="text-2xl font-semibold">Creating Clusters</p>
+  <div class="mt-6 mb-4 flex items-center"><span class="mr-3"><img src="../../../../assets/icons/icons_check.svg"
+        alt=""></span><span class="text-sm font-medium">Complete</span></div>
+  <div class="mb-6 flex items-center justify-between"><span class=""><i
+        class=" animate-spin pi pi-hourglass mr-3"></i><span class="text-sm font-medium">Creating
+        Clusters</span></span><span>3/4 Created</span></div>
+  <p>This can take a few minutes...</p>
+</p-dialog>
+
+
+
+
+<!-- <div class="mt-[500px]">
+
+  <div class="">
+    <div class="tw-flex tw-items-center tw-justify-between">
       <div class="tw-flex tw-space-x-4">
         <div class="tw-flex tw-items-center">
           <p-toggleButton
@@ -82,4 +225,4 @@
       Save Changes
     </button>
   </div>
-</div>
+</div> -->
