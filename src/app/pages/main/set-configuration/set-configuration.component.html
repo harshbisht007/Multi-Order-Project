@@ -48,7 +48,7 @@
           <div>
             <label for="routeStartTime" class="required">Route Start Time</label>
             <p-calendar [(ngModel)]="startTime" [iconDisplay]="'input'" [showIcon]="true" [timeOnly]="true"
-              inputId="templatedisplay">
+              inputId="templatedisplay" (ngModelChange)="onTimeChange($event)">
               <ng-template pTemplate="inputicon" let-clickCallBack="clickCallBack">
                 <i class="pi pi-user pointer-events-none" (click)="clickCallBack($event)"></i>
               </ng-template>
@@ -97,7 +97,8 @@
             (click)="showDialog()" />
 
           }@else{ -->
-          <p-button pRipple class="mr-2 mt-2" label="Save Changes" [disabled]="isSaveDisabled" severity="success" (onClick)="saveChanges()">
+          <p-button pRipple class="mr-2 mt-2" label="Save Changes" [disabled]="isSaveDisabled" severity="success"
+            (onClick)="saveChanges()">
           </p-button>
           <!-- } -->
         </p>

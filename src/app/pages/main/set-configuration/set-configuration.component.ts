@@ -174,6 +174,11 @@ export class SetConfigurationComponent implements OnInit {
       { id: 'endHub', label: 'End at Hub', model: this.endAtHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'End the route at the hub.' },
     ]
   }
+  onTimeChange(event: Date) {
+    const hours = event.getHours().toString().padStart(2, '0'); 
+    const minutes = event.getMinutes().toString().padStart(2, '0');
+    this.startTime = `${hours}:${minutes}`; 
+  }
 
   selectedCategory(event: any) {
     console.log(event, 'event');
