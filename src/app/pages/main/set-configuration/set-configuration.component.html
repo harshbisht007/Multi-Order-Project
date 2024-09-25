@@ -46,7 +46,7 @@
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label for="routeStartTime" class="required">Route Start Time</label>
+            <label for="routeStartTime" class="required">Route Start Time (HH:MM)</label>
             <p-calendar [(ngModel)]="startTime" [iconDisplay]="'input'" [showIcon]="true" [timeOnly]="true"
               inputId="templatedisplay" (ngModelChange)="onTimeChange($event)">
               <ng-template pTemplate="inputicon" let-clickCallBack="clickCallBack">
