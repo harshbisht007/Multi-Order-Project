@@ -217,18 +217,26 @@ export class SetConfigurationComponent implements OnInit {
   }
 
   async runRouting() {
+    this.showSpinner.emit(true)
     const mutation = gql`
       mutation run_routing($id: Int!) {  
         run_routing(route_id: $id)
       }
     `;
-
-    const res = await this.graphqlService.runMutation(mutation, {
-      id: this.routeId
-    });
-    this.orderId.emit(res?.run_routing);
-    this.manageOrders.emit(true);
-
+    try{
+      const res = await this.graphqlService.runMutation(mutation, {
+        id: this.routeId
+      });
+      if(res){
+        this.showSpinner.emit(false)
+      }
+      this.orderId.emit(res?.run_routing);
+      this.manageOrders.emit(true);
+    }catch(error){
+      console.log(error)
+      // this.showSpinner.emit(false)
+    }
+    this.showSpinner.emit(false)
   }
 
   shouldShowSpinner(event: any) {
