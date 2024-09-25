@@ -14,7 +14,7 @@
           let-index="index">
           <app-set-configuration (goToFirstStep)="prevCallback.emit()" (goToPreviousStep)="prevCallback.emit()"
             (dataForSecondStepper)="dataForSecondStepper($event)" (manageOrders)="activeIndex = 2"
-            (orderId)="reqOrderId($event)" [routeId]="routeId" [dataForMarker]="dataForMarker" (showSpinner)="showLoader=$event"
+            (orderId)="reqOrderId($event)" [routeId]="routeId" [dataForMarker]="dataForMarker" (showSpinner)="showLoader=$event" [readyZone]="readyZone"
             [retrieveSecondStepData]="retrieveSecondStepData">
           </app-set-configuration>
         </ng-template>

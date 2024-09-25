@@ -18,7 +18,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MapComponent } from '../../map/map.component';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
-
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 export interface ExtendedCategory extends Category {
   vehiclesCount: number;
   capacity: number;
@@ -36,7 +37,7 @@ export interface ExtendedCategory extends Category {
     CommonModule, IconFieldModule, InputIconModule,
     MapComponent,
     DropdownModule, ButtonModule,
-    NgClass, InputTextModule,
+    NgClass, InputTextModule,ToastModule,
     FormsModule,
     CalendarModule,
     AccordionModule, TooltipModule,
@@ -46,6 +47,7 @@ export interface ExtendedCategory extends Category {
     ToggleButtonModule,
     DialogModule
   ],
+  providers: [MessageService],
   templateUrl: './set-configuration.component.html',
   styleUrl: './set-configuration.component.scss'
 })
@@ -54,10 +56,10 @@ export class SetConfigurationComponent implements OnInit {
   endAtHub: boolean = true;
   overWriteDuplicate: boolean = true;
   @Input() retrieveSecondStepData: any;
-  @Output() showSpinner:EventEmitter<any>=new EventEmitter();
+  @Output() showSpinner: EventEmitter<any> = new EventEmitter();
   @Output() dataForSecondStepper: EventEmitter<any> = new EventEmitter()
   startTime: string = '00:45';
-  isDisable= true;
+  isDisable = true;
 
   categoryFields: Array<{ label: string; model: keyof ExtendedCategory; placeholder: string; id: string }> = [
     { label: 'No. of Vehicles', model: 'count', placeholder: 'Enter number of vehicles', id: 'noOfVehicles' },
@@ -84,6 +86,7 @@ export class SetConfigurationComponent implements OnInit {
   @Input() routeId!: any;
   isSaveDisabled: boolean = true;
   @Input() dataForMarker!: any[];
+  @Input() readyZone: any
   @Output() manageOrders: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() goToPreviousStep: EventEmitter<any> = new EventEmitter<any>();
   @Output() goToFirstStep: EventEmitter<void> = new EventEmitter<void>();
@@ -114,7 +117,7 @@ export class SetConfigurationComponent implements OnInit {
 
   categoriesFromSynco: any;
 
-  constructor(private categoryService: CategoryService, private graphqlService: GraphqlService) {
+  constructor(private categoryService: CategoryService, private graphqlService: GraphqlService,private messageService: MessageService) {
     this.categoryService.getCategories().subscribe(
       (data) => {
         this.categoriesFromSynco = data.data;
@@ -161,8 +164,8 @@ export class SetConfigurationComponent implements OnInit {
           shiftTime: config.shift_time
         };
       });
-      if(this.additionalFields.length){
-        
+      if (this.additionalFields.length) {
+
         this.checkFormValidity()
       }
     }
@@ -175,26 +178,23 @@ export class SetConfigurationComponent implements OnInit {
     ]
   }
   onTimeChange(event: Date) {
-    const hours = event.getHours().toString().padStart(2, '0'); 
+    const hours = event.getHours().toString().padStart(2, '0');
     const minutes = event.getMinutes().toString().padStart(2, '0');
-    this.startTime = `${hours}:${minutes}`; 
+    this.startTime = `${hours}:${minutes}`;
   }
 
   selectedCategory(event: any) {
     console.log(event, 'event');
     this.additionalFields = this.additionalFields || [];
-  
+
     const selectedCategories = event.value;
-  
-    // Get the names of the fields that are currently selected in the dropdown
+
     const selectedFieldNames = selectedCategories.map((category: any) => category.name);
-  
-    // Remove fields from additionalFields that are no longer selected
+
     this.additionalFields = this.additionalFields.filter((field: any) =>
       selectedFieldNames.includes(field.name)
     );
-  
-    // Add new fields that have been selected but are not yet in additionalFields
+
     const newFields = selectedCategories
       .filter((category: any) => !this.additionalFields.some((field: any) => field.name === category.name))
       .map((category: any) => ({
@@ -205,13 +205,12 @@ export class SetConfigurationComponent implements OnInit {
         waitTime: category.wait_time_per_stop || null,
         shiftTime: category.shift_time || null
       }));
-  
-    // Update additionalFields with the new fields
+
     this.additionalFields = [...this.additionalFields, ...newFields];
   }
-  
-  
-  
+
+
+
 
   goBack() {
     this.goToPreviousStep.emit(true)
@@ -232,8 +231,8 @@ export class SetConfigurationComponent implements OnInit {
 
   }
 
-  shouldShowSpinner(event:any){
-    console.log(event,'12223')
+  shouldShowSpinner(event: any) {
+    console.log(event, '12223')
     this.showSpinner.emit(event);
   }
 
@@ -271,12 +270,22 @@ export class SetConfigurationComponent implements OnInit {
         };
       })
     }
-    this.dataForSecondStepper.emit({ payload, selectedCategories: this.selectedCategories })
-    const res = await this.graphqlService.runMutation(mutation, {
-      id: this.routeId,
-      change: payload
-    });
-    this.routeId = res.update_route.id;
+
+    try {
+      this.dataForSecondStepper.emit({ payload, selectedCategories: this.selectedCategories })
+      const res = await this.graphqlService.runMutation(mutation, {
+        id: this.routeId,
+        change: payload
+      });
+      this.routeId = res.update_route.id;
+      this.messageService.add({ severity: 'success', summary: 'Route Configuration Saved', icon: 'pi pi-check'  });
+
+    } catch (error) {
+      this.messageService.add({ severity: 'error', summary: 'Error' });
+
+      console.error('GraphQL Error:', error);
+    }
+
   }
 
 
@@ -285,9 +294,9 @@ export class SetConfigurationComponent implements OnInit {
   }
 
   checkFormValidity() {
-    this.isSaveDisabled = this.additionalFields.some((category:any) => {
+    this.isSaveDisabled = this.additionalFields.some((category: any) => {
       return this.categoryFields.some(field => !category[field.model]);
     });
   }
-  
+
 }

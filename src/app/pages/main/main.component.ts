@@ -50,7 +50,7 @@ export class MainComponent {
     this.activeIndex = 1;
   }
 
-  reqOrderId(event: any) {
+   reqOrderId(event: any) {
     this.orderId = event;
   }
 

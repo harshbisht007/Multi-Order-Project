@@ -1,7 +1,8 @@
-import { AfterViewChecked, AfterViewInit, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import * as L from 'leaflet';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { pick } from 'apollo-angular/http/http-batch-link';
 
 @Component({
   standalone: true,
@@ -35,11 +36,11 @@ export class MapComponent implements OnChanges, AfterViewInit {
   };
 
   constructor(private http: HttpClient) { }
-
+ 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.map) {
       if (changes['dataForMarker']?.currentValue) {
-        this.plotMarkers(changes['dataForMarker'].currentValue);
+        this.plotMarkers(changes['dataForMarker'].currentValue,this.pickupLocation);
       }
       if (changes['thirdStepDataForMarker']?.currentValue) {
         this.plotMarkerForThirdStep(changes['thirdStepDataForMarker'].currentValue, this.isMissed);
@@ -78,7 +79,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
     setTimeout(async () => {
       
       if (this.dataForMarker) {
-        await this.plotMarkers(this.dataForMarker);
+        await this.plotMarkers(this.dataForMarker,this.pickupLocation);
       } else if (this.thirdStepDataForMarker) {
         await this.plotMarkerForThirdStep(this.thirdStepDataForMarker, this.isMissed);
       }
@@ -88,16 +89,18 @@ export class MapComponent implements OnChanges, AfterViewInit {
 
   }
 
-  private async plotMarkers(data: any[]): Promise<void>  {
+  private async plotMarkers(data: any[],hubLocation:any[]): Promise<void>  {
     this.clearMarkers();
     const markers = data
       .filter(row => row.latitude && row.longitude)
       .map(row => this.createMarker(row.latitude, row.longitude, row.shipment_id, 'assets/images/map-marker.png', [15, 31]));
 
     markers.forEach(marker => this.markersLayer.addLayer(marker));
-
-    if (markers.length) {
-      this.map.fitBounds(L.latLngBounds(markers.map(m => m.getLatLng())));
+    const hubMarker=this.createMarker(hubLocation[1], hubLocation[0], 'Hub', 'assets/images/merchant.png', [30, 30]);
+    this.markersLayer.addLayer(hubMarker); // Add hub marker to the map
+    const allMarkersLatLng = markers.map(m => m.getLatLng()).concat(hubMarker.getLatLng());
+    if (allMarkersLatLng.length) {
+      this.map.fitBounds(L.latLngBounds(allMarkersLatLng));
     }
   }
 
