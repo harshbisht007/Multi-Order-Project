@@ -15,6 +15,7 @@ import {BatchMoveDialogComponent} from '../../batch-move-dialog/batch-move-dialo
 import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
 
 import {DialogModule} from 'primeng/dialog';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -48,7 +49,7 @@ export class ManageOrdersComponent implements AfterViewInit {
   order!: any;
   batchInfo: any = []
 
-  constructor(private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
+  constructor(private router:Router,private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
   }
 
   onCancel() {
@@ -68,7 +69,7 @@ export class ManageOrdersComponent implements AfterViewInit {
     try {
       const res = await this.graphqlService.runMutation(mutation, {orderId: this.orderId});
       this.messageService.add({severity: 'success', summary: 'Order Created Successfully', icon: 'pi pi-check'});
-
+      this.router.navigateByUrl('https://synco-attendance.web.app/pages/multi-orders/pending-orders');
     } catch (error) {
       console.error('GraphQL Error:', error);
       this.messageService.add({severity: 'error', summary: 'Error',});
