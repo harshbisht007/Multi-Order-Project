@@ -54,7 +54,7 @@ export interface ExtendedCategory extends Category {
   templateUrl: './set-configuration.component.html',
   styleUrl: './set-configuration.component.scss'
 })
-export class SetConfigurationComponent implements OnInit {
+export class SetConfigurationComponent implements OnInit,OnChanges {
   startFromHub: boolean = true;
   endAtHub: boolean = true;
   overWriteDuplicate: boolean = true;
@@ -142,15 +142,67 @@ export class SetConfigurationComponent implements OnInit {
       }
     });
   }
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log(changes,'122')
+  }
 
   async ngOnInit() {
+    this.updateRoute();
+    this.getRouteData();
+
+
+
+    if (this.retrieveSecondStepData) {
+      this.startFromHub = this.retrieveSecondStepData.payload.start_from_hub;
+      this.endAtHub = this.retrieveSecondStepData.payload.end_at_hub;
+      this.checked = !this.retrieveSecondStepData.payload.single_batch;
+      this.overWriteDuplicate = this.retrieveSecondStepData.payload.overwrite_duplicate;
+      this.startTime = this.retrieveSecondStepData.payload.start_time;
+      this.maxMinInput[0].value = this.retrieveSecondStepData.payload.max_orders_in_cluster;
+      this.maxMinInput[1].value = this.retrieveSecondStepData.payload.min_orders_in_cluster;
+
+      // this.selectedCategories = this.retrieveSecondStepData.vehicle_config.map((config: any) => {
+      //   return {
+      //     name: config.category_name,
+      //     id: config.category_id,
+
+      //   };
+      // });
+      this.selectedCategories = this.retrieveSecondStepData.selectedCategories
+      this.additionalFields = this.retrieveSecondStepData.payload.vehicle_config.map((config: any) => {
+        return {
+          name: config.category_name,
+          count: config.count,
+          capacity: config.capacity,
+          range: config.range,
+          waitTime: config.wait_time_per_stop,
+          shiftTime: config.shift_time
+        };
+      });
+      if (this.additionalFields.length) {
+
+        this.checkFormValidity()
+      }
+    }
+
+
+    this.checkboxOptions = [
+      { id: 'startHub', label: 'Start from Hub', model: this.startFromHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'Start the route from the hub.' },
+      { id: 'overwrite', label: 'Overwrite Duplicate Data', model: this.overWriteDuplicate, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'Overwrite any duplicate data found.' },
+      { id: 'endHub', label: 'End at Hub', model: this.endAtHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'End the route at the hub.' },
+    ]
+  }
+
+
+  getRouteData() {
     // this.route.queryParamMap.subscribe((params: any) => {
     //   this.routeId = parseInt(params.get('route_id'));
     //   console.log('route_id on init:', this.routeId);
     // })
+
     const query = gql`
     query Get_route($getRouteId: Int!) {
-  get_route(id: $getRouteId) {
+    get_route(id: $getRouteId) {
     vehicle_config {
       category_id
       category_name
@@ -208,7 +260,7 @@ export class SetConfigurationComponent implements OnInit {
     updated_on
     company_id
   }
-}
+  }
   `;
     // try {
     //   console.log(this.routeId)
@@ -250,46 +302,32 @@ export class SetConfigurationComponent implements OnInit {
     // } catch (error) {
     //   console.error(error)
     // }
+  }
 
-    if (this.retrieveSecondStepData) {
-      this.startFromHub = this.retrieveSecondStepData.payload.start_from_hub;
-      this.endAtHub = this.retrieveSecondStepData.payload.end_at_hub;
-      this.checked = !this.retrieveSecondStepData.payload.single_batch;
-      this.overWriteDuplicate = this.retrieveSecondStepData.payload.overwrite_duplicate;
-      this.startTime = this.retrieveSecondStepData.payload.start_time;
-      this.maxMinInput[0].value = this.retrieveSecondStepData.payload.max_orders_in_cluster;
-      this.maxMinInput[1].value = this.retrieveSecondStepData.payload.min_orders_in_cluster;
-
-      // this.selectedCategories = this.retrieveSecondStepData.vehicle_config.map((config: any) => {
-      //   return {
-      //     name: config.category_name,
-      //     id: config.category_id,
-
-      //   };
-      // });
-      this.selectedCategories = this.retrieveSecondStepData.selectedCategories
-      this.additionalFields = this.retrieveSecondStepData.payload.vehicle_config.map((config: any) => {
-        return {
-          name: config.category_name,
-          count: config.count,
-          capacity: config.capacity,
-          range: config.range,
-          waitTime: config.wait_time_per_stop,
-          shiftTime: config.shift_time
-        };
-      });
-      if (this.additionalFields.length) {
-
-        this.checkFormValidity()
-      }
+  async updateRoute() {
+    const query = gql`
+    mutation Update_route($updateRouteId: Int!, $change: RouteInput!) {
+    update_route(id: $updateRouteId, change: $change) {
+    hub_location {
+      latitude
+      longitude
     }
+  }
+  }
+    `
+    try {
+      const res = await this.graphqlService.runQuery(query, {
+        updateRouteId: this.routeId, change: {
+          hub_location: {
+            latitude: this.readyZone.refrencePoint[0],
+            longitude: this.readyZone.refrencePoint[1]
+          }
+        }
+      })
 
+    } catch (errror) {
 
-    this.checkboxOptions = [
-      { id: 'startHub', label: 'Start from Hub', model: this.startFromHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'Start the route from the hub.' },
-      { id: 'overwrite', label: 'Overwrite Duplicate Data', model: this.overWriteDuplicate, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'Overwrite any duplicate data found.' },
-      { id: 'endHub', label: 'End at Hub', model: this.endAtHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'End the route at the hub.' },
-    ]
+    }
   }
   onTimeChange(event: Date) {
     this.startTime = moment(event).format('HH:mm');

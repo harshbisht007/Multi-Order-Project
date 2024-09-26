@@ -17,6 +17,7 @@ import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { CommonModule, NgForOf } from '@angular/common';
 import { RippleModule } from 'primeng/ripple';
+import { ValidateTooltipPipe } from '../../../core/pipes/validate-tooltip.pipe';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
@@ -58,6 +59,7 @@ export interface CustomValidObject {
     TagModule,
     ConfirmDialogModule,
     RippleModule,
+    ValidateTooltipPipe,
     SliderModule,
     ValidateColumnPipe,
     NgForOf,
@@ -479,14 +481,15 @@ export class LoadDataComponent implements OnInit {
   async submitData(rows: any[]) {
     const sanitizedRows = rows.reduce((acc, col) => {
       if (col['status']) {
-        const { status, latitude, longitude, weight, pincode, ...rest } = col;
+        const { external_id,status, latitude, longitude, weight, pincode, ...rest } = col;
 
         const sanitizedRow = {
           ...rest,
           latitude: typeof latitude === 'string' ? parseInt(latitude, 10) : latitude,
           longitude: typeof longitude === 'string' ? parseInt(longitude, 10) : longitude,
           weight: typeof weight === 'string' ? parseInt(weight, 10) : weight,
-          pincode: typeof pincode === 'number' ? pincode.toString() : pincode
+          pincode: typeof pincode === 'number' ? pincode.toString() : pincode,
+          external_id:typeof external_id==='number'?external_id.toString():external_id
         };
 
         acc.push(sanitizedRow);

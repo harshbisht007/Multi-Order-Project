@@ -99,8 +99,9 @@
             </p-cellEditor>
           </ng-container>
           <ng-template #displayCell>
-            <span [ngStyle]="{'color': row[col] | validateColumn: col}">
-              {{ row[col] }}
+            <span [ngStyle]="{'color': row[col] | validateColumn: col}" 
+            [pTooltip]="row[col] | validateTooltip: col" tooltipPosition="top">
+            {{ row[col] }}
             </span>
           </ng-template>
         </td>
