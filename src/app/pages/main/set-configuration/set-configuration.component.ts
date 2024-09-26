@@ -406,7 +406,6 @@ export class SetConfigurationComponent implements OnInit,OnChanges {
 
 
   async saveChanges() {
-    this.runRoute = true
     const mutation = gql`mutation updateRoute($id: Int!, $change: RouteInput!) {
       update_route(id: $id, change: $change) {
         id
@@ -443,6 +442,8 @@ export class SetConfigurationComponent implements OnInit,OnChanges {
       });
       this.routeId = res.update_route.id;
       this.messageService.add({ severity: 'success', summary: 'Route Configuration Saved', icon: 'pi pi-check' });
+      this.runRoute = true
+
 
     } catch (error) {
       this.messageService.add({ severity: 'error', summary: 'Error' });
