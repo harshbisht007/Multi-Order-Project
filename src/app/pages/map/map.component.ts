@@ -91,20 +91,28 @@ export class MapComponent implements OnChanges, AfterViewInit {
 
   }
 
-  private async plotMarkers(data: any[],hubLocation:any[]): Promise<void>  {
+  private async plotMarkers(data: any[], hubLocation: any[]): Promise<void> {
     this.clearMarkers();
+  
     const markers = data
       .filter(row => row.latitude && row.longitude)
-      .map(row => this.createMarker(row.latitude, row.longitude, row.shipment_id, 'assets/images/map-marker.png', [15, 31]));
-
-    markers.forEach(marker => this.markersLayer.addLayer(marker));
-    const hubMarker=this.createMarker(hubLocation[1], hubLocation[0], 'Hub', 'assets/images/merchant.png', [30, 30]);
-    this.markersLayer.addLayer(hubMarker); // Add hub marker to the map
-    const allMarkersLatLng = markers.map(m => m.getLatLng()).concat(hubMarker.getLatLng());
-    if (allMarkersLatLng.length) {
-      this.map.fitBounds(L.latLngBounds(allMarkersLatLng));
+      .map(row => {
+        const marker = this.createMarker(row.latitude, row.longitude, row.shipment_id, 'assets/images/map-marker.png', [15, 31]);
+        this.markersLayer.addLayer(marker);
+        return marker.getLatLng();
+      });
+  
+    if (hubLocation?.length > 0) {
+      const hubMarker = this.createMarker(hubLocation[1], hubLocation[0], 'Hub', 'assets/images/merchant.png', [30, 30]);
+      this.markersLayer.addLayer(hubMarker);
+      markers.push(hubMarker.getLatLng());
+    }
+  console.log(markers,'122')
+    if (markers.length > 0) {
+      this.map.fitBounds(L.latLngBounds(markers));
     }
   }
+  
 
   private async plotMarkerForThirdStep(data: any[], isMissed: any): Promise<void> {
 

@@ -126,7 +126,7 @@
     <p class="text-sm font-normal text-[#878682]">1391 Orders</p>
   </div>
   <div class="h-[400px] w-[100%] border rounded-md overflow-hidden">
-    <app-map [dataForMarker]="dataForMarker" (showSpinner)="shouldShowSpinner($event)"></app-map>
+    <app-map [dataForMarker]="dataForMarker" (showSpinner)="shouldShowSpinner($event)" [pickupLocation]="readyZone?.refrencePoint"></app-map>
   </div>
 
 

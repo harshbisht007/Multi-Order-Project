@@ -505,7 +505,7 @@ export class LoadDataComponent implements OnInit {
       this.dataForMarker.emit(rows);
       console.log(res);
       this.goToConfiguration.emit(res.create_shipments);
-      this.updateQueryParams('route_id', res.create_shipments);
+      // this.updateQueryParams('route_id', res.create_shipments);s
 
     } catch (error) {
       console.error('GraphQL Error:', error);

@@ -51,33 +51,33 @@ export class MainComponent {
   }
 
   ngOnInit() {
-    // Listen for query param changes and router events
-    this.route.queryParamMap.subscribe((params: any) => {
-      const routeId = params.get('route_id');
-      console.log('route_id on init:', routeId);
+    // // Listen for query param changes and router events
+    // this.route.queryParamMap.subscribe((params: any) => {
+    //   const routeId = params.get('route_id');
+    //   console.log('route_id on init:', routeId);
   
-      if (routeId) {
-        this.activeIndex = 1; // Move to step 1 if route_id is present
-      } else {
-        this.activeIndex = 0; // Default to step 0 if no route_id
-      }
-    });
+    //   if (routeId) {
+    //     this.activeIndex = 1; // Move to step 1 if route_id is present
+    //   } else {
+    //     this.activeIndex = 0; // Default to step 0 if no route_id
+    //   }
+    // });
   
-    // Subscribe to navigation events to handle back navigation correctly
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        this.route.queryParamMap.subscribe((params: any) => {
-          const routeId = params.get('route_id');
-          console.log('route_id on navigation:', routeId);
+    // // Subscribe to navigation events to handle back navigation correctly
+    // this.router.events.subscribe((event) => {
+    //   if (event instanceof NavigationEnd) {
+    //     this.route.queryParamMap.subscribe((params: any) => {
+    //       const routeId = params.get('route_id');
+    //       console.log('route_id on navigation:', routeId);
   
-          if (routeId) {
-            this.activeIndex = 1; // Move to step 1 if route_id is present
-          } else {
-            this.activeIndex = 0; // Default to step 0 if no route_id
-          }
-        });
-      }
-    });
+    //       if (routeId) {
+    //         this.activeIndex = 1; // Move to step 1 if route_id is present
+    //       } else {
+    //         this.activeIndex = 0; // Default to step 0 if no route_id
+    //       }
+    //     });
+    //   }
+    // });
   }
   
   

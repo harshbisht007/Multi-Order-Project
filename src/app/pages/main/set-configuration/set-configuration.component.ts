@@ -21,6 +21,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import moment from 'moment';
 
 export interface ExtendedCategory extends Category {
   vehiclesCount: number;
@@ -39,7 +40,7 @@ export interface ExtendedCategory extends Category {
     CommonModule, IconFieldModule, InputIconModule,
     MapComponent,
     DropdownModule, ButtonModule,
-    NgClass, InputTextModule,ToastModule,
+    NgClass, InputTextModule, ToastModule,
     FormsModule,
     CalendarModule,
     AccordionModule, TooltipModule,
@@ -60,7 +61,7 @@ export class SetConfigurationComponent implements OnInit {
   @Input() retrieveSecondStepData: any;
   @Output() showSpinner: EventEmitter<any> = new EventEmitter();
   @Output() dataForSecondStepper: EventEmitter<any> = new EventEmitter()
-  startTime: string = '00:45';
+  startTime: any = '00:45';
   isDisable = true;
 
   categoryFields: Array<{ label: string; model: keyof ExtendedCategory; placeholder: string; id: string }> = [
@@ -143,10 +144,10 @@ export class SetConfigurationComponent implements OnInit {
   }
 
   async ngOnInit() {
-    this.route.queryParamMap.subscribe((params: any) => {
-      this.routeId = parseInt(params.get('route_id'));
-      console.log('route_id on init:', this.routeId);
-    })
+    // this.route.queryParamMap.subscribe((params: any) => {
+    //   this.routeId = parseInt(params.get('route_id'));
+    //   console.log('route_id on init:', this.routeId);
+    // })
     const query = gql`
     query Get_route($getRouteId: Int!) {
   get_route(id: $getRouteId) {
@@ -209,38 +210,46 @@ export class SetConfigurationComponent implements OnInit {
   }
 }
   `;
-    try {
-      console.log(this.routeId)
-      const res = await this.graphqlService.runQuery(query, { getRouteId: this.routeId })
-      console.log(res);
+    // try {
+    //   console.log(this.routeId)
+    //   const res = await this.graphqlService.runQuery(query, { getRouteId: this.routeId })
+    //   console.log(res);
+    //   this.dataForMarker=res.get_route.touch_points
+    //   console.log(this.dataForMarker,'122')
+    //   this.checked=!res.get_route.single_batch
+    //   this.startTime= moment(res.get_route.start_time, 'HH:mm:ss').toDate();
 
-      this.maxMinInput[0].value = res.get_route.max_orders_in_cluster
-      this.maxMinInput[1].value = res.get_route.min_orders_in_cluster;
-      
-      
-      this.selectedCategories = this.categoriesFromSynco.filter((val: any) =>
-        res.get_route.vehicle_config.some((config: any) => config.category_id === val.id)
-      );
-      
-      this.additionalFields = res.get_route.vehicle_config.map((config: any) => {
-      
-        return {
-          name: config.category_name,
-          count: config.count,
-          capacity: config.capacity,
-          range: config.range,
-          waitTime: config.wait_time_per_stop,
-          shiftTime: config.shift_time
-        };
-      });
-      console.log(this.selectedCategories);
-      
-      console.log(this.additionalFields);
-      
+    //   this.startFromHub=res.get_route.start_from_hub;
+    //   this.overWriteDuplicate=res.get_route.overwrite_duplicate;
+    //   this.endAtHub=res.get_route.end_at_hub
 
-    } catch (error) {
-      console.error(error)
-    }
+    //   this.maxMinInput[0].value = res.get_route.max_orders_in_cluster
+    //   this.maxMinInput[1].value = res.get_route.min_orders_in_cluster;
+
+
+    //   this.selectedCategories = this.categoriesFromSynco.filter((val: any) =>
+    //     res.get_route.vehicle_config.some((config: any) => config.category_id === val.id)
+    //   );
+
+    //   this.additionalFields = res.get_route.vehicle_config.map((config: any) => {
+
+    //     return {
+    //       name: config.category_name,
+    //       count: config.count,
+    //       capacity: config.capacity,
+    //       range: config.range,
+    //       waitTime: config.wait_time_per_stop,
+    //       shiftTime: config.shift_time
+    //     };
+    //   });
+    //   console.log(this.selectedCategories);
+
+    //   console.log(this.additionalFields);
+
+
+    // } catch (error) {
+    //   console.error(error)
+    // }
 
     if (this.retrieveSecondStepData) {
       this.startFromHub = this.retrieveSecondStepData.payload.start_from_hub;
@@ -283,9 +292,8 @@ export class SetConfigurationComponent implements OnInit {
     ]
   }
   onTimeChange(event: Date) {
-    const hours = event.getHours().toString().padStart(2, '0');
-    const minutes = event.getMinutes().toString().padStart(2, '0');
-    this.startTime = `${hours}:${minutes}`;
+    this.startTime = moment(event).format('HH:mm');
+
   }
 
   selectedCategory(event: any) {
@@ -319,7 +327,7 @@ export class SetConfigurationComponent implements OnInit {
 
   goBack() {
     this.goToPreviousStep.emit(true);
-    const baseUrl = this.router.url.split('?')[0]; 
+    const baseUrl = this.router.url.split('?')[0];
     this.router.navigate([baseUrl], { queryParams: {} });
   }
 
@@ -330,23 +338,23 @@ export class SetConfigurationComponent implements OnInit {
         run_routing(route_id: $id)
       }
     `;
-    try{
+    try {
       const res = await this.graphqlService.runMutation(mutation, {
         id: this.routeId
       });
-      if(res){
+      if (res) {
         this.showSpinner.emit(false)
       }
       this.orderId.emit(res?.run_routing);
       this.manageOrders.emit(true);
-      const baseUrl = this.router.url.split('?')[0]; 
+      const baseUrl = this.router.url.split('?')[0];
       this.router.navigate([baseUrl], { queryParams: {} });
-    }catch(error){
+    } catch (error) {
       console.log(error)
       // this.showSpinner.emit(false)
     }
     this.showSpinner.emit(false)
-   
+
   }
 
   shouldShowSpinner(event: any) {
@@ -396,7 +404,7 @@ export class SetConfigurationComponent implements OnInit {
         change: payload
       });
       this.routeId = res.update_route.id;
-      this.messageService.add({ severity: 'success', summary: 'Route Configuration Saved', icon: 'pi pi-check'  });
+      this.messageService.add({ severity: 'success', summary: 'Route Configuration Saved', icon: 'pi pi-check' });
 
     } catch (error) {
       this.messageService.add({ severity: 'error', summary: 'Error' });
