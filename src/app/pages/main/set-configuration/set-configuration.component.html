@@ -97,7 +97,7 @@
             (click)="showDialog()" />
 
           }@else{ -->
-          <p-button pRipple class="mr-2 mt-2" label="Save Changes" severity="success" [disabled]="this.selectedCategories.length!=0 && isSaveDisabled"
+          <p-button pRipple class="mr-2 mt-2" label="Save Changes" severity="success" [disabled]="isSaveDisabled"
             (onClick)="saveChanges()">
           </p-button>
           <!-- } -->
