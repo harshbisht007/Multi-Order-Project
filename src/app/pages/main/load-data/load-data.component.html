@@ -110,9 +110,9 @@
         <td>
           <div class="flex align-items-center justify-content-center gap-1">
             @if (currentEditingRow === row) {
-            <span pButton pRipple type="button" pSaveEditableRow icon="pi pi-check" (click)="onRowEditSave(row)"
+            <span pButton pRipple [pTooltip]="'Save'" tooltipPosition="top" type="button" pSaveEditableRow icon="pi pi-check" (click)="onRowEditSave(row)"
             class="bg-transparent text-[#2C958C]"></span>
-            <span pButton type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancel(row, index)"
+            <span pButton  [pTooltip]="'Cancel'" tooltipPosition="top" type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancel(row, index)"
             class="bg-transparent text-[#D83A52]"></span>
             }
           </div>
@@ -121,11 +121,11 @@
         @if (currentEditingRow !== row) {
         <td>
           <div class="flex align-items-center justify-content-center gap-1">
-            <span *ngIf="currentEditingRow !== row" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil"
+            <span *ngIf="currentEditingRow !== row" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil"  [pTooltip]="'Edit'" tooltipPosition="top"
               (click)="onRowEditInit(row)" class="bg-transparent text-[#2C958C]"></span>
-            <span pButton pRipple class="p-0" (click)="deleteOrder(row)" icon="pi pi-trash" class="bg-transparent text-[#D83A52]"></span>
+            <span pButton pRipple  [pTooltip]="'Delete'" tooltipPosition="top" class="p-0" (click)="deleteOrder(row)" icon="pi pi-trash" class="bg-transparent text-[#D83A52]"></span>
           </div>
-        </td>
+        </td> 
         }
       </tr>
     </ng-template>

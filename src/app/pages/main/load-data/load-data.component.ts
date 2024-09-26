@@ -74,6 +74,7 @@ export interface CustomValidObject {
 export class LoadDataComponent implements OnInit {
   rows: CustomTouchPoint[] = [];
   @ViewChild('fileInput') fileInput!: any;
+  originalData:any={}
   @Output() goToConfiguration: EventEmitter<string> = new EventEmitter();
   @Output() dataForMarker: EventEmitter<any> = new EventEmitter();
   @Output() zoneForRouting: EventEmitter<any> = new EventEmitter()
@@ -230,6 +231,7 @@ export class LoadDataComponent implements OnInit {
 
   onRowEditInit(row: any) {
     this.isEditable = true
+    this.originalData={...row}
     this.currentEditingRow = row;
     console.log(row);
   }
@@ -243,8 +245,8 @@ export class LoadDataComponent implements OnInit {
   onRowEditCancel(row: any, index: any) {
     this.isEditable = false;
     this.currentEditingRow = null;
+    this.rows[index] = { ...this.originalData };
     this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
-
   }
   onHeaderCheckboxToggle(headCheckBox: any) {
     if (headCheckBox.checked == true) {
@@ -274,11 +276,11 @@ export class LoadDataComponent implements OnInit {
       accept: () => {
         this.rows = this.rows.filter(row => !this.selectedItems.some((selected: { shipment_id: string; }) => selected.shipment_id === row.shipment_id));
         this.selectedItems = [];
-        this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Rows deleted' });
+        this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Rows deleted' });
         this.validateData()
       },
       reject: () => {
-        this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
+        this.messageService.add({ severity: 'error', summary: 'Not Deleted', detail: 'You have rejected' });
       }
     })
   }
@@ -299,11 +301,11 @@ export class LoadDataComponent implements OnInit {
       accept: () => {
         this.rows = this.rows.filter(item => item.shipment_id !== event.shipment_id);
 
-        this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Row deleted' });
+        this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Rows deleted' });
         this.validateData()   
       },
       reject: () => {
-        this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
+        this.messageService.add({ severity: 'error', summary: 'Not Deleted', detail: 'You have rejected' });
       }
     });
   }
