@@ -275,8 +275,9 @@ export class ManageOrdersComponent implements AfterViewInit {
         {label: 'Batch ID', value: batch.id},
         {label: 'Order Volume', value: batch.volume || 'N/A'},
         {label: 'Category', value: batch.category_name || 'N/A'},
-        {label: 'Total Distance', value: (batch.distance || 0) + ' Km'},
-        {label: 'Estimated Time', value: (batch.duration ? (batch.duration / 60).toFixed(2) : '0.00') + ' Hrs'}
+        {label: 'Total Distance', value: (batch.total_km || 0) + ' Km'},
+        {label: 'Estimated Time', value: (batch.duration ? (batch.duration / 60).toFixed(2) : '0.00') + ' Hrs'},
+        {label:'Total Load',value: batch.total_load || 'N/A'}
       ])
     );
 

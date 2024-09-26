@@ -54,7 +54,7 @@ export interface ExtendedCategory extends Category {
   templateUrl: './set-configuration.component.html',
   styleUrl: './set-configuration.component.scss'
 })
-export class SetConfigurationComponent implements OnInit,OnChanges {
+export class SetConfigurationComponent implements OnInit {
   startFromHub: boolean = true;
   endAtHub: boolean = true;
   overWriteDuplicate: boolean = true;
@@ -69,7 +69,7 @@ export class SetConfigurationComponent implements OnInit,OnChanges {
     { label: 'Capacity of Each Vehicle', model: 'capacity', placeholder: 'Enter vehicle capacity', id: 'capacityOfVehicle' },
     { label: 'Max Range of Each Vehicle (In Km)', model: 'range', placeholder: 'Enter max range', id: 'maxRange' },
     { label: 'Wait Time per Stop', model: 'waitTime', placeholder: 'Enter wait time', id: 'waitTime' },
-    { label: 'Total Shift Time (In Hours)', model: 'shiftTime', placeholder: 'Enter total shift time', id: 'totalShiftTime' }
+    { label: 'Total Shift Time (In Minutes)', model: 'shiftTime', placeholder: 'Enter total shift time', id: 'totalShiftTime' }
 
   ];
 
@@ -142,9 +142,7 @@ export class SetConfigurationComponent implements OnInit,OnChanges {
       }
     });
   }
-  ngOnChanges(changes: SimpleChanges): void {
-    console.log(changes,'122')
-  }
+  
 
   async ngOnInit() {
     this.updateRoute();
@@ -241,6 +239,10 @@ export class SetConfigurationComponent implements OnInit,OnChanges {
       updated_on
       company_id
     }
+    total_load
+    total_km
+    duration
+    volume
     sequence_id
     start_time
     riders
@@ -308,10 +310,7 @@ export class SetConfigurationComponent implements OnInit,OnChanges {
     const query = gql`
     mutation Update_route($updateRouteId: Int!, $change: RouteInput!) {
     update_route(id: $updateRouteId, change: $change) {
-    hub_location {
-      latitude
-      longitude
-    }
+    id
   }
   }
     `
@@ -319,8 +318,8 @@ export class SetConfigurationComponent implements OnInit,OnChanges {
       const res = await this.graphqlService.runQuery(query, {
         updateRouteId: this.routeId, change: {
           hub_location: {
-            latitude: this.readyZone.refrencePoint[0],
-            longitude: this.readyZone.refrencePoint[1]
+            latitude: this.readyZone.refrencePoint[1],
+            longitude: this.readyZone.refrencePoint[0]
           }
         }
       })

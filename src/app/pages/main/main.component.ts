@@ -41,13 +41,13 @@ export class MainComponent {
   }
   
   onLogin() {
-    this.authService.login(this.email, this.password).subscribe(
-      (response) => {
-      },
-      (error) => {
-        console.error('Login failed', error);
-      }
-    );
+    // this.authService.login(this.email, this.password).subscribe(
+    //   (response) => {
+    //   },
+    //   (error) => {
+    //     console.error('Login failed', error);
+    //   }
+    // );
   }
 
   ngOnInit() {

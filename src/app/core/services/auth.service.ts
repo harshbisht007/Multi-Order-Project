@@ -11,23 +11,23 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  login(email: string, password: string): Observable<any> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-    });
+  // login(email: string, password: string): Observable<any> {
+  //   const headers = new HttpHeaders({
+  //     'Content-Type': 'application/json',
+  //   });
 
-    const payload = {
-      email: email,
-      password: password
-    };
+  //   const payload = {
+  //     email: email,
+  //     password: password
+  //   };
 
-    return this.http.post<any>(this.loginUrl, payload, { headers }).pipe(
-      tap((response) => {
-        localStorage.setItem('synco_auth_token', response.token);
-        localStorage.setItem('synco_refresh_token', response.refresh_token);
-      })
-    );
-  }
+  //   return this.http.post<any>(this.loginUrl, payload, { headers }).pipe(
+  //     tap((response) => {
+  //       localStorage.setItem('synco_auth_token', response.token);
+  //       localStorage.setItem('synco_refresh_token', response.refresh_token);
+  //     })
+  //   );
+  // }
 
   getToken(): string | null {
     return localStorage.getItem('synco_auth_token');

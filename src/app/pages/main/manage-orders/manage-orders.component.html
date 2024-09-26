@@ -2,8 +2,8 @@
 <p-tabView>
   @for(cluster of order?.clusters; track $index){
   <p-tabPanel header="Cluster {{ $index + 1 }}">
-    <p class="font-sm mb-3.5">Total Vehicles: <span class="font-semibold mr-8"> 10</span> Vehicles Required in Cluster
-      <span class="font-semibold  mr-8"> 1: 2</span> Zone: <span
+    <p class="font-sm mb-3.5">Total Vehicles: <span class="font-semibold mr-8"> {{cluster?.batches?.length}}</span> Vehicles Required in Cluster
+      <span class="font-semibold  mr-8"> {{$index + 1}}: {{cluster?.batches?.length}}</span> Zone: <span
         class="font-semibold">{{readyZone.event.value.name}}</span>
     </p>
     <div class="h-[56vh] overflow-y-auto custom_scrollbar">
