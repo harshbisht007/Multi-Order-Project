@@ -104,6 +104,9 @@ export class UploadDataFileComponent {
     this.fileSelected = false;
     this.selectedFile = null;
     this.rowError = false;
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = ''; 
+    }
   }
 
   onUpload() {
