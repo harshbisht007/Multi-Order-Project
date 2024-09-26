@@ -18,8 +18,10 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MapComponent } from '../../map/map.component';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+
 export interface ExtendedCategory extends Category {
   vehiclesCount: number;
   capacity: number;
@@ -117,7 +119,11 @@ export class SetConfigurationComponent implements OnInit {
 
   categoriesFromSynco: any;
 
-  constructor(private categoryService: CategoryService, private graphqlService: GraphqlService,private messageService: MessageService) {
+  constructor(private categoryService: CategoryService, private graphqlService: GraphqlService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private messageService: MessageService
+  ) {
     this.categoryService.getCategories().subscribe(
       (data) => {
         this.categoriesFromSynco = data.data;
@@ -136,7 +142,106 @@ export class SetConfigurationComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
+  async ngOnInit() {
+    this.route.queryParamMap.subscribe((params: any) => {
+      this.routeId = parseInt(params.get('route_id'));
+      console.log('route_id on init:', this.routeId);
+    })
+    const query = gql`
+    query Get_route($getRouteId: Int!) {
+  get_route(id: $getRouteId) {
+    vehicle_config {
+      category_id
+      category_name
+      count
+      capacity
+      range
+      wait_time_per_stop
+      shift_time
+      route_id
+      id
+      created_on
+      updated_on
+      company_id
+    }
+    touch_points {
+      weight
+      shipment_id
+      category_type
+      customer_name
+      customer_phone
+      cluster_number
+      routing_id
+      address
+      pincode
+      geom {
+        latitude
+        longitude
+      }
+      external_id
+      opening_time
+      closing_time
+      touch_point_type
+      touch_point_status
+      id
+      created_on
+      updated_on
+      company_id
+    }
+    sequence_id
+    start_time
+    riders
+    avg_speed
+    start_from_hub
+    end_at_hub
+    single_batch
+    overwrite_duplicate
+    hub_location {
+      latitude
+      longitude
+    }
+    max_orders_in_cluster
+    min_orders_in_cluster
+    id
+    created_on
+    updated_on
+    company_id
+  }
+}
+  `;
+    try {
+      console.log(this.routeId)
+      const res = await this.graphqlService.runQuery(query, { getRouteId: this.routeId })
+      console.log(res);
+
+      this.maxMinInput[0].value = res.get_route.max_orders_in_cluster
+      this.maxMinInput[1].value = res.get_route.min_orders_in_cluster;
+      
+      
+      this.selectedCategories = this.categoriesFromSynco.filter((val: any) =>
+        res.get_route.vehicle_config.some((config: any) => config.category_id === val.id)
+      );
+      
+      this.additionalFields = res.get_route.vehicle_config.map((config: any) => {
+      
+        return {
+          name: config.category_name,
+          count: config.count,
+          capacity: config.capacity,
+          range: config.range,
+          waitTime: config.wait_time_per_stop,
+          shiftTime: config.shift_time
+        };
+      });
+      console.log(this.selectedCategories);
+      
+      console.log(this.additionalFields);
+      
+
+    } catch (error) {
+      console.error(error)
+    }
+
     if (this.retrieveSecondStepData) {
       this.startFromHub = this.retrieveSecondStepData.payload.start_from_hub;
       this.endAtHub = this.retrieveSecondStepData.payload.end_at_hub;
@@ -213,7 +318,9 @@ export class SetConfigurationComponent implements OnInit {
 
 
   goBack() {
-    this.goToPreviousStep.emit(true)
+    this.goToPreviousStep.emit(true);
+    const baseUrl = this.router.url.split('?')[0]; 
+    this.router.navigate([baseUrl], { queryParams: {} });
   }
 
   async runRouting() {
@@ -232,11 +339,14 @@ export class SetConfigurationComponent implements OnInit {
       }
       this.orderId.emit(res?.run_routing);
       this.manageOrders.emit(true);
+      const baseUrl = this.router.url.split('?')[0]; 
+      this.router.navigate([baseUrl], { queryParams: {} });
     }catch(error){
       console.log(error)
       // this.showSpinner.emit(false)
     }
     this.showSpinner.emit(false)
+   
   }
 
   shouldShowSpinner(event: any) {

@@ -7,6 +7,7 @@ import { ManageOrdersComponent } from "./manage-orders/manage-orders.component";
 import { NgClass } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 @Component({
   selector: 'app-main',
   standalone: true,
@@ -32,9 +33,13 @@ export class MainComponent {
   email = 'roadcast_test@roadcast.in';
   password = 'Kuchnahi';
   @Input() retrieveSecondStepData: any
-  constructor(private authService: AuthService) {
+  constructor(private authService: AuthService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {
     this.onLogin()
   }
+  
   onLogin() {
     this.authService.login(this.email, this.password).subscribe(
       (response) => {
@@ -44,6 +49,38 @@ export class MainComponent {
       }
     );
   }
+
+  ngOnInit() {
+    // Listen for query param changes and router events
+    this.route.queryParamMap.subscribe((params: any) => {
+      const routeId = params.get('route_id');
+      console.log('route_id on init:', routeId);
+  
+      if (routeId) {
+        this.activeIndex = 1; // Move to step 1 if route_id is present
+      } else {
+        this.activeIndex = 0; // Default to step 0 if no route_id
+      }
+    });
+  
+    // Subscribe to navigation events to handle back navigation correctly
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.route.queryParamMap.subscribe((params: any) => {
+          const routeId = params.get('route_id');
+          console.log('route_id on navigation:', routeId);
+  
+          if (routeId) {
+            this.activeIndex = 1; // Move to step 1 if route_id is present
+          } else {
+            this.activeIndex = 0; // Default to step 0 if no route_id
+          }
+        });
+      }
+    });
+  }
+  
+  
 
   setRouteId(routeId: string): void {
     this.routeId = routeId;
@@ -63,6 +100,8 @@ export class MainComponent {
 
   activeStepChange(stepIndex: number): void {
     this.activeIndex = stepIndex;
+    console.log(this.activeIndex);
+    
   }
   dataForSecondStepper(event: any) {
     this.retrieveSecondStepData = event;
