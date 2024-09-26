@@ -3,13 +3,15 @@ import * as L from 'leaflet';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { pick } from 'apollo-angular/http/http-batch-link';
-
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 @Component({
   standalone: true,
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss'],
-  imports: [],
+  imports: [ToastModule],
+  providers:[MessageService]
 })
 export class MapComponent implements OnChanges, AfterViewInit {
   @Input() dataForMarker: any;
@@ -35,7 +37,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
     shadowUrl: 'assets/images/marker-shadow.png',
   };
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,private messageService: MessageService) { }
  
   ngOnChanges(changes: SimpleChanges): void {
     if (this.map) {
@@ -182,8 +184,21 @@ export class MapComponent implements OnChanges, AfterViewInit {
   }
 
   private async fetchRoute(coordinates: number[][]): Promise<any> {
-    return this.http.post('https://routing.roadcast.co.in/ors/v2/directions/driving-car/geojson', { coordinates }).toPromise();
+    try {
+      const response = await this.http
+        .post('https://routing.roadcast.co.in/ors/v2/directions/driving-car/geojson', { coordinates })
+        .toPromise();
+      
+      return response;
+    } catch (error) {
+      this.showSpinner.emit(false)
+      this.messageService.add({ severity: 'error', summary: 'Failed To Fetch  Route', icon: 'pi pi-cross'  });
+
+      console.error('Error fetching route:', error);
+      return null; 
+    }
   }
+  
 
   private plotRoute(route: any): void {
     if (this.previousRouteLayer) {
