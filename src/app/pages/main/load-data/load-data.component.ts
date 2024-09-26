@@ -24,6 +24,7 @@ import { ValidateColumnPipe } from '../../../core/pipes/validate-column.pipe';
 import { DialogModule } from 'primeng/dialog';
 import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { UploadDataFileComponent } from '../../upload-data-file/upload-data-file.component';
+import { ActivatedRoute, Router } from '@angular/router';
 
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
@@ -98,7 +99,8 @@ export class LoadDataComponent implements OnInit {
   referencePoint: any[]=[]
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService,
     private confirmationService: ConfirmationService, private messageService: MessageService,
-    public dialogService: DialogService) {
+    public dialogService: DialogService,
+    private router: Router, private activatedRoute: ActivatedRoute) {
 
   }
 
@@ -503,9 +505,20 @@ export class LoadDataComponent implements OnInit {
       this.dataForMarker.emit(rows);
       console.log(res);
       this.goToConfiguration.emit(res.create_shipments);
+      this.updateQueryParams('route_id', res.create_shipments);
+
     } catch (error) {
       console.error('GraphQL Error:', error);
     }
+  }
+
+  updateQueryParams(paramName: any, paramValue: any) {
+    // Query params ko update karenge
+    this.router.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams: { [paramName]: paramValue },
+      queryParamsHandling: 'merge'  // Existing query params ko preserve karna
+    });
   }
 
 
