@@ -51,6 +51,20 @@ export class MainComponent {
   }
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['auth_token']) {
+        localStorage.setItem('auth_token_synco', params['auth_token']);
+        
+        const newUrl = this.router.createUrlTree([], {
+          relativeTo: this.route,
+          queryParams: { auth_token: null },
+          queryParamsHandling: 'merge', 
+        });
+        
+        this.router.navigateByUrl(newUrl);
+      }
+    });
+  
     // // Listen for query param changes and router events
     // this.route.queryParamMap.subscribe((params: any) => {
     //   const routeId = params.get('route_id');
