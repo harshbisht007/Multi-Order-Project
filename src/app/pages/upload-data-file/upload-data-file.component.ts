@@ -16,11 +16,25 @@ import * as XLSX from 'xlsx';
   selector: 'app-upload-data-file',
   templateUrl: './upload-data-file.component.html',
   styleUrls: ['./upload-data-file.component.scss'],
-  imports: [CardModule, CommonModule,ToastModule , ProgressBarModule, ButtonModule, DialogModule, CheckboxModule, FormsModule]
+  imports: [CardModule, CommonModule, ToastModule, ProgressBarModule, ButtonModule, DialogModule, CheckboxModule, FormsModule]
 })
 
 export class UploadDataFileComponent {
-  validFileFormat = ['address', 'category_type', 'closing_time', 'external_id', 'latitude', 'longitude', 'opening_time', 'pincode', 'shipment_id', 'touch_point_type', 'weight']
+  validFileFormat = [
+    "Weight",
+    "Shipment Id",
+    "Customer Name",
+    "Customer Number",
+    "Category Type",
+    "Address",
+    "Pincode",
+    "Opening Time",
+    "Closing Time",
+    "Touch Point Type",
+    "Latitude",
+    "Longitude",
+    "External Id"
+  ]
   @ViewChild('fileInput') fileInput: ElementRef | undefined;
   fileSelected: boolean = false;
   pizza: string[] = [];
@@ -30,7 +44,7 @@ export class UploadDataFileComponent {
   MAX_ROWS = 1500;
   MAX_FILE_SIZE_MB = 20;
 
-  constructor(public dialogRef: DynamicDialogRef,private messageService: MessageService) { }
+  constructor(public dialogRef: DynamicDialogRef, private messageService: MessageService) { }
 
   triggerFileSelect() {
     this.fileInput?.nativeElement.click();
@@ -38,7 +52,7 @@ export class UploadDataFileComponent {
 
   onFileSelect(event: any) {
     const file = event.target.files[0];
-    if(file){
+    if (file) {
       this.processFile(file);
     }
   }
@@ -53,20 +67,20 @@ export class UploadDataFileComponent {
     const fileType = file?.name.split('.').pop()?.toLowerCase();
     const fileSizeMB = file.size / (1024 * 1024);
     if (fileSizeMB > this.MAX_FILE_SIZE_MB) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: `File size exceeds ${this.MAX_FILE_SIZE_MB}MB. Please upload a smaller file.`});
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: `File size exceeds ${this.MAX_FILE_SIZE_MB}MB. Please upload a smaller file.` });
       this.rowError = true;
       this.fileSelected = false;
       return;
     }
-  
+
     if (!file || !['csv', 'xlsx', 'xls'].includes(fileType!)) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Invalid File Type'});
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Invalid File Type' });
       return;
     }
 
-    this.fileSelected = false; 
+    this.fileSelected = false;
     const reader = new FileReader();
-  
+
     if (fileType === 'csv') {
       reader.onload = (e: any) => this.processCSV(e.target.result, file);
       reader.readAsText(file);
@@ -91,7 +105,7 @@ export class UploadDataFileComponent {
     if (rowCount > this.MAX_ROWS) {
       this.rowError = true;
       this.fileSelected = false;
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: `File exceeds ${this.MAX_ROWS} rows.`});
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: `File exceeds ${this.MAX_ROWS} rows.` });
 
     } else {
       this.selectedFile = file;
@@ -105,7 +119,7 @@ export class UploadDataFileComponent {
     this.selectedFile = null;
     this.rowError = false;
     if (this.fileInput) {
-      this.fileInput.nativeElement.value = ''; 
+      this.fileInput.nativeElement.value = '';
     }
   }
 
@@ -123,7 +137,7 @@ export class UploadDataFileComponent {
         const columns = jsonData[0] as any;
         console.log(columns);
 
-        if (columns.length !== 11 || !columns.every((col: any) => this.validFileFormat.includes(col))) {
+        if (columns.length !== 13 || !columns.every((col: any) => this.validFileFormat.includes(col))) {
           this.messageService.add({ severity: 'error', summary: 'Please upload a valid format.' });
           return;
         }
@@ -141,11 +155,11 @@ export class UploadDataFileComponent {
   }
 
   onDragOver(event: DragEvent) {
-    event.preventDefault(); 
+    event.preventDefault();
   }
 
   onDrop(event: DragEvent) {
-    event.preventDefault(); 
+    event.preventDefault();
     if (event.dataTransfer?.files) {
       const file = event.dataTransfer.files[0];
       this.processFile(file);

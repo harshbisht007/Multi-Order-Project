@@ -74,14 +74,30 @@ export interface CustomValidObject {
 export class LoadDataComponent implements OnInit {
   rows: CustomTouchPoint[] = [];
   @ViewChild('fileInput') fileInput!: any;
-  originalData:any={}
+  originalData: any = {}
   @Output() goToConfiguration: EventEmitter<string> = new EventEmitter();
   @Output() dataForMarker: EventEmitter<any> = new EventEmitter();
   @Output() zoneForRouting: EventEmitter<any> = new EventEmitter()
   @Input() valueForTable: any[] = []
   @Input() readyZone: any;
   loading: boolean = false;
-  headers: string[] = [];
+  headers: any[] = [
+    { field: 'weight', header: 'Weight' },
+    { field: 'shipment_id', header: 'Shipment Id' },
+    { field: 'customer_name', header: 'Customer Name' },
+    { field: 'customer_phone', header: 'Customer Number' },
+    { field: 'category_type', header: 'Category Type' },
+    { field: 'address', header: 'Address' },
+    { field: 'pincode', header: 'Pincode' },
+    { field: 'opening_time', header: 'Opening Time' },
+    { field: 'closing_time', header: 'Closing Time' },
+    { field: 'touch_point_type', header: 'Touch Point Type' },
+    { field: 'latitude', header: 'Latitude' },
+    { field: 'longitude', header: 'Longitude' },
+    { field: 'external_id', header: 'External Id' },
+    { field: 'status', header: 'Status' }
+  ];
+
   showActions: any = true;
   selectedSource: any = 'upload';
   sources: any;
@@ -99,7 +115,7 @@ export class LoadDataComponent implements OnInit {
   }
   currentEditingRow: any = null;
   dialogRef: DynamicDialogRef | undefined;
-  referencePoint: any[]=[]
+  referencePoint: any[] = []
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService,
     private confirmationService: ConfirmationService, private messageService: MessageService,
     public dialogService: DialogService,
@@ -119,10 +135,10 @@ export class LoadDataComponent implements OnInit {
 
     if (this.readyZone) {
       this.selectedZone = this.readyZone.event.value;
-      this.referencePoint=this.readyZone.referencePoint
+      this.referencePoint = this.readyZone.referencePoint
     }
     if (this.valueForTable.length) {
-      this.headers = Object.keys(this.valueForTable[0]);
+      // this.headers = Object.keys(this.valueForTable[0]);
       this.rows = this.valueForTable;
     }
     this.sources = [
@@ -134,17 +150,17 @@ export class LoadDataComponent implements OnInit {
   async onZoneChange(event: DropdownChangeEvent) {
     await this.removeFarOrders(event.value.geom.coordinates[0]);
     this.zoneForRouting.emit({ event, refrencePoint: this.referencePoint });
-    if(!this.rows.length)
-    this.selectedZone = {
-      __typename: 'Zone',
-      id: '',
-      name: ''
-    };
+    if (!this.rows.length)
+      this.selectedZone = {
+        __typename: 'Zone',
+        id: '',
+        name: ''
+      };
   }
 
 
   async removeFarOrders(zonePoints: any) {
-    this.referencePoint=[0,0]
+    this.referencePoint = [0, 0]
     this.referencePoint = this.getZoneMeanPoint(zonePoints);
     const distanceThreshold = 200;
 
@@ -197,7 +213,7 @@ export class LoadDataComponent implements OnInit {
   }
 
   getStraightDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 6371; 
+    const R = 6371;
 
     const dLat = this.deg2rad(lat2 - lat1);
     const dLon = this.deg2rad(lon2 - lon1);
@@ -218,7 +234,7 @@ export class LoadDataComponent implements OnInit {
 
 
 
-  
+
 
 
 
@@ -231,7 +247,7 @@ export class LoadDataComponent implements OnInit {
 
   onRowEditInit(row: any) {
     this.isEditable = true
-    this.originalData={...row}
+    this.originalData = { ...row }
     this.currentEditingRow = row;
     console.log(row);
   }
@@ -302,7 +318,7 @@ export class LoadDataComponent implements OnInit {
         this.rows = this.rows.filter(item => item.shipment_id !== event.shipment_id);
 
         this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Rows deleted' });
-        this.validateData()   
+        this.validateData()
       },
       reject: () => {
         this.messageService.add({ severity: 'error', summary: 'Not Deleted', detail: 'You have rejected' });
@@ -316,11 +332,11 @@ export class LoadDataComponent implements OnInit {
       this.fileInput.nativeElement.value = '';  // Reset the file input
     }
     this.rows = [];
-    this.headers = []
+    // this.headers = []
   }
 
   onSourceChange(event: DropdownChangeEvent) {
-    this.headers = []
+    // this.headers = []
     this.rows = []
     if (this.selectedSource === 'upload') {
       console.log('Upload File selected');
@@ -357,10 +373,10 @@ export class LoadDataComponent implements OnInit {
     try {
 
       const res = await this.graphqlService.runQuery(query)
-      if (res.list_touch_point.length>0) {
-        this.loading=true;
+      if (res.list_touch_point.length > 0) {
+        this.loading = true;
         this.appendDataToTable(res.list_touch_point)
-      }else{
+      } else {
         this.messageService.add({ severity: 'error', summary: 'Database is empty', icon: 'pi pi-info-circle' });
 
       }
@@ -371,32 +387,32 @@ export class LoadDataComponent implements OnInit {
   }
   async appendDataToTable(newData: any) {
     if (this.rows && this.rows.length > 0) {
-      const uniqueKey = 'external_id'; 
+      const uniqueKey = 'external_id';
       const existingIds = new Set(this.rows.map((row: any) => row[uniqueKey]));
-  
+
       newData.forEach((newRow: any) => {
         if (!existingIds.has(newRow[uniqueKey])) {
-          this.rows.push(newRow); 
+          this.rows.push(newRow);
         } else {
           const existingRow = this.rows.find((row: any) => row[uniqueKey] === newRow[uniqueKey]);
-  
+
           if (existingRow) {
-            Object.assign(existingRow, newRow); 
+            Object.assign(existingRow, newRow);
           }
         }
       });
     } else {
       this.rows = [...newData];
     }
-  
+
     this.validateData();
-  
+
     console.log(this.rows, 'Data after merging and validation');
   }
-  
-  
+
+
   async onFileChange(event: any) {
-    this.loading=true;
+    this.loading = true;
     const target: DataTransfer = <DataTransfer>(event.target);
     if (target.files.length !== 1) {
       throw new Error('Cannot use multiple files');
@@ -410,15 +426,18 @@ export class LoadDataComponent implements OnInit {
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
       const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
-      this.headers = rows[0];
-      this.headers = [...this.headers, 'status']
+      // this.headers = rows[0];
       this.rows = rows.slice(1).map((row: any) => {
         const obj: any = {};
         row.forEach((cell: any, index: number) => {
-          obj[this.headers[index]] = cell;
+          const headerField = this.headers[index]?.field; // Get the field property from headers
+          if (headerField) {
+            obj[headerField] = cell; // Use the field as the key
+          }
         });
         return obj;
       });
+      
       this.appendDataToTable(this.rows);
 
     };
@@ -427,6 +446,7 @@ export class LoadDataComponent implements OnInit {
 
   validateData() {
     this.totalInvalid = 0;
+    console.log(this.rows,'122')
     this.rows.forEach((obj: any) => {
       const hasComma = Object.keys(obj)
         .filter(key => key !== 'address')
@@ -468,8 +488,8 @@ export class LoadDataComponent implements OnInit {
         ? '../../../../assets/icons/icons_warning.svg'
         : '../../../../assets/icons/icons_check_circle.svg'
     }
-    this.loading=false;
-    
+    this.loading = false;
+
 
   }
 
@@ -483,7 +503,7 @@ export class LoadDataComponent implements OnInit {
   async submitData(rows: any[]) {
     const sanitizedRows = rows.reduce((acc, col) => {
       if (col['status']) {
-        const { external_id,status, latitude, longitude, weight, pincode, ...rest } = col;
+        const { external_id,status, latitude, longitude, weight, pincode, customer_phone, ...rest } = col;
 
         const sanitizedRow = {
           ...rest,
@@ -491,7 +511,8 @@ export class LoadDataComponent implements OnInit {
           longitude: typeof longitude === 'string' ? parseInt(longitude, 10) : longitude,
           weight: typeof weight === 'string' ? parseInt(weight, 10) : weight,
           pincode: typeof pincode === 'number' ? pincode.toString() : pincode,
-          external_id:typeof external_id==='number'?external_id.toString():external_id
+          external_id: typeof external_id === 'number' ? external_id.toString() : external_id,
+          customer_phone:typeof customer_phone==='number'?customer_phone.toString():customer_phone
         };
 
         acc.push(sanitizedRow);
@@ -548,16 +569,16 @@ export class LoadDataComponent implements OnInit {
       this.messageService.add({ severity: 'error', summary: 'Please upload the data first', icon: 'pi pi-info-circle' });
     } else {
       const data = this.rows;
-  
+
       const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
-  
+
       const workbook: XLSX.WorkBook = {
         Sheets: { 'data': worksheet },
         SheetNames: ['data']
       };
-  
+
       XLSX.writeFile(workbook, 'Multi_Order_Report.xlsx');
     }
-  }  
-    
+  }
+
 }

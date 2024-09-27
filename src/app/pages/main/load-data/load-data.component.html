@@ -64,13 +64,13 @@
         <th style="width: 1rem">
           <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
         </th>
-        <th *ngFor="let col of columns" pSortableColumn="{{col}}">
-          <span class="flex items-center font-semibold"  [ngClass]="col === 'address' ? 'w-[20rem]' : ''">
-            <!-- {{ col }} -->
-            {{ col | titlecase }}
-            <p-sortIcon field="{{col}}"></p-sortIcon>
+        <th *ngFor="let col of headers" pSortableColumn="{{col.field}}">
+          <span class="flex items-center font-semibold" [ngClass]="col.field === 'address' ? 'w-[20rem]' : ''">
+            {{ col.header | titlecase }}
+            <p-sortIcon [field]="col.field"></p-sortIcon>
           </span>
         </th>
+        
         @if (showActions) {
         <th>Actions</th>
         }
@@ -83,25 +83,25 @@
           <p-tableCheckbox [value]="row"></p-tableCheckbox>
         </td>
 
-        <td *ngFor="let col of columns" pEditableColumn>
+        <td *ngFor="let col of headers" pEditableColumn>
           <ng-container *ngIf="currentEditingRow === row; else displayCell">
             <p-cellEditor>
               <ng-template pTemplate="input">
-                <input [(ngModel)]="row[col]" [disabled]="col=='status'" class="border border-grey rounded-md px-1 py-1"
+                <input [(ngModel)]="row[col.field]" [disabled]="col.field=='status'" class="border border-grey rounded-md px-1 py-1"
                   pInputText type="text" />
               </ng-template>
 
               <ng-template pTemplate="output">
                 <span>
-                  {{ row[col] }}
+                  {{ row[col.field] }}
                 </span>
               </ng-template>
             </p-cellEditor>
           </ng-container>
           <ng-template #displayCell>
-            <span [ngStyle]="{'color': row[col] | validateColumn: col}" 
-            [pTooltip]="row[col] | validateTooltip: col" tooltipPosition="top">
-            {{ row[col] }}
+            <span [ngStyle]="{'color': row[col.field] | validateColumn: col.field}" 
+            [pTooltip]="row[col.field] | validateTooltip: col.field" tooltipPosition="top">
+            {{ row[col.field] }}
             </span>
           </ng-template>
         </td>
