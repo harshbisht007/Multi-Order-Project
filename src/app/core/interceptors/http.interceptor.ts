@@ -7,15 +7,15 @@ import { ActivatedRoute } from '@angular/router';
 
 @Injectable()
 export class TokenInjectorInterceptor implements HttpInterceptor {
-  private authToken: string | null = null;
+  private authToken: string | null = null; 
 
   constructor(private route: ActivatedRoute) {
   this.authToken=localStorage.getItem('auth_token_synco');
     }
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    if (req.url.includes('amazon') || req.url.includes('/api/v1/auth/zone') || req.url.includes('api/v1/auth/category')) {
-      return next.handle(req);
-    }
+    // if (req.url.includes('amazon') || req.url.includes('/api/v1/auth/zone') || req.url.includes('api/v1/auth/category')) {
+    //   return next.handle(req);
+    // }
 
 
     const authReq = req.clone({

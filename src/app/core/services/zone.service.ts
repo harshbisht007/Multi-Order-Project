@@ -33,7 +33,6 @@ export class ZoneService {
   getZones(): Observable<any> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      // If the API requires authorization, include the token here
       'Authorization': this.authToken,
     });
 
