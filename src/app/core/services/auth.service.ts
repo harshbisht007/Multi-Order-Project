@@ -30,6 +30,6 @@ export class AuthService {
   // }
 
   getToken(): string | null {
-    return localStorage.getItem('synco_auth_token');
+    return localStorage.getItem('auth_token_synco');
   }
 }
