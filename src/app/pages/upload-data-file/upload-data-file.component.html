@@ -1,11 +1,11 @@
 <div class="" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
-  <!-- Preparing a CSV Section (Only show if no file is selected) -->
+  <!-- Preparing a Excel Section (Only show if no file is selected) -->
   @if(!fileSelected){
 
   <div class="bg-[#EBF6F4] p-4 rounded-lg text-gray-700 my-6">
     <div class="flex items-center mb-2">
       <i class="pi pi-info-circle mr-2"></i>
-      <span class="font-sm font-semibold">Preparing a CSV</span>
+      <span class="font-sm font-semibold">Preparing a Excel</span>
     </div>
     <ul class="list-disc ml-6">
       <li>Use supported headings: Field1, Field2, Field3, Field4, Field5</li>
@@ -13,12 +13,12 @@
       <li>Cells must be formatted to type "Text"</li>
     </ul>
     <div class="ml-3 my-5">
-      <span (click)="downloadSample()" class="text-[--baseColor] cursor-pointer font-sm font-semiBold"><i class="pi pi-download mr-2"></i>Download CSV Template</span>
+      <span (click)="downloadSample()" class="text-[--baseColor] cursor-pointer font-sm font-semiBold"><i class="pi pi-download mr-2"></i>Download Excel Template</span>
     </div>
   </div>
   }
 
-  <!-- CSV Upload Section -->
+  <!-- Excel Upload Section -->
   @if(!fileSelected){
 
   <div class="p-6 border-2 border-dashed border-gray-300 rounded-lg text-center h-[120px]">
@@ -27,7 +27,7 @@
       <span class="beforecomputer text-[--baseColor] ml-4 relative" (click)="triggerFileSelect()">Add
         from computer</span>
     </div>
-    <small class="block text-gray-400 mt-2 cursor-pointer">CSV format; Max size - 20MB</small>
+    <small class="block text-gray-400 mt-2 cursor-pointer">Excel format; Max size - 20MB</small>
   </div>
   }
 
@@ -46,13 +46,13 @@
   }
 
   <!-- Hidden file input -->
-  <input type="file" #fileInput style="display:none" accept=".csv, .xlsx, .xls" (change)="onFileSelect($event)" />
+  <input type="file" #fileInput style="display:none" accept=".Excel, .xlsx, .xls" (change)="onFileSelect($event)" />
 
   <!-- Error message for too many rows -->
   @if(rowError){
 
   <div class="mt-2 text-red-500">
-    The CSV file exceeds the 1500 row limit. Please upload a smaller file.
+    The Excel file exceeds the 1500 row limit. Please upload a smaller file.
   </div>
   }
   <div class="flex justify-end mt-6 space-x-2">

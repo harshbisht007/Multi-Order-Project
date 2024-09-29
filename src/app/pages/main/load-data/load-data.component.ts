@@ -85,11 +85,12 @@ export class LoadDataComponent implements OnInit {
   @Input() readyZone: any;
   loading: boolean = false;
   headers: any[] = [
-    { field: 'weight', header: 'Weight' },
     { field: 'shipment_id', header: 'Shipment Id' },
+    { field: 'external_id', header: 'External Id' },
     { field: 'customer_name', header: 'Customer Name' },
     { field: 'customer_phone', header: 'Customer Number' },
     { field: 'category_type', header: 'Category Type' },
+    { field: 'weight', header: 'Weight' },
     { field: 'address', header: 'Address' },
     { field: 'pincode', header: 'Pincode' },
     { field: 'opening_time', header: 'Opening Time' },
@@ -97,9 +98,9 @@ export class LoadDataComponent implements OnInit {
     { field: 'touch_point_type', header: 'Touch Point Type' },
     { field: 'latitude', header: 'Latitude' },
     { field: 'longitude', header: 'Longitude' },
-    { field: 'external_id', header: 'External Id' },
     { field: 'status', header: 'Status' }
   ];
+
 
   showActions: any = true;
   selectedSource: any = 'upload';
@@ -275,19 +276,6 @@ export class LoadDataComponent implements OnInit {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
-  }
-
-
-
-
-
-
-
-  downloadSample() {
-    const link = document.createElement('a');
-    link.href = 'assets/sample_shipments.xlsx';
-    link.download = 'sample_shipments.xlsx';
-    link.click();
   }
 
   onRowEditInit(row: any) {
@@ -471,13 +459,21 @@ export class LoadDataComponent implements OnInit {
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
       const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
-      // this.headers = rows[0];
+      const excelHeaders: string[] = rows[0];
+      const headerMapping: any = {};
+      excelHeaders.forEach((excelHeader: string, index: number) => {
+        const matchedHeader = this.headers.find((header: any) => header.header.toLowerCase() === excelHeader.toLowerCase());
+        if (matchedHeader) {
+          headerMapping[index] = matchedHeader.field;
+        }
+      });
+
       this.rows = rows.slice(1).map((row: any) => {
         const obj: any = {};
         row.forEach((cell: any, index: number) => {
-          const headerField = this.headers[index]?.field; // Get the field property from headers
+          const headerField = headerMapping[index]; 
           if (headerField) {
-            obj[headerField] = cell; // Use the field as the key
+            obj[headerField] = cell; 
           }
         });
         return obj;
@@ -486,6 +482,7 @@ export class LoadDataComponent implements OnInit {
       this.appendDataToTable(this.rows);
 
     };
+
     reader.readAsBinaryString(target.files[0]);
   }
 

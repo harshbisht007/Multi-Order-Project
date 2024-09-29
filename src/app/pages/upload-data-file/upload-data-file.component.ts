@@ -58,8 +58,8 @@ export class UploadDataFileComponent {
   }
   downloadSample() {
     const link = document.createElement('a');
-    link.href = 'assets/sample_shipments.csv';
-    link.download = 'sample_shipments.csv';
+    link.href = 'assets/sample_shipments.xlsx';
+    link.download = 'sample_shipments.xlsx';
     link.click();
   }
 
