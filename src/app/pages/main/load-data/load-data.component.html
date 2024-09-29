@@ -5,11 +5,13 @@
     <div class="grid grid-cols-5 gap-8 my-4">
       <div>
         <label class="flex"><span class="required mr-2.5 ">Zone </span>
-          <img [pTooltip]="'Note: Only orders from the selected zone will be displayed'" alt="" src="../../../../assets/icons/icons-info.svg"></label>
+          <img [pTooltip]="'Note: Only orders from the selected zone will be displayed'" alt=""
+            src="../../../../assets/icons/icons-info.svg"></label>
         <!-- <p-dropdown (onChange)="onZoneChange($event)" [(ngModel)]="selectedZone"  [options]="zones()" class="custom-dropdown mt-2.5 "
                     optionLabel="name" placeholder="Select Zone"/> -->
-        <p-dropdown [disabled]="this.rows.length==0" (onChange)="onZoneChange($event)" [(ngModel)]="selectedZone" [options]="zoneFromSynco"
-          [filter]="true" class="custom-dropdown mt-2.5 " optionLabel="name" placeholder="Select Zone" />
+        <p-dropdown [disabled]="this.rows.length==0" (onChange)="onZoneChange($event)" [(ngModel)]="selectedZone"
+          [options]="zoneFromSynco" [filter]="true" class="custom-dropdown mt-2.5 " optionLabel="name"
+          placeholder="Select Zone" />
       </div>
       <!-- <div>
         <label for="" class="mb-2.5 required">Data Source</label><p-dropdown [options]="sources"
@@ -37,6 +39,8 @@
           <!-- } -->
           <p-button (onClick)="downloadTable()" [outlined]="true" class="mr-2" icon="pi pi-upload"
             label="Download Report" pRipple severity="success" />
+          <p-button (onClick)="fetchQRreport()" [outlined]="true" class="mr-2" icon="pi pi-upload"
+            label="Download QR Report" pRipple severity="success" />
           <p-button (onClick)="confirmDelete()" [disabled]="!rows.length || !selectedItems?.length" [outlined]="true"
             class="" icon="pi pi-trash" label="Delete" pRipple severity="danger" />
         </div>
@@ -70,7 +74,7 @@
             <p-sortIcon [field]="col.field"></p-sortIcon>
           </span>
         </th>
-        
+
         @if (showActions) {
         <th>Actions</th>
         }
@@ -87,8 +91,8 @@
           <ng-container *ngIf="currentEditingRow === row; else displayCell">
             <p-cellEditor>
               <ng-template pTemplate="input">
-                <input [(ngModel)]="row[col.field]" [disabled]="col.field=='status'" class="border border-grey rounded-md px-1 py-1"
-                  pInputText type="text" />
+                <input [(ngModel)]="row[col.field]" [disabled]="col.field=='status'"
+                  class="border border-grey rounded-md px-1 py-1" pInputText type="text" />
               </ng-template>
 
               <ng-template pTemplate="output">
@@ -99,9 +103,9 @@
             </p-cellEditor>
           </ng-container>
           <ng-template #displayCell>
-            <span [ngStyle]="{'color': row[col.field] | validateColumn: col.field}" 
-            [pTooltip]="row[col.field] | validateTooltip: col.field" tooltipPosition="top">
-            {{ row[col.field] }}
+            <span [ngStyle]="{'color': row[col.field] | validateColumn: col.field}"
+              [pTooltip]="row[col.field] | validateTooltip: col.field" tooltipPosition="top">
+              {{ row[col.field] }}
             </span>
           </ng-template>
         </td>
@@ -110,10 +114,10 @@
         <td>
           <div class="flex align-items-center justify-content-center gap-1">
             @if (currentEditingRow === row) {
-            <span pButton pRipple [pTooltip]="'Save'" tooltipPosition="top" type="button" pSaveEditableRow icon="pi pi-check" (click)="onRowEditSave(row)"
-            class="bg-transparent text-[#2C958C]"></span>
-            <span pButton  [pTooltip]="'Cancel'" tooltipPosition="top" type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancel(row, index)"
-            class="bg-transparent text-[#D83A52]"></span>
+            <span pButton pRipple [pTooltip]="'Save'" tooltipPosition="top" type="button" pSaveEditableRow
+              icon="pi pi-check" (click)="onRowEditSave(row)" class="bg-transparent text-[#2C958C]"></span>
+            <span pButton [pTooltip]="'Cancel'" tooltipPosition="top" type="button" pCancelEditableRow
+              icon="pi pi-times" (click)="onRowEditCancel(row, index)" class="bg-transparent text-[#D83A52]"></span>
             }
           </div>
         </td>
@@ -121,17 +125,19 @@
         @if (currentEditingRow !== row) {
         <td>
           <div class="flex align-items-center justify-content-center gap-1">
-            <span *ngIf="currentEditingRow !== row" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil"  [pTooltip]="'Edit'" tooltipPosition="top"
-              (click)="onRowEditInit(row)" class="bg-transparent text-[#2C958C]"></span>
-            <span pButton pRipple  [pTooltip]="'Delete'" tooltipPosition="top" class="p-0" (click)="deleteOrder(row)" icon="pi pi-trash" class="bg-transparent text-[#D83A52]"></span>
+            <span *ngIf="currentEditingRow !== row" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil"
+              [pTooltip]="'Edit'" tooltipPosition="top" (click)="onRowEditInit(row)"
+              class="bg-transparent text-[#2C958C]"></span>
+            <span pButton pRipple [pTooltip]="'Delete'" tooltipPosition="top" class="p-0" (click)="deleteOrder(row)"
+              icon="pi pi-trash" class="bg-transparent text-[#D83A52]"></span>
           </div>
-        </td> 
+        </td>
         }
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="10">No Shipments found.</td>
+        <td colspan="16">No Shipments found.</td>
       </tr>
     </ng-template>
 

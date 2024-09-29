@@ -26,6 +26,9 @@ import { DialogModule } from 'primeng/dialog';
 import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { UploadDataFileComponent } from '../../upload-data-file/upload-data-file.component';
 import { ActivatedRoute, Router } from '@angular/router';
+import jsPDF from 'jspdf';
+import * as QRCode from 'qrcode';
+
 
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
@@ -157,8 +160,50 @@ export class LoadDataComponent implements OnInit {
         name: ''
       };
   }
+  async fetchQRreport() {
+    if (this.rows.length === 0) {
+      this.messageService.add({ severity: 'error', summary: 'Please upload the data first', icon: 'pi pi-info-circle' });
+    } else {
 
 
+      const pdf = new jsPDF();
+      let yPosition = 10; 
+
+      for (const row of this.rows) {
+        const qrCodeDataUrl = await this.generateQRCode(row.shipment_id);
+
+        pdf.addImage(qrCodeDataUrl, 'PNG', 10, yPosition, 30, 30);
+
+        pdf.setFontSize(10);
+        pdf.text(`Shipment ID: ${row.shipment_id}`, 50, yPosition + 5);
+        pdf.text(`Customer Phone: ${row.customer_phone}`, 50, yPosition + 15);
+        pdf.text(`Customer Name: ${row.customer_name}`, 50, yPosition + 25);
+        pdf.text(`Address: ${row.address}`, 50, yPosition + 35);
+
+        yPosition += 50;
+
+        if (yPosition > 270) {
+          pdf.addPage();
+          yPosition = 10;
+        }
+      }
+
+      pdf.save('shipment-report.pdf');
+    }
+
+
+
+  }
+
+
+  private generateQRCode(shipmentId: any): Promise<string> {
+    return new Promise((resolve, reject) => {
+      QRCode.toDataURL(shipmentId, { width: 200, errorCorrectionLevel: 'H' }, (err:any, url:any) => {
+        if (err) reject(err);
+        resolve(url);
+      });
+    });
+  }
   async removeFarOrders(zonePoints: any) {
     this.referencePoint = [0, 0]
     this.referencePoint = this.getZoneMeanPoint(zonePoints);
@@ -437,7 +482,7 @@ export class LoadDataComponent implements OnInit {
         });
         return obj;
       });
-      
+
       this.appendDataToTable(this.rows);
 
     };
@@ -446,7 +491,7 @@ export class LoadDataComponent implements OnInit {
 
   validateData() {
     this.totalInvalid = 0;
-    console.log(this.rows,'122')
+    console.log(this.rows, '122')
     this.rows.forEach((obj: any) => {
       const hasComma = Object.keys(obj)
         .filter(key => key !== 'address')
@@ -503,7 +548,7 @@ export class LoadDataComponent implements OnInit {
   async submitData(rows: any[]) {
     const sanitizedRows = rows.reduce((acc, col) => {
       if (col['status']) {
-        const { external_id,status, latitude, longitude, weight, pincode, customer_phone, ...rest } = col;
+        const { external_id, status, latitude, longitude, weight, pincode, customer_phone, ...rest } = col;
 
         const sanitizedRow = {
           ...rest,
@@ -512,7 +557,7 @@ export class LoadDataComponent implements OnInit {
           weight: typeof weight === 'string' ? parseInt(weight, 10) : weight,
           pincode: typeof pincode === 'number' ? pincode.toString() : pincode,
           external_id: typeof external_id === 'number' ? external_id.toString() : external_id,
-          customer_phone:typeof customer_phone==='number'?customer_phone.toString():customer_phone
+          customer_phone: typeof customer_phone === 'number' ? customer_phone.toString() : customer_phone
         };
 
         acc.push(sanitizedRow);
