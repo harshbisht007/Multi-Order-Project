@@ -23,6 +23,7 @@ import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import moment from 'moment';
 import { RunRoutingService } from '../../../core/services/run-routing.service';
+import { read } from 'xlsx';
 export interface ExtendedCategory extends Category {
   vehiclesCount: number;
   capacity: number;
@@ -61,7 +62,7 @@ export class SetConfigurationComponent implements OnInit {
   @Input() retrieveSecondStepData: any;
   @Output() showSpinner: EventEmitter<any> = new EventEmitter();
   @Output() dataForSecondStepper: EventEmitter<any> = new EventEmitter()
-  startTime: any = '00:45';
+  startTime: any;
   isDisable = true;
 
   categoryFields: Array<{ label: string; model: keyof ExtendedCategory; placeholder: string; id: string }> = [
@@ -145,8 +146,8 @@ export class SetConfigurationComponent implements OnInit {
 
 
   async ngOnInit() {
-    this.updateRoute();
-    this.getRouteData();
+    await this.updateRoute();
+    await this.getRouteData();
 
 
 
@@ -192,67 +193,77 @@ export class SetConfigurationComponent implements OnInit {
   }
 
 
-  getRouteData() {
-    // this.route.queryParamMap.subscribe((params: any) => {
-    //   this.routeId = parseInt(params.get('route_id'));
-    //   console.log('route_id on init:', this.routeId);
-    // })
+  async getRouteData() {
+    this.route.queryParamMap.subscribe((params: any) => {
+      this.routeId = parseInt(params.get('route_id'));
+      console.log('route_id on init:', this.routeId);
+    })
 
+
+    try {
+      const res = await this.runRoutingService.fetchRouteDetails(this.routeId)
+      this.dataForMarker = res.get_route.touch_points;
+      if (!this.readyZone || Object.keys(this.readyZone).length === 0) {
+        this.readyZone = {};
+        this.readyZone['refrencePoint'] = [null, null];
+        this.readyZone['refrencePoint'][1] = res.get_route.hub_location.latitude;
+        this.readyZone['refrencePoint'][0] = res.get_route.hub_location.longitude;
+    }
     
-    // try {
-    //   console.log(this.routeId)
-      // const res=await this.runRoutingService.fetchRouteDetails(this.routeId)
-    //   console.log(res);
-    //   this.dataForMarker=res.get_route.touch_points
-    //   console.log(this.dataForMarker,'122')
-    //   this.checked=!res.get_route.single_batch
-    //   this.startTime= moment(res.get_route.start_time, 'HH:mm:ss').toDate();
+      console.log(this.readyZone.refrencePoint, '122')
+      this.checked = !res.get_route.single_batch
+      const defaultTime = moment().format('HH:mm:ss');
+      this.startTime = moment(res.get_route.start_time ?? defaultTime, 'HH:mm:ss').toDate();
+      this.startFromHub = res.get_route.start_from_hub;
+      this.overWriteDuplicate = res.get_route.overwrite_duplicate;
+      this.endAtHub = res.get_route.end_at_hub
 
-    //   this.startFromHub=res.get_route.start_from_hub;
-    //   this.overWriteDuplicate=res.get_route.overwrite_duplicate;
-    //   this.endAtHub=res.get_route.end_at_hub
+      this.maxMinInput[0].value = res.get_route.max_orders_in_cluster
+      this.maxMinInput[1].value = res.get_route.min_orders_in_cluster;
 
-    //   this.maxMinInput[0].value = res.get_route.max_orders_in_cluster
-    //   this.maxMinInput[1].value = res.get_route.min_orders_in_cluster;
+      if(this.categoriesFromSynco?.length>0){
+        this.selectedCategories = this.categoriesFromSynco.filter((val: any) =>
+          res.get_route.vehicle_config.some((config: any) => config.category_id === val.id)
+        );
+      }
 
+      this.additionalFields = res.get_route.vehicle_config.map((config: any) => {
 
-    //   this.selectedCategories = this.categoriesFromSynco.filter((val: any) =>
-    //     res.get_route.vehicle_config.some((config: any) => config.category_id === val.id)
-    //   );
+        return {
+          name: config.category_name,
+          count: config.count,
+          capacity: config.capacity,
+          range: config.range,
+          waitTime: config.wait_time_per_stop,
+          shiftTime: config.shift_time
+        };
+      });
+      console.log(this.selectedCategories);
 
-    //   this.additionalFields = res.get_route.vehicle_config.map((config: any) => {
-
-    //     return {
-    //       name: config.category_name,
-    //       count: config.count,
-    //       capacity: config.capacity,
-    //       range: config.range,
-    //       waitTime: config.wait_time_per_stop,
-    //       shiftTime: config.shift_time
-    //     };
-    //   });
-    //   console.log(this.selectedCategories);
-
-    //   console.log(this.additionalFields);
+      console.log(this.additionalFields);
 
 
-    // } catch (error) {
-    //   console.error(error)
-    // }
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   async updateRoute() {
-    try {
-      await this.runRoutingService.updateRoute(this.routeId, {
-        hub_location: {
-          latitude: this.readyZone.refrencePoint[1],
-          longitude: this.readyZone.refrencePoint[0]
-        }
-      })
+    console.log(this.readyZone,'122')
+    if (this.readyZone) {
+      try {
+        await this.runRoutingService.updateRoute(this.routeId, {
+          zone_id:this.readyZone.event.value.id,
+          hub_location: {
+            latitude: this.readyZone.refrencePoint[1],
+            longitude: this.readyZone.refrencePoint[0]
+          }
+        })
 
 
-    } catch (errror) {
+      } catch (errror) {
 
+      }
     }
   }
   onTimeChange(event: Date) {
@@ -308,7 +319,7 @@ export class SetConfigurationComponent implements OnInit {
       this.orderId.emit(res?.run_routing);
       this.manageOrders.emit(true);
       const baseUrl = this.router.url.split('?')[0];
-      this.router.navigate([baseUrl], { queryParams: {} });
+      this.router.navigate([baseUrl], { queryParams: { order_id: res?.run_routing } });
     } catch (error) {
       console.log(error)
       // this.showSpinner.emit(false)
@@ -324,17 +335,20 @@ export class SetConfigurationComponent implements OnInit {
 
   onCancel() {
     this.goToFirstStep.emit();
+    const baseUrl = this.router.url.split('?')[0];
+    this.router.navigate([baseUrl], { queryParams: {} });
   }
 
 
   async saveChanges() {
-
     const payload = {
       start_from_hub: this.checkboxOptions.find(option => option.id === 'startHub')?.model,
       end_at_hub: this.checkboxOptions.find(option => option.id === 'endHub')?.model,
       single_batch: !this.checked,
       overwrite_duplicate: this.checkboxOptions.find(option => option.id === 'overwrite')?.model,
-      start_time: this.startTime,
+      start_time: moment(this.startTime, moment.ISO_8601, true).isValid()
+        ? moment(this.startTime).format('HH:mm')
+        : this.startTime,
       max_orders_in_cluster: this.maxMinInput[0].value,
       min_orders_in_cluster: this.maxMinInput[1].value,
       vehicle_config: this.selectedCategories.map((category, index) => {

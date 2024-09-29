@@ -8,6 +8,7 @@ import { NgClass } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
 @Component({
   selector: 'app-main',
   standalone: true,
@@ -64,34 +65,31 @@ export class MainComponent {
         this.router.navigateByUrl(newUrl);
       }
     });
+
+    
+    this.checkQueryParams();
+
+    this.router.events
+      .pipe(filter((event: any) => event instanceof NavigationEnd)) // Filter for NavigationEnd events
+      .subscribe(() => this.checkQueryParams());
   
-    // // Listen for query param changes and router events
-    // this.route.queryParamMap.subscribe((params: any) => {
-    //   const routeId = params.get('route_id');
-    //   console.log('route_id on init:', routeId);
-  
-    //   if (routeId) {
-    //     this.activeIndex = 1; // Move to step 1 if route_id is present
-    //   } else {
-    //     this.activeIndex = 0; // Default to step 0 if no route_id
-    //   }
-    // });
-  
-    // // Subscribe to navigation events to handle back navigation correctly
-    // this.router.events.subscribe((event) => {
-    //   if (event instanceof NavigationEnd) {
-    //     this.route.queryParamMap.subscribe((params: any) => {
-    //       const routeId = params.get('route_id');
-    //       console.log('route_id on navigation:', routeId);
-  
-    //       if (routeId) {
-    //         this.activeIndex = 1; // Move to step 1 if route_id is present
-    //       } else {
-    //         this.activeIndex = 0; // Default to step 0 if no route_id
-    //       }
-    //     });
-    //   }
-    // });
+  }
+
+  private checkQueryParams() {
+    this.route.queryParamMap.subscribe(params => {
+      const routeId = params.get('route_id');
+      const orderId = params.get('order_id');
+
+      if (routeId) {
+        this.activeIndex = 1; 
+      } else if (orderId) {
+        this.activeIndex = 2; 
+      } else {
+        this.activeIndex = 0;
+      }
+
+      console.log('Current activeIndex:', this.activeIndex);
+    });
   }
   
   

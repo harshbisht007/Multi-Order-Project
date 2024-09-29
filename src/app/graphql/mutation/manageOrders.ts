@@ -40,6 +40,7 @@ export const getOrderDetails = gql`query Get_order($getOrderId: Int!) {
       start_from_hub
       end_at_hub
       single_batch
+      zone_id
       overwrite_duplicate
       hub_location {
         latitude

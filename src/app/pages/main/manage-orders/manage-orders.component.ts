@@ -15,7 +15,7 @@ import { BatchMoveDialogComponent } from '../../batch-move-dialog/batch-move-dia
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ManageOrdersService } from '../../../core/services/manage-orders.service';
 import { DialogModule } from 'primeng/dialog';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 
 @Component({
@@ -48,16 +48,24 @@ export class ManageOrdersComponent implements AfterViewInit {
   @Input() orderId!: number;
   order!: any;
   batchInfo: any = []
+  startFromHub: any;
+  endAtHub: any;
 
-  constructor(private manageOrderService: ManageOrdersService, private router: Router, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
+  constructor(private route: ActivatedRoute, private manageOrderService: ManageOrdersService, private router: Router, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
   }
 
   onCancel() {
     this.goToFirstStep.emit(true)
+    const baseUrl = this.router.url.split('?')[0];
+    this.router.navigate([baseUrl], { queryParams: {} });
   }
 
   goBack() {
     this.goToPreviousStep.emit(true);
+    const baseUrl = this.router.url.split('?')[0];
+    console.log(baseUrl, this.order.route.id, '122')
+    this.router.navigate([baseUrl], { queryParams: { route_id: this.order.route.id } });
+
   }
 
   async createOrder() {
@@ -74,6 +82,10 @@ export class ManageOrdersComponent implements AfterViewInit {
   }
 
   ngOnInit() {
+    this.route.queryParamMap.subscribe((params: any) => {
+      this.orderId = parseInt(params.get('order_id'));
+      console.log('order_id on init:', this.orderId);
+    })
     // this.assignDriver = [
     //   { name: 'Assigned', code: 'assigned' },
     //   { name: 'Unassigned', code: 'unassigned' },
@@ -176,7 +188,15 @@ export class ManageOrdersComponent implements AfterViewInit {
   }
 
   async getOrder() {
-    const res=await this.manageOrderService.fetchOrderDetails(this.orderId);
+    const res = await this.manageOrderService.fetchOrderDetails(this.orderId);
+    if (!this.readyZone || Object.keys(this.readyZone).length === 0) {
+      this.readyZone = {};
+      this.readyZone['refrencePoint'] = [null, null];
+      this.readyZone['refrencePoint'][1] = res.get_order.route.hub_location.latitude;
+      this.readyZone['refrencePoint'][0] = res.get_order.route.hub_location.longitude;
+    }
+    this.startFromHub = res.get_order.route.start_from_hub;
+    this.endAtHub = res.get_order.route.end_at_hub;
     this.order = res.get_order;
     this.checkIfMissedOrder(this.order);
     this.batchInfo = this.order?.clusters.flatMap((cluster: any) =>
@@ -212,7 +232,7 @@ export class ManageOrdersComponent implements AfterViewInit {
   }
 
   private async updateTouchPointOrder(touchPoints: any[]): Promise<any> {
-   
+
     const rows = touchPoints.map((tp, index) => ({
       priority: index + 1,
       id: tp.id,

@@ -54,16 +54,13 @@ touch_points {
   updated_on
   company_id
 }
-total_load
-total_km
-duration
-volume
 sequence_id
 start_time
 riders
 avg_speed
 start_from_hub
 end_at_hub
+zone_id
 single_batch
 overwrite_duplicate
 hub_location {

@@ -19,6 +19,8 @@ export class MapComponent implements OnChanges, AfterViewInit {
   @Input() pickupLocation: any;
   @Input() isMissed: any;
   @Output() showSpinner:EventEmitter<any>=new EventEmitter();
+  @Input() startFromHub:any;
+  @Input() endAtHub:any;
   private map!: L.Map;
   private markersLayer = L.layerGroup();
   private touchPointMarkers: L.Marker[] = [];
@@ -45,7 +47,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
         this.plotMarkers(changes['dataForMarker'].currentValue,this.pickupLocation);
       }
       if (changes['thirdStepDataForMarker']?.currentValue) {
-        this.plotMarkerForThirdStep(changes['thirdStepDataForMarker'].currentValue, this.isMissed);
+        this.plotMarkerForThirdStep(changes['thirdStepDataForMarker'].currentValue);
       }
     }
   }
@@ -83,7 +85,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
       if (this.dataForMarker) {
         await this.plotMarkers(this.dataForMarker,this.pickupLocation);
       } else if (this.thirdStepDataForMarker) {
-        await this.plotMarkerForThirdStep(this.thirdStepDataForMarker, this.isMissed);
+        await this.plotMarkerForThirdStep(this.thirdStepDataForMarker);
       }
       this.map.invalidateSize({ debounceMoveend: true });
       this.showSpinner.emit(false)
@@ -93,11 +95,14 @@ export class MapComponent implements OnChanges, AfterViewInit {
 
   private async plotMarkers(data: any[], hubLocation: any[]): Promise<void> {
     this.clearMarkers();
-  
+    
     const markers = data
-      .filter(row => row.latitude && row.longitude)
+      .filter(row => (row.latitude || (row.geom && row.geom.latitude)) && (row.longitude || (row.geom && row.geom.longitude)))
       .map(row => {
-        const marker = this.createMarker(row.latitude, row.longitude, row.shipment_id, 'assets/images/map-marker.png', [15, 31]);
+        const latitude = row.latitude || row.geom.latitude; // Fallback to geom.latitude
+        const longitude = row.longitude || row.geom.longitude; // Fallback to geom.longitude
+        
+        const marker = this.createMarker(latitude, longitude, row.shipment_id, 'assets/images/map-marker.png', [15, 31]);
         this.markersLayer.addLayer(marker);
         return marker.getLatLng();
       });
@@ -107,17 +112,20 @@ export class MapComponent implements OnChanges, AfterViewInit {
       this.markersLayer.addLayer(hubMarker);
       markers.push(hubMarker.getLatLng());
     }
-  console.log(markers,'122')
+  
+    console.log(markers, '122');
+    
     if (markers.length > 0) {
       this.map.fitBounds(L.latLngBounds(markers));
     }
   }
   
+  
 
-  private async plotMarkerForThirdStep(data: any[], isMissed: any): Promise<void> {
-
+  private async plotMarkerForThirdStep(data: any[]): Promise<void> {
+    console.log(data,this.startFromHub,this.endAtHub,'122')
     await this.clearMarkers();
-    if (!this.isMissed) {
+    if (!this.isMissed&&this.startFromHub) {
       this.touchPointMarkers.push(this.createMarker(this.pickupLocation[1], this.pickupLocation[0], 'Hub', 'assets/images/merchant.png', [30, 30]));
       // Prepare coordinates for route
       const coordinates = [
