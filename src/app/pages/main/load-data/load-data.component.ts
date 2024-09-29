@@ -28,7 +28,8 @@ import { UploadDataFileComponent } from '../../upload-data-file/upload-data-file
 import { ActivatedRoute, Router } from '@angular/router';
 import jsPDF from 'jspdf';
 import * as QRCode from 'qrcode';
-
+import { CreateShipmentService } from '../../../core/services/create-shipment.service';
+import { FetchDatafromDBService } from '../../../core/services/fetch-datafrom-db.service';
 
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
@@ -121,8 +122,8 @@ export class LoadDataComponent implements OnInit {
   dialogRef: DynamicDialogRef | undefined;
   referencePoint: any[] = []
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService,
-    private confirmationService: ConfirmationService, private messageService: MessageService,
-    public dialogService: DialogService,
+    private confirmationService: ConfirmationService, private messageService: MessageService,private fetchDataFromDBService:FetchDatafromDBService,
+    public dialogService: DialogService,public createShipmentService:CreateShipmentService,
     private router: Router, private activatedRoute: ActivatedRoute) {
 
   }
@@ -379,33 +380,9 @@ export class LoadDataComponent implements OnInit {
   }
 
   async fetchDataFromDB() {
-    const query = gql`
-    query List_shipment {
-    list_touch_point {
-      id
-      routing_id(isNull: true)
-      customer_name
-      customer_phone
-      geom {
-        latitude
-        longitude
-      }
-      shipment_id
-      touch_point_status
-      touch_point_type
-      address
-      external_id
-      weight
-      pincode
-      opening_time
-      closing_time
-      category_type
-    }
-  }
-  `;
+   
     try {
-
-      const res = await this.graphqlService.runQuery(query)
+     const res= await this.fetchDataFromDBService.fetchDataFromDB();
       if (res.list_touch_point.length > 0) {
         this.loading = true;
         this.appendDataToTable(res.list_touch_point)
@@ -562,18 +539,14 @@ export class LoadDataComponent implements OnInit {
       return acc;
     }, []);
 
-    const mutation = gql`
-      mutation CreateShipment($data: [CustomTouchPointInput!]!) {
-        create_shipments(data: $data)
-      }
-    `;
-
+   
+    
     try {
-      const res = await this.graphqlService.runMutation(mutation, { data: sanitizedRows });
+      const res= await this.createShipmentService.createShipments(sanitizedRows)
       this.dataForMarker.emit(rows);
       console.log(res);
       this.goToConfiguration.emit(res.create_shipments);
-      // this.updateQueryParams('route_id', res.create_shipments);s
+      // this.updateQueryParams('route_id', res.create_shipments);
 
     } catch (error) {
       console.error('GraphQL Error:', error);

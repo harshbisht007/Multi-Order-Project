@@ -22,7 +22,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import moment from 'moment';
-
+import { RunRoutingService } from '../../../core/services/run-routing.service';
 export interface ExtendedCategory extends Category {
   vehiclesCount: number;
   capacity: number;
@@ -120,7 +120,7 @@ export class SetConfigurationComponent implements OnInit {
 
   categoriesFromSynco: any;
 
-  constructor(private categoryService: CategoryService, private graphqlService: GraphqlService,
+  constructor(private categoryService: CategoryService, private graphqlService: GraphqlService, private runRoutingService: RunRoutingService,
     private router: Router,
     private route: ActivatedRoute,
     private messageService: MessageService
@@ -142,7 +142,7 @@ export class SetConfigurationComponent implements OnInit {
       }
     });
   }
-  
+
 
   async ngOnInit() {
     this.updateRoute();
@@ -198,75 +198,10 @@ export class SetConfigurationComponent implements OnInit {
     //   console.log('route_id on init:', this.routeId);
     // })
 
-    const query = gql`
-    query Get_route($getRouteId: Int!) {
-    get_route(id: $getRouteId) {
-    vehicle_config {
-      category_id
-      category_name
-      count
-      capacity
-      range
-      wait_time_per_stop
-      shift_time
-      route_id
-      id
-      created_on
-      updated_on
-      company_id
-    }
-    touch_points {
-      weight
-      shipment_id
-      category_type
-      customer_name
-      customer_phone
-      cluster_number
-      routing_id
-      address
-      pincode
-      geom {
-        latitude
-        longitude
-      }
-      external_id
-      opening_time
-      closing_time
-      touch_point_type
-      touch_point_status
-      id
-      created_on
-      updated_on
-      company_id
-    }
-    total_load
-    total_km
-    duration
-    volume
-    sequence_id
-    start_time
-    riders
-    avg_speed
-    start_from_hub
-    end_at_hub
-    single_batch
-    overwrite_duplicate
-    hub_location {
-      latitude
-      longitude
-    }
-    max_orders_in_cluster
-    min_orders_in_cluster
-    id
-    created_on
-    updated_on
-    company_id
-  }
-  }
-  `;
+    
     // try {
     //   console.log(this.routeId)
-    //   const res = await this.graphqlService.runQuery(query, { getRouteId: this.routeId })
+      // const res=await this.runRoutingService.fetchRouteDetails(this.routeId)
     //   console.log(res);
     //   this.dataForMarker=res.get_route.touch_points
     //   console.log(this.dataForMarker,'122')
@@ -307,22 +242,14 @@ export class SetConfigurationComponent implements OnInit {
   }
 
   async updateRoute() {
-    const query = gql`
-    mutation Update_route($updateRouteId: Int!, $change: RouteInput!) {
-    update_route(id: $updateRouteId, change: $change) {
-    id
-  }
-  }
-    `
     try {
-      const res = await this.graphqlService.runQuery(query, {
-        updateRouteId: this.routeId, change: {
-          hub_location: {
-            latitude: this.readyZone.refrencePoint[1],
-            longitude: this.readyZone.refrencePoint[0]
-          }
+      await this.runRoutingService.updateRoute(this.routeId, {
+        hub_location: {
+          latitude: this.readyZone.refrencePoint[1],
+          longitude: this.readyZone.refrencePoint[0]
         }
       })
+
 
     } catch (errror) {
 
@@ -370,15 +297,11 @@ export class SetConfigurationComponent implements OnInit {
 
   async runRouting() {
     this.showSpinner.emit(true)
-    const mutation = gql`
-      mutation run_routing($id: Int!) {  
-        run_routing(route_id: $id)
-      }
-    `;
+
+
     try {
-      const res = await this.graphqlService.runMutation(mutation, {
-        id: this.routeId
-      });
+      const res = await this.runRoutingService.runRouting(this.routeId);
+
       if (res) {
         this.showSpinner.emit(false)
       }
@@ -405,11 +328,7 @@ export class SetConfigurationComponent implements OnInit {
 
 
   async saveChanges() {
-    const mutation = gql`mutation updateRoute($id: Int!, $change: RouteInput!) {
-      update_route(id: $id, change: $change) {
-        id
-      }
-    }`
+
     const payload = {
       start_from_hub: this.checkboxOptions.find(option => option.id === 'startHub')?.model,
       end_at_hub: this.checkboxOptions.find(option => option.id === 'endHub')?.model,
@@ -435,10 +354,8 @@ export class SetConfigurationComponent implements OnInit {
 
     try {
       this.dataForSecondStepper.emit({ payload, selectedCategories: this.selectedCategories })
-      const res = await this.graphqlService.runMutation(mutation, {
-        id: this.routeId,
-        change: payload
-      });
+      const res = await this.runRoutingService.updateRoute(this.routeId, payload)
+
       this.routeId = res.update_route.id;
       this.messageService.add({ severity: 'success', summary: 'Route Configuration Saved', icon: 'pi pi-check' });
       this.runRoute = true

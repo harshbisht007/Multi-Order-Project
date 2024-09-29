@@ -6,7 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
 import { GraphqlService } from '../../core/services/graphql.service';
-
+import { ManageOrdersService } from '../../core/services/manage-orders.service';
 @Component({
   standalone: true,
   selector: 'app-batch-move-dialog',
@@ -25,7 +25,7 @@ export class BatchMoveDialogComponent implements OnInit, OnChanges {
   selectedBatch: any;
   batchOptions: { label: string, value: any }[] = [];
 
-  constructor(private graphqlService: GraphqlService) { }
+  constructor(private graphqlService: GraphqlService,private manageOrderService:ManageOrdersService) { }
   ngOnChanges(changes: SimpleChanges): void {
     this.selectedBatch = null
     if (changes['cluster']) {
@@ -61,13 +61,9 @@ export class BatchMoveDialogComponent implements OnInit, OnChanges {
   }
 
   private async moveTouchPointToBatch(batchId: number, touchPointId: number): Promise<void> {
-    const mutation = gql`
-      mutation Change_touch_point_batch($toBatchId: Int!, $touchPointId: Int!) {
-        change_touch_point_batch(to_batch_id: $toBatchId, touch_point_id: $touchPointId)
-      }`;
   
     try {
-      const response = await this.graphqlService.runMutation(mutation, { toBatchId: batchId, touchPointId:touchPointId });
+      const response=await this.manageOrderService.moveTouchPointToBatch(batchId,touchPointId)
       console.log('API Response:', response);
   
       // Assuming the response contains the necessary success information
