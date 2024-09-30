@@ -125,7 +125,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
   private async plotMarkerForThirdStep(data: any[]): Promise<void> {
     console.log(data,this.startFromHub,this.endAtHub,'122')
     await this.clearMarkers();
-    if (!this.isMissed&&this.startFromHub) {
+    if (!this.isMissed) {
       this.touchPointMarkers.push(this.createMarker(this.pickupLocation[1], this.pickupLocation[0], 'Hub', 'assets/images/merchant.png', [30, 30]));
       // Prepare coordinates for route
       const coordinates = [
