@@ -4,8 +4,8 @@
   <p-tabPanel header="Cluster {{ $index + 1 }}">
     <p class="font-sm mb-3.5">Total Vehicles: <span class="font-semibold mr-8"> {{cluster?.batches?.length}}</span>
       Vehicles Required in Cluster
-      <span class="font-semibold  mr-8"> {{$index + 1}}: {{cluster?.batches?.length}}</span> Zone: <span
-        class="font-semibold">{{readyZone?.event?.value?.name}}</span>
+      <span class="font-semibold  mr-8"> {{$index + 1}}: {{cluster?.batches?.length}}</span> Zone: 
+      <span class="font-semibold">{{readyZone?.event?.value?.name ? readyZone.event.value.name : (selectedZone?.[0]?.name || 'Default Name')}}</span>
     </p>
     <div class="h-[56vh] overflow-y-auto custom_scrollbar">
       <p-accordion (activeIndexChange)="onTabChange($event)">

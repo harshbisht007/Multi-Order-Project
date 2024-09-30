@@ -16,7 +16,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-
 import { ManageOrdersService } from '../../../core/services/manage-orders.service';
 import { DialogModule } from 'primeng/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-
+import { ZoneService } from '../../../core/services/zone.service';
 
 @Component({
   selector: 'app-manage-orders',
@@ -50,8 +50,10 @@ export class ManageOrdersComponent implements AfterViewInit {
   batchInfo: any = []
   startFromHub: any;
   endAtHub: any;
+  selectedZone: any;
+  zoneId: any;
 
-  constructor(private route: ActivatedRoute, private manageOrderService: ManageOrdersService, private router: Router, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
+  constructor(private zoneService:ZoneService,private route: ActivatedRoute, private manageOrderService: ManageOrdersService, private router: Router, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
   }
 
   onCancel() {
@@ -93,8 +95,17 @@ export class ManageOrdersComponent implements AfterViewInit {
     // ];
   }
 
-  ngAfterViewInit() {
-    this.getOrder().then();
+  async ngAfterViewInit() {
+
+    await this.getOrder().then();
+    this.zoneService.getZones(this.zoneId).subscribe(
+      (data) => {
+        this.selectedZone = data.data; 
+      },
+      (error) => {
+        console.error('Error fetching zones:', error); // Handle errors here
+      }
+    );
   }
 
   onTabChange(event: any) {
@@ -195,6 +206,7 @@ export class ManageOrdersComponent implements AfterViewInit {
       this.readyZone['refrencePoint'][1] = res.get_order.route.hub_location.latitude;
       this.readyZone['refrencePoint'][0] = res.get_order.route.hub_location.longitude;
     }
+    this.zoneId=res.get_order.route.zone_id;
     this.startFromHub = res.get_order.route.start_from_hub;
     this.endAtHub = res.get_order.route.end_at_hub;
     this.order = res.get_order;
