@@ -5,7 +5,7 @@ import { placeOrder } from '../../graphql/mutation/manageOrders';
 import { addInMissedBatch } from '../../graphql/mutation/manageOrders';
 import { addNewMissedBatch } from '../../graphql/mutation/manageOrders';
 import { updateBatchTouchPointOrder } from '../../graphql/mutation/manageOrders';
-import { getOrderDetails } from '../../graphql/mutation/manageOrders';
+import { getOrderDetails } from '../../graphql/queries/getOrder';
 @Injectable({
   providedIn: 'root'
 })

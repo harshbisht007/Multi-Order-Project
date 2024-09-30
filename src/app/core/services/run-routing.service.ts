@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { GraphqlService } from './graphql.service';
 import { run_routing } from '../../graphql/mutation/runRouting';
 import { updateRoute } from '../../graphql/mutation/runRouting';
-import { getRouteDetails } from '../../graphql/mutation/runRouting';
+import { getRouteDetails } from '../../graphql/queries/getRoute';
 @Injectable({
   providedIn: 'root'
 })

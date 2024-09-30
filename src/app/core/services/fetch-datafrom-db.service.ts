@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { GraphqlService } from './graphql.service';
-import { fetchDataFromDB } from '../../graphql/mutation/fetchDataDB';
+import { fetchDataFromDB } from '../../graphql/queries/fetchDataDB';
 @Injectable({
   providedIn: 'root'
 })
