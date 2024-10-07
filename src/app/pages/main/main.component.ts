@@ -42,19 +42,19 @@ export class MainComponent {
   }
   
   onLogin() {
-    // this.authService.login(this.email, this.password).subscribe(
-    //   (response) => {
-    //   },
-    //   (error) => {
-    //     console.error('Login failed', error);
-    //   }
-    // );
+    this.authService.login(this.email, this.password).subscribe(
+      (response) => {
+      },
+      (error) => {
+        console.error('Login failed', error);
+      }
+    );
   }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['auth_token']) {
-        localStorage.setItem('auth_token_synco', params['auth_token']);
+        localStorage.setItem('synco_auth_token', params['auth_token']);
         
         const newUrl = this.router.createUrlTree([], {
           relativeTo: this.route,
