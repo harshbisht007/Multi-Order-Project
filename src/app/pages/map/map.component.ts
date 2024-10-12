@@ -11,16 +11,16 @@ import { ToastModule } from 'primeng/toast';
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss'],
   imports: [ToastModule],
-  providers:[MessageService]
+  providers: [MessageService]
 })
 export class MapComponent implements OnChanges, AfterViewInit {
   @Input() dataForMarker: any;
   @Input() thirdStepDataForMarker: any;
   @Input() pickupLocation: any;
   @Input() isMissed: any;
-  @Output() showSpinner:EventEmitter<any>=new EventEmitter();
-  @Input() startFromHub:any;
-  @Input() endAtHub:any;
+  @Output() showSpinner: EventEmitter<any> = new EventEmitter();
+  @Input() startFromHub: any;
+  @Input() endAtHub: any;
   private map!: L.Map;
   private markersLayer = L.layerGroup();
   private touchPointMarkers: L.Marker[] = [];
@@ -39,12 +39,12 @@ export class MapComponent implements OnChanges, AfterViewInit {
     shadowUrl: 'assets/images/marker-shadow.png',
   };
 
-  constructor(private http: HttpClient,private messageService: MessageService) { }
- 
+  constructor(private http: HttpClient, private messageService: MessageService) { }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (this.map) {
       if (changes['dataForMarker']?.currentValue) {
-        this.plotMarkers(changes['dataForMarker'].currentValue,this.pickupLocation);
+        this.plotMarkers(changes['dataForMarker'].currentValue, this.pickupLocation);
       }
       if (changes['thirdStepDataForMarker']?.currentValue) {
         this.plotMarkerForThirdStep(changes['thirdStepDataForMarker'].currentValue);
@@ -81,9 +81,9 @@ export class MapComponent implements OnChanges, AfterViewInit {
     this.showSpinner.emit(true);
 
     setTimeout(async () => {
-      
+
       if (this.dataForMarker) {
-        await this.plotMarkers(this.dataForMarker,this.pickupLocation);
+        await this.plotMarkers(this.dataForMarker, this.pickupLocation);
       } else if (this.thirdStepDataForMarker) {
         await this.plotMarkerForThirdStep(this.thirdStepDataForMarker);
       }
@@ -95,44 +95,39 @@ export class MapComponent implements OnChanges, AfterViewInit {
 
   private async plotMarkers(data: any[], hubLocation: any[]): Promise<void> {
     this.clearMarkers();
-    
+
     const markers = data
       .filter(row => (row.latitude || (row.geom && row.geom.latitude)) && (row.longitude || (row.geom && row.geom.longitude)))
       .map(row => {
         const latitude = row.latitude || row.geom.latitude; // Fallback to geom.latitude
         const longitude = row.longitude || row.geom.longitude; // Fallback to geom.longitude
-        
+
         const marker = this.createMarker(latitude, longitude, row.shipment_id, 'assets/images/map-marker.png', [15, 31]);
         this.markersLayer.addLayer(marker);
         return marker.getLatLng();
       });
-  
+
     if (hubLocation?.length > 0) {
       const hubMarker = this.createMarker(hubLocation[1], hubLocation[0], 'Hub', 'assets/images/merchant.png', [30, 30]);
       this.markersLayer.addLayer(hubMarker);
       markers.push(hubMarker.getLatLng());
     }
-  
-    console.log(markers, '122');
-    
+
+
     if (markers.length > 0) {
       this.map.fitBounds(L.latLngBounds(markers));
     }
   }
-  
-  
+
+
 
   private async plotMarkerForThirdStep(data: any[]): Promise<void> {
-    console.log(data,this.startFromHub,this.endAtHub,'122')
     await this.clearMarkers();
     if (!this.isMissed) {
       this.touchPointMarkers.push(this.createMarker(this.pickupLocation[1], this.pickupLocation[0], 'Hub', 'assets/images/merchant.png', [30, 30]));
-      // Prepare coordinates for route
-      const coordinates = [
-        [this.pickupLocation[0], this.pickupLocation[1]],
-        ...data.map(point => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]),
-      ];
 
+      const coordinates = await this.buildCoordinates(data);
+      
       // Fetch and plot the route
       if (coordinates.length > 1) {
         const route = await this.fetchRoute(coordinates);
@@ -149,8 +144,34 @@ export class MapComponent implements OnChanges, AfterViewInit {
     data.forEach((point, index) => this.createSpecialMarker(point, index + 1));
   }
 
-  private createSpecialMarker(point: any, index: number): void {
+  private async buildCoordinates(data: any): Promise<any> {
+    let coordinates;
+    if (this.startFromHub && this.endAtHub) {
+      coordinates = [
+        [this.pickupLocation[0], this.pickupLocation[1]],
+        ...data.map((point: any) => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]), // Touch points
+        [this.pickupLocation[0], this.pickupLocation[1]]
+      ];
+    } else if (this.startFromHub) {
+      coordinates = [
+        [this.pickupLocation[0], this.pickupLocation[1]],
+        ...data.map((point: any) => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]), // Touch points
+      ]
+    } else if (this.endAtHub) {
+      coordinates = [
+        ...data.map((point: any) => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]), // Touch points
+        [this.pickupLocation[0], this.pickupLocation[1]],
 
+      ]
+    } else {
+      coordinates = [
+        ...data.map((point: any) => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]), // Touch points
+      ]
+    }
+    return coordinates;
+  }
+
+  private createSpecialMarker(point: any, index: number): void {
     const isMissed = this.isMissed;
 
     const iconOptions: L.IconOptions = {
@@ -186,7 +207,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
         point.touch_point.geom.latitude,
         point.touch_point.geom.longitude
       ];
-  
+
       this.markerBounds = this.markerBounds || new L.LatLngBounds(latlng, latlng);
       this.markerBounds.extend(latlng);
       this.fitMapToMarkers();
@@ -201,20 +222,21 @@ export class MapComponent implements OnChanges, AfterViewInit {
 
   private async fetchRoute(coordinates: number[][]): Promise<any> {
     try {
-      const response = await this.http
-        .post('https://routing.roadcast.co.in/ors/v2/directions/driving-car/geojson', { coordinates })
-        .toPromise();
-      
+      const response = await this.http.post(
+        'https://prod-s2.track360.net.in/api/v1/auth/calculate_eta_route', {
+        coordinates,
+        radiuses: [-1]
+      }).toPromise();
       return response;
     } catch (error) {
       this.showSpinner.emit(false)
-      this.messageService.add({ severity: 'error', summary: 'Failed To Fetch  Route', icon: 'pi pi-cross'  });
+      this.messageService.add({ severity: 'error', summary: 'Failed To Fetch  Route', icon: 'pi pi-cross' });
 
       console.error('Error fetching route:', error);
-      return null; 
+      return null;
     }
   }
-  
+
 
   private plotRoute(route: any): void {
     if (this.previousRouteLayer) {
