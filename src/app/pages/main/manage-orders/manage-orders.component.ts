@@ -54,6 +54,10 @@ export class ManageOrdersComponent implements AfterViewInit {
   selectedZone: any;
   zoneId: any;
 
+
+  activeClusterTabIndex: number = 0;  // Track the active cluster tab
+  accordionState: boolean[][] = [];  
+
   constructor(private zoneService: ZoneService, private route: ActivatedRoute, private manageOrderService: ManageOrdersService, private router: Router, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
   }
 
@@ -109,10 +113,7 @@ export class ManageOrdersComponent implements AfterViewInit {
     );
   }
 
-  onAccordionChange(event: any) {
-    this.activeAccordionIndex = event === this.activeAccordionIndex ? null : event;
-  }
-  
+ 
  
 
   confirmDelete(touchPoint: any, batch: any) {
@@ -213,6 +214,11 @@ export class ManageOrdersComponent implements AfterViewInit {
     this.startFromHub = res.get_order.route.start_from_hub;
     this.endAtHub = res.get_order.route.end_at_hub;
     this.order = res.get_order;
+    if (this.order && this.order.clusters) {
+      this.accordionState = this.order.clusters.map((cluster:any) => 
+        cluster.batches.map(() => false));  // All accordion tabs closed initially
+    }
+    console.log(this.accordionState,'122')
     this.checkIfMissedOrder(this.order);
     this.batchInfo = this.order?.clusters.flatMap((cluster: any) =>
       cluster.batches.map((batch: any) => [
@@ -232,11 +238,40 @@ export class ManageOrdersComponent implements AfterViewInit {
       cluster.batches.some((batch: any) => batch.is_missed === true)
     );
   }
+ 
+
 
   shouldShowSpinner(event: any) {
     this.showSpinner.emit(event);
 
   }
+
+  onClusterTabChange(index: number) {
+    if (this.activeClusterTabIndex !== index) {
+      this.accordionState[this.activeClusterTabIndex] = this.accordionState[this.activeClusterTabIndex].map(() => false);
+    }
+
+    this.activeClusterTabIndex = index;
+  }
+
+   onOpen(event: { index: number }, clusterIndex: number) {
+    const batchIndex = event.index; // Extract the index of the opened accordion
+    this.accordionState[clusterIndex] = this.accordionState[clusterIndex].map((_, index) => index === batchIndex); 
+
+    this.accordionState[clusterIndex][batchIndex] = true; // Set the state to true for opened
+    console.log(`Opened cluster ${clusterIndex} batch ${batchIndex}`, this.accordionState);
+  }
+
+  onClose(event: { index: number }, clusterIndex: number) {
+    const batchIndex = event.index; // Extract the index of the closed accordion
+    this.accordionState[clusterIndex][batchIndex] = false; // Set the state to false for closed
+    console.log(`Closed cluster ${clusterIndex} batch ${batchIndex}`, this.accordionState);
+  }
+
+  onAccordionChange(event: any) {
+    this.activeAccordionIndex = event === this.activeAccordionIndex ? null : event;
+  }
+  
 
   private getUpdatedTouchPoints(): any[] {
     return this.order.clusters.flatMap((cluster: any) =>

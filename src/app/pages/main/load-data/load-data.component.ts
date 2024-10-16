@@ -120,11 +120,7 @@ export class LoadDataComponent implements OnInit {
   currentEditingRow: any = null;
   dialogRef: DynamicDialogRef | undefined;
   referencePoint: any[] = []
-<<<<<<< Updated upstream
-  constructor(private zoneService: ZoneService, private graphqlService: GraphqlService,
-=======
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private runRouteService: RunRoutingService,
->>>>>>> Stashed changes
     private confirmationService: ConfirmationService, private messageService: MessageService, private fetchDataFromDBService: FetchDatafromDBService,
     public dialogService: DialogService, public createShipmentService: CreateShipmentService,
     private router: Router, private activatedRoute: ActivatedRoute) {
@@ -465,11 +461,7 @@ export class LoadDataComponent implements OnInit {
         row.forEach((cell: any, index: number) => {
           const headerField = headerMapping[index];
           if (headerField) {
-<<<<<<< Updated upstream
-            obj[headerField] = cell;
-=======
             obj[headerField] = cell !== undefined ? cell : null;
->>>>>>> Stashed changes
           }
         });
         return obj;
