@@ -101,8 +101,6 @@ export class LoadDataComponent implements OnInit {
     { field: 'longitude', header: 'Longitude' },
     { field: 'status', header: 'Status' }
   ];
-
-
   showActions: any = true;
   selectedSource: any = 'upload';
   sources: any;
@@ -122,8 +120,8 @@ export class LoadDataComponent implements OnInit {
   dialogRef: DynamicDialogRef | undefined;
   referencePoint: any[] = []
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService,
-    private confirmationService: ConfirmationService, private messageService: MessageService,private fetchDataFromDBService:FetchDatafromDBService,
-    public dialogService: DialogService,public createShipmentService:CreateShipmentService,
+    private confirmationService: ConfirmationService, private messageService: MessageService, private fetchDataFromDBService: FetchDatafromDBService,
+    public dialogService: DialogService, public createShipmentService: CreateShipmentService,
     private router: Router, private activatedRoute: ActivatedRoute) {
 
   }
@@ -169,7 +167,7 @@ export class LoadDataComponent implements OnInit {
 
 
       const pdf = new jsPDF();
-      let yPosition = 10; 
+      let yPosition = 10;
 
       for (const row of this.rows) {
         const qrCodeDataUrl = await this.generateQRCode(row.shipment_id);
@@ -200,16 +198,16 @@ export class LoadDataComponent implements OnInit {
 
   private generateQRCode(shipmentId: any): Promise<string> {
     return new Promise((resolve, reject) => {
-      QRCode.toDataURL(shipmentId, { width: 200, errorCorrectionLevel: 'H' }, (err:any, url:any) => {
+      QRCode.toDataURL(shipmentId, { width: 200, errorCorrectionLevel: 'H' }, (err: any, url: any) => {
         if (err) reject(err);
         resolve(url);
       });
     });
   }
   async removeFarOrders(zonePoints: any) {
-    this.referencePoint = [0, 0]
     this.referencePoint = this.getZoneMeanPoint(zonePoints);
     const distanceThreshold = 200;
+    let farOrdersRemoved = false;
 
     this.rows = this.rows.filter((order: CustomTouchPoint) => {
       if (order.latitude && order.longitude) {
@@ -217,19 +215,28 @@ export class LoadDataComponent implements OnInit {
           this.referencePoint[1], this.referencePoint[0],
           order.latitude, order.longitude
         );
-
-        return distance <= distanceThreshold;
-      } else {
-        return true;
+        if (distance > distanceThreshold) {
+          farOrdersRemoved = true;
+          return false;
+        }
       }
+      return true;
     });
-
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Orders Updated',
-      detail: 'Far orders have been removed.'
-    });
+    if (farOrdersRemoved) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Far Orders Removed',
+        detail: 'Orders beyond the threshold distance have been removed.'
+      });
+    } else {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Order updated',
+        detail: 'No orders were beyond the distance threshold.'
+      });
+    }
   }
+
 
   getZoneMeanPoint(arr: [number, number][]): [number, number] {
     let twoTimesSignedArea = 0;
@@ -380,9 +387,9 @@ export class LoadDataComponent implements OnInit {
   }
 
   async fetchDataFromDB() {
-   
+
     try {
-     const res= await this.fetchDataFromDBService.fetchDataFromDB();
+      const res = await this.fetchDataFromDBService.fetchDataFromDB();
       if (res.list_touch_point.length > 0) {
         this.loading = true;
         this.appendDataToTable(res.list_touch_point)
@@ -448,9 +455,9 @@ export class LoadDataComponent implements OnInit {
       this.rows = rows.slice(1).map((row: any) => {
         const obj: any = {};
         row.forEach((cell: any, index: number) => {
-          const headerField = headerMapping[index]; 
+          const headerField = headerMapping[index];
           if (headerField) {
-            obj[headerField] = cell; 
+            obj[headerField] = cell;
           }
         });
         return obj;
@@ -539,10 +546,10 @@ export class LoadDataComponent implements OnInit {
       return acc;
     }, []);
 
-   
-    
+
+
     try {
-      const res= await this.createShipmentService.createShipments(sanitizedRows)
+      const res = await this.createShipmentService.createShipments(sanitizedRows)
       this.dataForMarker.emit(rows);
       console.log(res);
       this.goToConfiguration.emit(res.create_shipments);
