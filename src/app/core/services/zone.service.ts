@@ -10,7 +10,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class ZoneService {
-  private apiUrl = 'https://synco-demo.roadcast.net/api/v1/auth/zone';  // Base URL without query params
+  private apiUrl = 'https://synco-demo.roadcast.net/api/v1/auth/zone';  
 
   authToken:any;
   zones: WritableSignal<Zone[]> = signal([] as Zone[]);

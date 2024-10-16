@@ -30,6 +30,7 @@ import jsPDF from 'jspdf';
 import * as QRCode from 'qrcode';
 import { CreateShipmentService } from '../../../core/services/create-shipment.service';
 import { FetchDatafromDBService } from '../../../core/services/fetch-datafrom-db.service';
+import { RunRoutingService } from '../../../core/services/run-routing.service';
 
 export interface CustomTouchPoint extends TouchPoint {
   latitude: number;
@@ -70,7 +71,7 @@ export interface CustomValidObject {
     DialogModule,
     DynamicDialogModule
   ],
-  providers: [ConfirmationService, MessageService, ZoneService, DialogService],
+  providers: [ConfirmationService, MessageService, ZoneService, RunRoutingService, DialogService],
 
   templateUrl: './load-data.component.html',
   styleUrl: './load-data.component.scss'
@@ -119,7 +120,11 @@ export class LoadDataComponent implements OnInit {
   currentEditingRow: any = null;
   dialogRef: DynamicDialogRef | undefined;
   referencePoint: any[] = []
+<<<<<<< Updated upstream
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService,
+=======
+  constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private runRouteService: RunRoutingService,
+>>>>>>> Stashed changes
     private confirmationService: ConfirmationService, private messageService: MessageService, private fetchDataFromDBService: FetchDatafromDBService,
     public dialogService: DialogService, public createShipmentService: CreateShipmentService,
     private router: Router, private activatedRoute: ActivatedRoute) {
@@ -426,8 +431,6 @@ export class LoadDataComponent implements OnInit {
 
     console.log(this.rows, 'Data after merging and validation');
   }
-
-
   async onFileChange(event: any) {
     this.loading = true;
     const target: DataTransfer = <DataTransfer>(event.target);
@@ -436,15 +439,17 @@ export class LoadDataComponent implements OnInit {
     }
     this.rows = [];
     const reader: FileReader = new FileReader();
+
     reader.onload = async (e: any) => {
       const bstr: string = e.target.result;
       const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
-
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
       const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
       const excelHeaders: string[] = rows[0];
       const headerMapping: any = {};
+
       excelHeaders.forEach((excelHeader: string, index: number) => {
         const matchedHeader = this.headers.find((header: any) => header.header.toLowerCase() === excelHeader.toLowerCase());
         if (matchedHeader) {
@@ -454,40 +459,135 @@ export class LoadDataComponent implements OnInit {
 
       this.rows = rows.slice(1).map((row: any) => {
         const obj: any = {};
+        Object.values(headerMapping).forEach((headerField: any) => {
+          obj[headerField] = null;
+        });
         row.forEach((cell: any, index: number) => {
           const headerField = headerMapping[index];
           if (headerField) {
+<<<<<<< Updated upstream
             obj[headerField] = cell;
+=======
+            obj[headerField] = cell !== undefined ? cell : null;
+>>>>>>> Stashed changes
           }
         });
         return obj;
       });
-
+      const payload = this.rows.map((row) => {
+        const skip = row['latitude'] && row['longitude'];
+        return {
+          skip: !!skip,
+          external_id: row.external_id,
+          address: row.address,
+        };
+      });
+      const rowsToFetchLatLng = payload.filter((p) => !p.skip);
+      if (rowsToFetchLatLng.length > 0) {
+        try {
+          const apiResponse: any = await this.fetchLatLngFromApi(rowsToFetchLatLng);
+          this.updateLatLngInRows(apiResponse);
+        } catch (error) {
+          console.error('Error fetching lat/lng from API', error);
+        }
+      }
       this.appendDataToTable(this.rows);
-
     };
 
     reader.readAsBinaryString(target.files[0]);
   }
 
+  async fetchLatLngFromApi(payload: any[]): Promise<any[]> {
+    try {
+      const response = await this.runRouteService.fetchOrderLatLng(payload);
+      const data = response?.response.map((row: any) => ({
+        external_id: row.external_id,
+        lat: row?.geom?.latitude,
+        lng: row?.geom?.longitude,
+      }));
+      console.log(data, '122')
+      return data;
+    } catch (error) {
+      console.error('Error fetching lat/lng from API:', error);
+      throw error;
+    }
+  }
+
+
+  updateLatLngInRows(apiResponse: any[]) {
+    apiResponse.forEach((response) => {
+      const rowToUpdate = this.rows.find((row) => row.external_id === response.external_id);
+      if (rowToUpdate) {
+        rowToUpdate['latitude'] = response.lat;
+        rowToUpdate['longitude'] = response.lng;
+      }
+    });
+  }
+
+
+
+  // async onFileChange(event: any) {
+  //   this.loading = true;
+  //   const target: DataTransfer = <DataTransfer>(event.target);
+  //   if (target.files.length !== 1) {
+  //     throw new Error('Cannot use multiple files');
+  //   }
+  //   this.rows = [];
+  //   const reader: FileReader = new FileReader();
+  //   reader.onload = async (e: any) => {
+  //     const bstr: string = e.target.result;
+  //     const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+
+  //     const wsname: string = wb.SheetNames[0];
+  //     const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+  //     const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+  //     const excelHeaders: string[] = rows[0];
+  //     const headerMapping: any = {};
+  //     excelHeaders.forEach((excelHeader: string, index: number) => {
+  //       const matchedHeader = this.headers.find((header: any) => header.header.toLowerCase() === excelHeader.toLowerCase());
+  //       if (matchedHeader) {
+  //         headerMapping[index] = matchedHeader.field;
+  //       }
+  //     });
+
+  //     this.rows = rows.slice(1).map((row: any) => {
+  //       const obj: any = {};
+  //       row.forEach((cell: any, index: number) => {
+  //         const headerField = headerMapping[index]; 
+  //         if (headerField) {
+  //           obj[headerField] = cell; 
+  //         }
+  //       });
+  //       return obj;
+  //     });
+
+  //     this.appendDataToTable(this.rows);
+
+  //   };
+
+  //   reader.readAsBinaryString(target.files[0]);
+  // }
+
   validateData() {
     this.totalInvalid = 0;
-    console.log(this.rows, '122')
+
     this.rows.forEach((obj: any) => {
       const hasComma = Object.keys(obj)
         .filter(key => key !== 'address')
         .some(key => typeof obj[key] === 'string' && obj[key].includes(','));
+
       const invalidTouchPointType = obj.touch_point_type !== 'PICKUP' && obj.touch_point_type !== 'DROP';
-      obj.status = hasComma || invalidTouchPointType ? 'INVALID' : 'VALID';
+
+      const hasNullValue = Object.keys(obj)
+        .filter(key => key !== 'address')
+        .some(key => obj[key] === null || obj[key] === undefined || obj[key] === '');
+
+      obj.status = hasComma || invalidTouchPointType || hasNullValue ? 'INVALID' : 'VALID';
     });
 
     this.showToastForValidCheck = true;
 
-    this.rows.map((obj: any) => {
-      if (obj.status === 'INVALID') {
-        this.totalInvalid += 1;
-      }
-    })
+    this.totalInvalid = this.rows.filter((obj: any) => obj.status === 'INVALID').length;
 
     this.validColumnObject = {
       classes: {
@@ -506,17 +606,14 @@ export class LoadDataComponent implements OnInit {
 
       message: this.totalInvalid > 0
         ? `${this.totalInvalid} Rows invalid. Please correct it.`
-        : this.totalInvalid === 0
-          ? 'Data looks good! You’re all set.'
-          : '',
+        : 'Data looks good! You’re all set.',
 
       imageSrc: this.totalInvalid === 0
         ? '../../../../assets/icons/icons_warning.svg'
         : '../../../../assets/icons/icons_check_circle.svg'
-    }
+    };
+
     this.loading = false;
-
-
   }
 
 
@@ -538,6 +635,7 @@ export class LoadDataComponent implements OnInit {
           weight: typeof weight === 'string' ? parseInt(weight, 10) : weight,
           pincode: typeof pincode === 'number' ? pincode.toString() : pincode,
           external_id: typeof external_id === 'number' ? external_id.toString() : external_id,
+          
           customer_phone: typeof customer_phone === 'number' ? customer_phone.toString() : customer_phone
         };
 

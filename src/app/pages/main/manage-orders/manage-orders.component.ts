@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, Input, Output } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { GraphqlService } from "../../../core/services/graphql.service";
 import { gql } from "apollo-angular";
 import { AccordionModule } from "primeng/accordion";
@@ -17,7 +17,6 @@ import { ManageOrdersService } from '../../../core/services/manage-orders.servic
 import { DialogModule } from 'primeng/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ZoneService } from '../../../core/services/zone.service';
-
 @Component({
   selector: 'app-manage-orders',
   standalone: true,
@@ -31,6 +30,8 @@ import { ZoneService } from '../../../core/services/zone.service';
   styleUrl: './manage-orders.component.scss'
 })
 export class ManageOrdersComponent implements AfterViewInit {
+  @ViewChild(MapComponent) mapComponent!: MapComponent;
+
   @Output() goToPreviousStep: EventEmitter<any> = new EventEmitter<any>();
   @Output() goToFirstStep: EventEmitter<any> = new EventEmitter<any>();
   @Output() showSpinner: EventEmitter<any> = new EventEmitter<any>();
@@ -42,7 +43,7 @@ export class ManageOrdersComponent implements AfterViewInit {
   reorder: boolean = false;
   visible: boolean = false;
   isMissed: boolean = false;
-  activeTabIndex: number | null = null;
+  activeAccordionIndex: number | null = null;
   // assignDriver: { name: string, code: string }[] = [];
   @Input() routeId!: string;
   @Input() orderId!: number;
@@ -53,7 +54,7 @@ export class ManageOrdersComponent implements AfterViewInit {
   selectedZone: any;
   zoneId: any;
 
-  constructor(private zoneService:ZoneService,private route: ActivatedRoute, private manageOrderService: ManageOrdersService, private router: Router, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
+  constructor(private zoneService: ZoneService, private route: ActivatedRoute, private manageOrderService: ManageOrdersService, private router: Router, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
   }
 
   onCancel() {
@@ -100,7 +101,7 @@ export class ManageOrdersComponent implements AfterViewInit {
     await this.getOrder().then();
     this.zoneService.getZones(this.zoneId).subscribe(
       (data) => {
-        this.selectedZone = data.data; 
+        this.selectedZone = data.data;
       },
       (error) => {
         console.error('Error fetching zones:', error); // Handle errors here
@@ -108,9 +109,11 @@ export class ManageOrdersComponent implements AfterViewInit {
     );
   }
 
-  onTabChange(event: any) {
-    this.activeTabIndex = event === this.activeTabIndex ? null : event;
+  onAccordionChange(event: any) {
+    this.activeAccordionIndex = event === this.activeAccordionIndex ? null : event;
   }
+  
+ 
 
   confirmDelete(touchPoint: any, batch: any) {
     const isMissed = batch.some((element: any) => element.is_missed === true);
@@ -206,7 +209,7 @@ export class ManageOrdersComponent implements AfterViewInit {
       this.readyZone['refrencePoint'][1] = res.get_order.route.hub_location.latitude;
       this.readyZone['refrencePoint'][0] = res.get_order.route.hub_location.longitude;
     }
-    this.zoneId=res.get_order.route.zone_id;
+    this.zoneId = res.get_order.route.zone_id;
     this.startFromHub = res.get_order.route.start_from_hub;
     this.endAtHub = res.get_order.route.end_at_hub;
     this.order = res.get_order;

@@ -1,19 +1,20 @@
-import { AfterViewChecked, AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import * as L from 'leaflet';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { pick } from 'apollo-angular/http/http-batch-link';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 @Component({
   standalone: true,
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss'],
-  imports: [ToastModule],
+  imports: [ToastModule,LeafletModule],
   providers: [MessageService]
 })
-export class MapComponent implements OnChanges, AfterViewInit {
+export class MapComponent implements OnChanges {
   @Input() dataForMarker: any;
   @Input() thirdStepDataForMarker: any;
   @Input() pickupLocation: any;
@@ -21,13 +22,16 @@ export class MapComponent implements OnChanges, AfterViewInit {
   @Output() showSpinner: EventEmitter<any> = new EventEmitter();
   @Input() startFromHub: any;
   @Input() endAtHub: any;
-  private map!: L.Map;
+  map!: L.Map;
+  layerMainGroup!: L.LayerGroup[];
+
   private markersLayer = L.layerGroup();
   private touchPointMarkers: L.Marker[] = [];
   private markerBounds!: L.LatLngBounds
   private previousRouteLayer: L.GeoJSON | null = null;
+  
 
-  private readonly options = {
+  options = {
     zoom: 5,
     center: L.latLng(28.7040795, 77.1591007),
     maxZoom: 20,
@@ -52,22 +56,17 @@ export class MapComponent implements OnChanges, AfterViewInit {
     }
   }
 
-  ngAfterViewInit(): void {
-    setTimeout(() => {
 
-      this.initializeMap();
-      this.handleInitialData();
-    }, 500);
-  }
+  async initializeMap(map:L.Map) {
 
-  private initializeMap(): void {
-    this.map = L.map('map', {
-      center: this.options.center,
-      zoom: this.options.zoom,
-      maxZoom: this.options.maxZoom,
-      zoomControl: true,
-    });
+    this.map = map;
+    if (this.map) {
+      setInterval(() => {
+        this.map.invalidateSize({ debounceMoveend: true });
 
+      }, 500);
+  
+    }
     L.tileLayer(`https://mt{s}.googleapis.com/vt?x={x}&y={y}&z={z}&key=${environment.googleMapKey}`, {
       subdomains: ['0', '1', '2', '3'],
       maxZoom: this.options.maxZoom,
@@ -75,21 +74,22 @@ export class MapComponent implements OnChanges, AfterViewInit {
     }).addTo(this.map);
 
     this.markersLayer.addTo(this.map);
-  }
+    await this.handleInitialData();
+
+}
+
 
   private async handleInitialData(): Promise<void> {
-    this.showSpinner.emit(true);
 
     setTimeout(async () => {
-
+      this.showSpinner.emit(true)
       if (this.dataForMarker) {
         await this.plotMarkers(this.dataForMarker, this.pickupLocation);
       } else if (this.thirdStepDataForMarker) {
         await this.plotMarkerForThirdStep(this.thirdStepDataForMarker);
       }
-      this.map.invalidateSize({ debounceMoveend: true });
       this.showSpinner.emit(false)
-    }, 500);
+    }, 1000);
 
   }
 
@@ -252,7 +252,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
     }).bindTooltip(tooltipText, { direction: 'top' }).addTo(this.map);
   }
 
-  private async clearMarkers(): Promise<void> {
+   async clearMarkers(): Promise<void> {
     this.markersLayer.clearLayers();
     this.touchPointMarkers.forEach((marker: L.Marker) => {
       this.map.removeLayer(marker); // Removes the marker from the map
@@ -260,7 +260,9 @@ export class MapComponent implements OnChanges, AfterViewInit {
     this.touchPointMarkers = [];
   }
   ngOnDestroy() {
-    this.map.remove();
+    if (this.map) {
+    
+  }
     this.clearMarkers()
   }
 }

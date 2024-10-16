@@ -8,7 +8,7 @@
       <span class="font-semibold">{{readyZone?.event?.value?.name ? readyZone.event.value.name : (selectedZone?.[0]?.name || 'Default Name')}}</span>
     </p>
     <div class="h-[56vh] overflow-y-auto custom_scrollbar">
-      <p-accordion (activeIndexChange)="onTabChange($event)">
+      <p-accordion (activeIndexChange)="onAccordionChange($event)">
         @if(cluster.batches){
 
         @for(batch of cluster.batches; let batchIndex = $index; track batchIndex) {
@@ -98,7 +98,7 @@
 
             </div>
             <div class="h-[350px] w-full bg-white rounded-lg overflow-hidden border border-[#E5E7EB]">
-              <app-map *ngIf="activeTabIndex === batchIndex" [thirdStepDataForMarker]="batch.touch_points"
+              <app-map *ngIf="activeAccordionIndex === batchIndex" [thirdStepDataForMarker]="batch.touch_points"
                 (showSpinner)="shouldShowSpinner($event)" [startFromHub]="startFromHub" [endAtHub]="endAtHub"
                 [isMissed]="batch.is_missed" [pickupLocation]="readyZone?.refrencePoint">
               </app-map>
