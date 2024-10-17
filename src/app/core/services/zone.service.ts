@@ -38,7 +38,6 @@ export class ZoneService {
     });
   
     let params = new HttpParams()
-      .set('__limit', '80')
       .set('__active__bool', 'true')
       .set('__geom__ne', 'null');
   
