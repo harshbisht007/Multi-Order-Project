@@ -82,8 +82,8 @@ export class MapComponent implements OnChanges {
 
   private async handleInitialData(): Promise<void> {
 
+    this.showSpinner.emit(true)
     setTimeout(async () => {
-      this.showSpinner.emit(true)
       if (this.dataForMarker) {
         await this.plotMarkers(this.dataForMarker, this.pickupLocation);
       } else if (this.thirdStepDataForMarker) {

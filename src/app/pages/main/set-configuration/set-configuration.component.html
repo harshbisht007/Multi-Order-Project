@@ -80,27 +80,12 @@
         }
       </div>
       }
-      <!-- <div class="grid grid-cols-3 gap-x-8 gap-y-4 mt-4">
-        @for(field of singleTimeFields; track field.id;let i=$index){
-        <div>
-          <label [for]="field.id + i" class="required">{{ field.label }}</label>
-          <input [id]="field.id + i" pInputText [(ngModel)]="field.model" type="number"
-            class="form-input mt-2" [placeholder]="field.placeholder" />
-        </div>
-        }
-      </div> -->
 
       <div class="grid grid-cols-1 gap-x-8 gap-y-4">
         <p class="text-right mt-4">
-          <!-- @if(this.checked){
-          <p-button pRipple class="mr-2 mt-2 " label="Create Clusters" icon="pi pi-plus" severity="success"
-            (click)="showDialog()" />
-
-          }@else{ -->
           <p-button pRipple class="ml-2 mt-2" label="Save Changes" severity="success" [disabled]="isSaveDisabled"
             (onClick)="saveChanges()">
           </p-button>
-          <!-- } -->
         </p>
       </div>
     </p-accordionTab>
@@ -149,83 +134,3 @@
 <p-toast />
 
 
-<!-- <div class="mt-[500px]">
-
-  <div class="">
-    <div class="tw-flex tw-items-center tw-justify-between">
-      <div class="tw-flex tw-space-x-4">
-        <div class="tw-flex tw-items-center">
-          <p-toggleButton
-            id="singleBatch"
-            [(ngModel)]="singleBatch"
-            onLabel="Single Batch"
-            offLabel="Multi Batch" />
-        </div>
-
-      </div>
-    </div>
-
-    <div class="tw-mt-4 tw-grid tw-grid-cols-2 tw-gap-4">
-      <div class="tw-flex tw-items-center">
-        <input type="checkbox" id="startHub" class="tw-mr-2" [(ngModel)]="startFromHub" />
-        <label for="startHub">Start from hub</label>
-      </div>
-      <div class="tw-flex tw-items-center">
-        <input type="checkbox" id="endHub" class="tw-mr-2" [(ngModel)]="endAtHub"/>
-        <label for="endHub">End at hub</label>
-      </div>
-      <div class="tw-flex tw-items-center">
-        <input type="checkbox" id="overwrite" class="tw-mr-2" [(ngModel)]="overWriteDuplicate"/>
-        <label for="overwrite">Overwrite Duplicate Data</label>
-      </div>
-      <div class="tw-flex tw-items-center">
-        <label for="routeStartTime" class="tw-mr-2">Route Start Time <span class="tw-text-red-500">*</span></label>
-        <input id="routeStartTime" type="time" class="tw-form-input" [(ngModel)]="startTime"/>
-      </div>
-      <div class="tw-flex tw-items-center">
-        <label for="vehicleCategory" class="tw-mr-2">Vehicle Category <span class="tw-text-red-500">*</span></label>
-        <p-multiSelect
-          [options]="categories()"
-          [(ngModel)]="selectedCategories"
-          id="vehicleCategory"
-          optionLabel="name"
-          placeholder="Select Cities" />
-      </div>
-    </div>
-  </div>
-
-
-  @for(category of selectedCategories; track $index) {
-    <h3 class="tw-font-bold tw-mb-2">{{category.name}}</h3>
-    <div class="tw-grid tw-grid-cols-3 tw-gap-4">
-      <div>
-        <label for="noOfVehicles" class="tw-block">No. of Vehicles <span class="tw-text-red-500">*</span></label>
-        <input id="noOfVehicles" [(ngModel)]="category.vehiclesCount" type="number" class="form-input" />
-      </div>
-      <div>
-        <label for="capacityOfVehicle" class="tw-block">Capacity of Each Vehicle <span class="tw-text-red-500">*</span></label>
-        <input id="capacityOfVehicle" [(ngModel)]="category.capacity" type="number" class="form-input" />
-      </div>
-      <div>
-        <label for="maxRange" class="tw-block">Max Range of Each Vehicle <span class="tw-text-red-500">*</span></label>
-        <input id="maxRange" [(ngModel)]="category.range" type="number" class="form-input" />
-      </div>
-      <div>
-        <label for="waitTime" class="tw-block">Wait Time per Stop <span class="tw-text-red-500">*</span></label>
-        <input id="waitTime" [(ngModel)]="category.waitTime" type="number" class="form-input" />
-      </div>
-      <div>
-        <label for="totalShiftTime" class="tw-block">Total Shift Time <span class="tw-text-red-500">*</span></label>
-        <input id="totalShiftTime" [(ngModel)]="category.shiftTime" type="number" class="form-input" />
-      </div>
-    </div>
-
-  }
-
-
-  <div class="tw-mt-6 tw-text-right">
-    <button class="tw-bg-green-500 tw-text-white tw-font-bold tw-py-2 tw-px-4 tw-rounded hover:tw-bg-green-600" (click)="saveChanges()">
-      Save Changes
-    </button>
-  </div>
-</div> -->

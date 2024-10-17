@@ -107,7 +107,7 @@ export class LoadDataComponent implements OnInit {
   isEditable: boolean = false
   zones = this.zoneService.zones;
   zoneFromSynco: any;
-  selectedZone!: Zone;
+  selectedZone: Zone | null = null;
   selectedItems: any;
   totalInvalid: number = 0;
   showToastForValidCheck: boolean = false;
@@ -338,6 +338,7 @@ export class LoadDataComponent implements OnInit {
       this.fileInput.nativeElement.value = '';  // Reset the file input
     }
     this.rows = [];
+    this.selectedZone=null
     // this.headers = []
   }
 

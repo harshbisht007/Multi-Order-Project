@@ -308,8 +308,6 @@ export class SetConfigurationComponent implements OnInit {
 
   async runRouting() {
     this.showSpinner.emit(true)
-
-
     try {
       const res = await this.runRoutingService.runRouting(this.routeId);
 
@@ -323,10 +321,8 @@ export class SetConfigurationComponent implements OnInit {
     } catch (error) {
       console.log(error)
       this.messageService.add({ severity: 'error', summary: 'Routing Failed' });
-
-      // this.showSpinner.emit(false)
+      this.showSpinner.emit(false)
     }
-    this.showSpinner.emit(false)
 
   }
 

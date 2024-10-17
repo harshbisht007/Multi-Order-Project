@@ -7,17 +7,12 @@
         <label class="flex"><span class="required mr-2.5 ">Zone </span>
           <img [pTooltip]="'Note: Only orders from the selected zone will be displayed'" alt=""
             src="../../../../assets/icons/icons-info.svg"></label>
-        <!-- <p-dropdown (onChange)="onZoneChange($event)" [(ngModel)]="selectedZone"  [options]="zones()" class="custom-dropdown mt-2.5 "
-                    optionLabel="name" placeholder="Select Zone"/> -->
+      
         <p-dropdown [disabled]="this.rows.length==0 || this.totalInvalid !=0 || loading" (onChange)="onZoneChange($event)" [(ngModel)]="selectedZone"
           [options]="zoneFromSynco" [filter]="true" class="custom-dropdown mt-2.5 " optionLabel="name"
           placeholder="Select Zone" />
       </div>
-      <!-- <div>
-        <label for="" class="mb-2.5 required">Data Source</label><p-dropdown [options]="sources"
-          (onChange)="onSourceChange($event)" [(ngModel)]="selectedSource" optionLabel="name" optionValue="value"
-          placeholder="Select Data Source" class="custom-dropdown mt-2.5 " />
-      </div> -->
+  
     </div>
   </div>
   <p-table #dt1 (onHeaderCheckboxToggle)="onHeaderCheckboxToggle($event)" (onRowSelect)="onRowSelect($event)"
@@ -25,18 +20,14 @@
     [globalFilterFields]="headers" [loading]="loading" [paginator]="true" [rowsPerPageOptions]="[10, 25, 50]"
     [rows]="10" [value]="rows" editMode="row" styleClass="p-datatable-striped">
     <ng-template pTemplate="caption">
-      <!-- @if(selectedSource=='upload'){ -->
-      <!-- <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" /> -->
-      <!-- } -->
+    
       <div class="grid gap-4 grid-cols-2 mb-2">
         <div>
-          <!-- @if(selectedSource=='fetch'){ -->
           <p-button (onClick)="uploadData()" class="mr-2" icon="pi pi-download" label="Upload file" pRipple
             severity="success" />
 
           <p-button (onClick)="fetchDataFromDB()" class="mr-2" icon="pi pi-refresh" label="Fetch Data" pRipple
             severity="success" />
-          <!-- } -->
           <p-button (onClick)="downloadTable()" [outlined]="true" class="mr-2" icon="pi pi-upload"
             label="Download Report" pRipple severity="success" />
          
