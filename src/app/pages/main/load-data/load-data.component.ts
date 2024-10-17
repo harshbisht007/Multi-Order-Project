@@ -244,6 +244,14 @@ export class LoadDataComponent implements OnInit {
   }
 
   onRowEditInit(row: any) {
+    if (this.currentEditingRow && this.currentEditingRow !== row) {
+      this.messageService.add({ 
+          severity: 'warn', 
+          summary: 'You need to save or cancel the current editing before editing another row.', 
+          detail: 'You need to save or cancel the current editing before editing another row.' 
+      });
+      return; 
+  }
     this.isEditable = true
     this.originalData = { ...row }
     this.currentEditingRow = row;
@@ -379,7 +387,7 @@ export class LoadDataComponent implements OnInit {
       this.rows = [...newData];
     }
 
-    this.validateData();
+    this.validateData(true);
 
     console.log(this.rows, 'Data after merging and validation');
   }
@@ -516,7 +524,7 @@ export class LoadDataComponent implements OnInit {
   //   reader.readAsBinaryString(target.files[0]);
   // }
 
-  validateData() {
+  validateData(validateOnly?:boolean) {
     this.totalInvalid = 0;
 
     this.rows.forEach((obj: any) => {
@@ -562,7 +570,10 @@ export class LoadDataComponent implements OnInit {
     };
 
     this.loading = false;
-    this.messageService.add({ severity: 'success', summary: 'Data Upload Successfully' });
+    if(validateOnly){
+
+      this.messageService.add({ severity: 'success', summary: 'Data Upload Successfully' });
+    }
   }
 
 
