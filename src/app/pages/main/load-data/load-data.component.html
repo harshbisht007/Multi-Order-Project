@@ -9,7 +9,7 @@
             src="../../../../assets/icons/icons-info.svg"></label>
         <!-- <p-dropdown (onChange)="onZoneChange($event)" [(ngModel)]="selectedZone"  [options]="zones()" class="custom-dropdown mt-2.5 "
                     optionLabel="name" placeholder="Select Zone"/> -->
-        <p-dropdown [disabled]="this.rows.length==0" (onChange)="onZoneChange($event)" [(ngModel)]="selectedZone"
+        <p-dropdown [disabled]="this.rows.length==0 || this.totalInvalid !=0 || loading" (onChange)="onZoneChange($event)" [(ngModel)]="selectedZone"
           [options]="zoneFromSynco" [filter]="true" class="custom-dropdown mt-2.5 " optionLabel="name"
           placeholder="Select Zone" />
       </div>

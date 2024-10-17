@@ -208,5 +208,12 @@
           }
     }
   }
+
+    ::ng-deep .p-datatable .p-datatable-loading-icon {
+      font-size: 1rem;
+      width: 2rem;
+      height: 2rem;
+    }
+
 }
   
