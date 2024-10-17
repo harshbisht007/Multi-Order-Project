@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, Input, Output } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { GraphqlService } from "../../../core/services/graphql.service";
 import { gql } from "apollo-angular";
 import { AccordionModule } from "primeng/accordion";
@@ -17,7 +17,6 @@ import { ManageOrdersService } from '../../../core/services/manage-orders.servic
 import { DialogModule } from 'primeng/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ZoneService } from '../../../core/services/zone.service';
-
 @Component({
   selector: 'app-manage-orders',
   standalone: true,
@@ -31,6 +30,8 @@ import { ZoneService } from '../../../core/services/zone.service';
   styleUrl: './manage-orders.component.scss'
 })
 export class ManageOrdersComponent implements AfterViewInit {
+  @ViewChild(MapComponent) mapComponent!: MapComponent;
+
   @Output() goToPreviousStep: EventEmitter<any> = new EventEmitter<any>();
   @Output() goToFirstStep: EventEmitter<any> = new EventEmitter<any>();
   @Output() showSpinner: EventEmitter<any> = new EventEmitter<any>();
@@ -42,7 +43,7 @@ export class ManageOrdersComponent implements AfterViewInit {
   reorder: boolean = false;
   visible: boolean = false;
   isMissed: boolean = false;
-  activeTabIndex: number | null = null;
+  activeAccordionIndex: number | null = null;
   // assignDriver: { name: string, code: string }[] = [];
   @Input() routeId!: string;
   @Input() orderId!: number;
@@ -53,7 +54,11 @@ export class ManageOrdersComponent implements AfterViewInit {
   selectedZone: any;
   zoneId: any;
 
-  constructor(private zoneService:ZoneService,private route: ActivatedRoute, private manageOrderService: ManageOrdersService, private router: Router, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
+
+  activeClusterTabIndex: number = 0;  // Track the active cluster tab
+  accordionState: boolean[][] = [];
+
+  constructor(private zoneService: ZoneService, private route: ActivatedRoute, private manageOrderService: ManageOrdersService, private router: Router, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
   }
 
   onCancel() {
@@ -100,7 +105,7 @@ export class ManageOrdersComponent implements AfterViewInit {
     await this.getOrder().then();
     this.zoneService.getZones(this.zoneId).subscribe(
       (data) => {
-        this.selectedZone = data.data; 
+        this.selectedZone = data.data;
       },
       (error) => {
         console.error('Error fetching zones:', error); // Handle errors here
@@ -108,9 +113,8 @@ export class ManageOrdersComponent implements AfterViewInit {
     );
   }
 
-  onTabChange(event: any) {
-    this.activeTabIndex = event === this.activeTabIndex ? null : event;
-  }
+
+
 
   confirmDelete(touchPoint: any, batch: any) {
     const isMissed = batch.some((element: any) => element.is_missed === true);
@@ -180,9 +184,10 @@ export class ManageOrdersComponent implements AfterViewInit {
 
   onUpdateOrder(): void {
     const updatedTouchPoints = this.getUpdatedTouchPoints();
+    console.log(updatedTouchPoints, '122')
     this.updateTouchPointOrder(updatedTouchPoints).then(response => {
       this.messageService.add({ severity: 'success', summary: 'TouchPoint Reordered Successfully', icon: 'pi pi-check' });
-      this.getOrder()
+      this.getOrder(true)
     }).catch(error => {
       console.error('Error updating order:', error);
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error' });
@@ -191,14 +196,22 @@ export class ManageOrdersComponent implements AfterViewInit {
   }
 
   showDialog() {
-    if (this.isMissed) {
-      this.visible = true;
-    } else {
+    this.order.clusters.forEach((cluster: any) => {
+      cluster.batches.forEach((batch: any) => {
+        if (batch.is_missed === true) {
+          if (batch.touch_points.length !== 0) {
+            this.visible = true;
+          }
+        }
+      });
+    });
+
+    if (!this.visible) {
       this.createOrder()
     }
   }
 
-  async getOrder() {
+  async getOrder(isUpdate?: boolean) {
     const res = await this.manageOrderService.fetchOrderDetails(this.orderId);
     if (!this.readyZone || Object.keys(this.readyZone).length === 0) {
       this.readyZone = {};
@@ -206,10 +219,18 @@ export class ManageOrdersComponent implements AfterViewInit {
       this.readyZone['refrencePoint'][1] = res.get_order.route.hub_location.latitude;
       this.readyZone['refrencePoint'][0] = res.get_order.route.hub_location.longitude;
     }
-    this.zoneId=res.get_order.route.zone_id;
+    this.zoneId = res.get_order.route.zone_id;
     this.startFromHub = res.get_order.route.start_from_hub;
     this.endAtHub = res.get_order.route.end_at_hub;
     this.order = res.get_order;
+    if (!isUpdate) {
+
+      if (this.order && this.order.clusters) {
+        this.accordionState = this.order.clusters.map((cluster: any) =>
+          cluster.batches.map(() => false));  // All accordion tabs closed initially
+      }
+    }
+    console.log(this.accordionState, '122')
     this.checkIfMissedOrder(this.order);
     this.batchInfo = this.order?.clusters.flatMap((cluster: any) =>
       cluster.batches.map((batch: any) => [
@@ -230,10 +251,40 @@ export class ManageOrdersComponent implements AfterViewInit {
     );
   }
 
+
+
   shouldShowSpinner(event: any) {
     this.showSpinner.emit(event);
 
   }
+
+  onClusterTabChange(index: number) {
+    if (this.activeClusterTabIndex !== index) {
+      this.accordionState[this.activeClusterTabIndex] = this.accordionState[this.activeClusterTabIndex].map(() => false);
+    }
+
+    this.activeClusterTabIndex = index;
+    this.activeAccordionIndex = null;
+  }
+
+  onOpen(event: { index: number }, clusterIndex: number) {
+    const batchIndex = event.index; // Extract the index of the opened accordion
+    this.accordionState[clusterIndex] = this.accordionState[clusterIndex].map((_, index) => index === batchIndex);
+
+    this.accordionState[clusterIndex][batchIndex] = true; // Set the state to true for opened
+    console.log(`Opened cluster ${clusterIndex} batch ${batchIndex}`, this.accordionState);
+  }
+
+  onClose(event: { index: number }, clusterIndex: number) {
+    const batchIndex = event.index; // Extract the index of the closed accordion
+    this.accordionState[clusterIndex][batchIndex] = false; // Set the state to false for closed
+    console.log(`Closed cluster ${clusterIndex} batch ${batchIndex}`, this.accordionState);
+  }
+
+  onAccordionChange(event: any) {
+    this.activeAccordionIndex = event === this.activeAccordionIndex ? null : event;
+  }
+
 
   private getUpdatedTouchPoints(): any[] {
     return this.order.clusters.flatMap((cluster: any) =>

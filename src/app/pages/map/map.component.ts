@@ -1,33 +1,38 @@
-import { AfterViewChecked, AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import * as L from 'leaflet';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { pick } from 'apollo-angular/http/http-batch-link';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 @Component({
   standalone: true,
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss'],
-  imports: [ToastModule],
+  imports: [ToastModule, LeafletModule],
   providers: [MessageService]
 })
-export class MapComponent implements OnChanges, AfterViewInit {
+export class MapComponent implements OnChanges {
   @Input() dataForMarker: any;
   @Input() thirdStepDataForMarker: any;
   @Input() pickupLocation: any;
+  @Input() zoneName: any;
   @Input() isMissed: any;
   @Output() showSpinner: EventEmitter<any> = new EventEmitter();
   @Input() startFromHub: any;
   @Input() endAtHub: any;
-  private map!: L.Map;
+  map!: L.Map;
+  layerMainGroup!: L.LayerGroup[];
+
   private markersLayer = L.layerGroup();
   private touchPointMarkers: L.Marker[] = [];
   private markerBounds!: L.LatLngBounds
   private previousRouteLayer: L.GeoJSON | null = null;
 
-  private readonly options = {
+
+  options = {
     zoom: 5,
     center: L.latLng(28.7040795, 77.1591007),
     maxZoom: 20,
@@ -52,22 +57,17 @@ export class MapComponent implements OnChanges, AfterViewInit {
     }
   }
 
-  ngAfterViewInit(): void {
-    setTimeout(() => {
 
-      this.initializeMap();
-      this.handleInitialData();
-    }, 500);
-  }
+  async initializeMap(map: L.Map) {
 
-  private initializeMap(): void {
-    this.map = L.map('map', {
-      center: this.options.center,
-      zoom: this.options.zoom,
-      maxZoom: this.options.maxZoom,
-      zoomControl: true,
-    });
+    this.map = map;
+    if (this.map) {
+      setInterval(() => {
+        this.map.invalidateSize({ debounceMoveend: true });
 
+      }, 500);
+
+    }
     L.tileLayer(`https://mt{s}.googleapis.com/vt?x={x}&y={y}&z={z}&key=${environment.googleMapKey}`, {
       subdomains: ['0', '1', '2', '3'],
       maxZoom: this.options.maxZoom,
@@ -75,21 +75,22 @@ export class MapComponent implements OnChanges, AfterViewInit {
     }).addTo(this.map);
 
     this.markersLayer.addTo(this.map);
+    await this.handleInitialData();
+
   }
 
+
   private async handleInitialData(): Promise<void> {
-    this.showSpinner.emit(true);
 
     setTimeout(async () => {
-
+      this.showSpinner.emit(true)
       if (this.dataForMarker) {
         await this.plotMarkers(this.dataForMarker, this.pickupLocation);
       } else if (this.thirdStepDataForMarker) {
         await this.plotMarkerForThirdStep(this.thirdStepDataForMarker);
       }
-      this.map.invalidateSize({ debounceMoveend: true });
       this.showSpinner.emit(false)
-    }, 500);
+    }, 1000);
 
   }
 
@@ -99,8 +100,8 @@ export class MapComponent implements OnChanges, AfterViewInit {
     const markers = data
       .filter(row => (row.latitude || (row.geom && row.geom.latitude)) && (row.longitude || (row.geom && row.geom.longitude)))
       .map(row => {
-        const latitude = row.latitude || row.geom.latitude; // Fallback to geom.latitude
-        const longitude = row.longitude || row.geom.longitude; // Fallback to geom.longitude
+        const latitude = row.latitude || row.geom.latitude;
+        const longitude = row.longitude || row.geom.longitude;
 
         const marker = this.createMarker(latitude, longitude, row.shipment_id, 'assets/images/map-marker.png', [15, 31]);
         this.markersLayer.addLayer(marker);
@@ -108,7 +109,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
       });
 
     if (hubLocation?.length > 0) {
-      const hubMarker = this.createMarker(hubLocation[1], hubLocation[0], 'Hub', 'assets/images/merchant.png', [30, 30]);
+      const hubMarker = this.createMarker(hubLocation[1], hubLocation[0], this.zoneName ? this.zoneName : 'Hub', 'assets/images/merchant.png', [30, 30]);
       this.markersLayer.addLayer(hubMarker);
       markers.push(hubMarker.getLatLng());
     }
@@ -124,10 +125,10 @@ export class MapComponent implements OnChanges, AfterViewInit {
   private async plotMarkerForThirdStep(data: any[]): Promise<void> {
     await this.clearMarkers();
     if (!this.isMissed) {
-      this.touchPointMarkers.push(this.createMarker(this.pickupLocation[1], this.pickupLocation[0], 'Hub', 'assets/images/merchant.png', [30, 30]));
+      this.touchPointMarkers.push(this.createMarker(this.pickupLocation[1], this.pickupLocation[0], this.zoneName ? this.zoneName : 'Hub', 'assets/images/merchant.png', [30, 30]));
 
       const coordinates = await this.buildCoordinates(data);
-      
+
       // Fetch and plot the route
       if (coordinates.length > 1) {
         const route = await this.fetchRoute(coordinates);
@@ -172,6 +173,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
   }
 
   private createSpecialMarker(point: any, index: number): void {
+    console.log(point, '122')
     const isMissed = this.isMissed;
 
     const iconOptions: L.IconOptions = {
@@ -197,7 +199,13 @@ export class MapComponent implements OnChanges, AfterViewInit {
       {
         icon: iconHtml,
       }
-    ).bindTooltip(point.customer_name || `Point ${index}`, { direction: 'top' });
+    ).bindTooltip(
+      `${point.customer_name || point?.touch_point?.customer_name} (#${point?.touch_point?.id || ''})`,
+      { direction: 'top' }
+    );
+
+
+
 
     this.touchPointMarkers.push(marker);
     marker.addTo(this.map);
@@ -223,7 +231,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
   private async fetchRoute(coordinates: number[][]): Promise<any> {
     try {
       const response = await this.http.post(
-        'https://prod-s2.track360.net.in/api/v1/auth/calculate_eta_route', {
+        'https://test-bolt.roadcast.net/api/v1/auth/calculate_eta_route', {
         coordinates,
         radiuses: [-1]
       }).toPromise();
@@ -252,7 +260,7 @@ export class MapComponent implements OnChanges, AfterViewInit {
     }).bindTooltip(tooltipText, { direction: 'top' }).addTo(this.map);
   }
 
-  private async clearMarkers(): Promise<void> {
+  async clearMarkers(): Promise<void> {
     this.markersLayer.clearLayers();
     this.touchPointMarkers.forEach((marker: L.Marker) => {
       this.map.removeLayer(marker); // Removes the marker from the map
@@ -260,7 +268,9 @@ export class MapComponent implements OnChanges, AfterViewInit {
     this.touchPointMarkers = [];
   }
   ngOnDestroy() {
-    this.map.remove();
+    if (this.map) {
+
+    }
     this.clearMarkers()
   }
 }

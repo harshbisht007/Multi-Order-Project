@@ -1,18 +1,20 @@
 <p class="text-2xl font-semibold mb-4 text-[--baseColor]">Review</p>
-<p-tabView>
-  @for(cluster of order?.clusters; track $index){
-  <p-tabPanel header="Cluster {{ $index + 1 }}">
+<p-tabView (activeIndexChange)="onClusterTabChange($event)">
+  @for(cluster of order?.clusters; let clusterIndex = $index; track clusterIndex){
+  <p-tabPanel header="Cluster {{ clusterIndex + 1 }}">
     <p class="font-sm mb-3.5">Total Vehicles: <span class="font-semibold mr-8"> {{cluster?.batches?.length}}</span>
       Vehicles Required in Cluster
-      <span class="font-semibold  mr-8"> {{$index + 1}}: {{cluster?.batches?.length}}</span> Zone: 
-      <span class="font-semibold">{{readyZone?.event?.value?.name ? readyZone.event.value.name : (selectedZone?.[0]?.name || 'Default Name')}}</span>
+      <span class="font-semibold  mr-8"> {{clusterIndex + 1}}: {{cluster?.batches?.length}}</span> Zone:
+      <span class="font-semibold">{{readyZone?.event?.value?.name ? readyZone.event.value.name :
+        (selectedZone?.[0]?.name || 'Default Name')}}</span>
     </p>
     <div class="h-[56vh] overflow-y-auto custom_scrollbar">
-      <p-accordion (activeIndexChange)="onTabChange($event)">
+      <p-accordion (activeIndexChange)="onAccordionChange($event)" (onOpen)="onOpen($event, clusterIndex)"
+        (onClose)="onClose($event,activeClusterTabIndex)">
         @if(cluster.batches){
 
         @for(batch of cluster.batches; let batchIndex = $index; track batchIndex) {
-        <p-accordionTab>
+        <p-accordionTab [selected]="accordionState[clusterIndex][batchIndex]">
           <ng-template pTemplate="header">
             <span class="flex align-items-center justify-between gap-2 w-full text-sm ">
               @if(batch.is_missed){
@@ -58,7 +60,7 @@
             </table>
           </div>
           <div class="grid grid-cols-2 gap-4  p-[1.25rem]">
-            <div>
+            <div class="h-[451px] overflow-y-auto">
               <table class="border-collapse border border-slate-400 w-full table-striped" cdkDropList
                 (cdkDropListDropped)="drop($event, batch)">
                 <thead>
@@ -74,7 +76,7 @@
                   <tr *ngFor="let tp of batch.touch_points; let i = index" cdkDrag>
                     <td class="border border-slate-300 p-3">{{ i + 1 }}.</td>
                     <td class="border border-slate-300 p-3">#{{ tp.touch_point?.id }}</td>
-                    <td class="border border-slate-300 p-3">{{ tp.touch_point?.category_type }}</td>
+                    <td class="border border-slate-300 p-3">{{ tp.touch_point?.customer_name }}</td>
                     <td class="border border-slate-300 p-3">{{ tp.touch_point?.address }}</td>
                     <td class="border border-slate-300 p-3 text-center">
                       <div class="flex justify-center items-center gap-2">
@@ -83,7 +85,7 @@
                           tooltipPosition="top"><img src="../../../../assets/icons/icons_move.svg" alt=""
                             class="mr-2 cursor-pointer"></span>
                         }@else(){
-                        <span pTooltip="ReOrder" hideDelay="3" tooltipPosition="top" cdkDragHandle
+                        <span pTooltip="Reorder" hideDelay="3" tooltipPosition="top" cdkDragHandle
                           class="cursor-grab"><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
                         <span pTooltip="Delete Order" hideDelay="3" tooltipPosition="top"
                           (click)="confirmDelete(tp,cluster.batches)"><img
@@ -97,10 +99,11 @@
               </table>
 
             </div>
-            <div class="h-[350px] w-full bg-white rounded-lg overflow-hidden border border-[#E5E7EB]">
-              <app-map *ngIf="activeTabIndex === batchIndex" [thirdStepDataForMarker]="batch.touch_points"
-                (showSpinner)="shouldShowSpinner($event)" [startFromHub]="startFromHub" [endAtHub]="endAtHub"
-                [isMissed]="batch.is_missed" [pickupLocation]="readyZone?.refrencePoint">
+            <div class="h-[450px] w-full bg-white rounded-lg overflow-hidden border border-[#E5E7EB]">
+              <app-map *ngIf="activeAccordionIndex === batchIndex && clusterIndex === activeClusterTabIndex"
+                [thirdStepDataForMarker]="batch.touch_points" (showSpinner)="shouldShowSpinner($event)"
+                [startFromHub]="startFromHub" [endAtHub]="endAtHub" [isMissed]="batch.is_missed"
+                [pickupLocation]="readyZone?.refrencePoint" [zoneName]="selectedZone?.[0]?.name">
               </app-map>
             </div>
 
@@ -128,7 +131,7 @@
   </button>
 
   <div class="flex space-x-2">
-    <button (click)="goBack()" class=" text-black text-sm font-normal px-4 h-9">
+    <button (click)="goBack()" class="text-black bg-[#E4E4E4] rounded-md text-sm font-normal px-4 h-9 w-[120px]">
       Back
     </button>
     <button (click)="showDialog()"
