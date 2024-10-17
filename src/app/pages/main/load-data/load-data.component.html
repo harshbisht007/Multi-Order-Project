@@ -39,8 +39,7 @@
           <!-- } -->
           <p-button (onClick)="downloadTable()" [outlined]="true" class="mr-2" icon="pi pi-upload"
             label="Download Report" pRipple severity="success" />
-          <p-button (onClick)="fetchQRreport()" [outlined]="true" class="mr-2" icon="pi pi-upload"
-            label="Download QR Report" pRipple severity="success" />
+         
           <p-button (onClick)="confirmDelete()" [disabled]="!rows.length || !selectedItems?.length" [outlined]="true"
             class="" icon="pi pi-trash" label="Delete" pRipple severity="danger" />
         </div>

@@ -27,7 +27,6 @@ import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dy
 import { UploadDataFileComponent } from '../../upload-data-file/upload-data-file.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import jsPDF from 'jspdf';
-import * as QRCode from 'qrcode';
 import { CreateShipmentService } from '../../../core/services/create-shipment.service';
 import { FetchDatafromDBService } from '../../../core/services/fetch-datafrom-db.service';
 import { RunRoutingService } from '../../../core/services/run-routing.service';
@@ -161,50 +160,7 @@ export class LoadDataComponent implements OnInit {
         name: ''
       };
   }
-  async fetchQRreport() {
-    if (this.rows.length === 0) {
-      this.messageService.add({ severity: 'error', summary: 'Please upload the data first', icon: 'pi pi-info-circle' });
-    } else {
-
-
-      const pdf = new jsPDF();
-      let yPosition = 10;
-
-      for (const row of this.rows) {
-        const qrCodeDataUrl = await this.generateQRCode(row.shipment_id);
-
-        pdf.addImage(qrCodeDataUrl, 'PNG', 10, yPosition, 30, 30);
-
-        pdf.setFontSize(10);
-        pdf.text(`Shipment ID: ${row.shipment_id}`, 50, yPosition + 5);
-        pdf.text(`Customer Phone: ${row.customer_phone}`, 50, yPosition + 15);
-        pdf.text(`Customer Name: ${row.customer_name}`, 50, yPosition + 25);
-        pdf.text(`Address: ${row.address}`, 50, yPosition + 35);
-
-        yPosition += 50;
-
-        if (yPosition > 270) {
-          pdf.addPage();
-          yPosition = 10;
-        }
-      }
-
-      pdf.save('shipment-report.pdf');
-    }
-
-
-
-  }
-
-
-  private generateQRCode(shipmentId: any): Promise<string> {
-    return new Promise((resolve, reject) => {
-      QRCode.toDataURL(shipmentId, { width: 200, errorCorrectionLevel: 'H' }, (err: any, url: any) => {
-        if (err) reject(err);
-        resolve(url);
-      });
-    });
-  }
+ 
   async removeFarOrders(zonePoints: any) {
     this.referencePoint = this.getZoneMeanPoint(zonePoints);
     const distanceThreshold = 200;
