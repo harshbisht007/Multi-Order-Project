@@ -422,11 +422,11 @@ export class LoadDataComponent implements OnInit {
         });
         return obj;
       });
-      const payload = this.rows.map((row) => {
+      const payload = this.rows.map((row:any) => {
         const skip = row['latitude'] && row['longitude'];
         return {
           skip: !!skip,
-          external_id: row.external_id,
+          external_id: typeof row?.external_id == 'number' ? row?.external_id.toString() : row.external_id,
           address: row.address,
         };
       });

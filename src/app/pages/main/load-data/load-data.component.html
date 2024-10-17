@@ -96,7 +96,7 @@
 
               <ng-template pTemplate="output">
                 <span>
-                  {{ row[col.field] }}
+                  {{ row[col.field] ?? 'null' }}
                 </span>
               </ng-template>
             </p-cellEditor>
@@ -104,7 +104,7 @@
           <ng-template #displayCell>
             <span [ngStyle]="{'color': row[col.field] | validateColumn: col.field}"
               [pTooltip]="row[col.field] | validateTooltip: col.field" tooltipPosition="top">
-              {{ row[col.field] }}
+              {{ row[col.field] ?? 'null' }}
             </span>
           </ng-template>
         </td>

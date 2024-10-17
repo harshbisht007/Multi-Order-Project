@@ -12,10 +12,10 @@ export class ValidateColumnPipe implements PipeTransform {
 
     switch (col) {
       case 'status':
-        return value === 'INVALID' ? 'red' : value === 'VALID' ? 'green' : 'inherit';
+        return value === 'INVALID' || isNullOrEmpty(value) ? 'red' : value === 'VALID' ? 'green' : 'inherit';
         
       case 'touch_point_type':
-        return (value !== 'PICKUP' && value !== 'DROP') ? 'red' : 'inherit';
+        return (value !== 'PICKUP' && value !== 'DROP') || isNullOrEmpty(value) ? 'red' : 'inherit';
 
       case 'latitude':
       case 'longitude':
@@ -26,7 +26,7 @@ export class ValidateColumnPipe implements PipeTransform {
         if (col !== 'address' && typeof value === 'string' && value.includes(',')) {
           return 'red';
         }
-        return 'inherit';
+        return isNullOrEmpty(value) ? 'red' : 'inherit';
     }
   }
 }
