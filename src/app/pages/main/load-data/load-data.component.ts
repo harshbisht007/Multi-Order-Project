@@ -464,7 +464,7 @@ export class LoadDataComponent implements OnInit {
 
   updateLatLngInRows(apiResponse: any[]) {
     apiResponse.forEach((response) => {
-      const rowToUpdate = this.rows.find((row) => row.external_id === response.external_id);
+      const rowToUpdate = this.rows.find((row) => row.external_id == response.external_id);
       if (rowToUpdate) {
         rowToUpdate['latitude'] = response.lat;
         rowToUpdate['longitude'] = response.lng;
