@@ -322,6 +322,8 @@ export class SetConfigurationComponent implements OnInit {
       this.router.navigate([baseUrl], { queryParams: { order_id: res?.run_routing } });
     } catch (error) {
       console.log(error)
+      this.messageService.add({ severity: 'error', summary: 'Routing Failed' });
+
       // this.showSpinner.emit(false)
     }
     this.showSpinner.emit(false)
