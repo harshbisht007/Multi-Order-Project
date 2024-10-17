@@ -56,7 +56,7 @@ export class ManageOrdersComponent implements AfterViewInit {
 
 
   activeClusterTabIndex: number = 0;  // Track the active cluster tab
-  accordionState: boolean[][] = [];  
+  accordionState: boolean[][] = [];
 
   constructor(private zoneService: ZoneService, private route: ActivatedRoute, private manageOrderService: ManageOrdersService, private router: Router, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
   }
@@ -113,8 +113,8 @@ export class ManageOrdersComponent implements AfterViewInit {
     );
   }
 
- 
- 
+
+
 
   confirmDelete(touchPoint: any, batch: any) {
     const isMissed = batch.some((element: any) => element.is_missed === true);
@@ -184,9 +184,10 @@ export class ManageOrdersComponent implements AfterViewInit {
 
   onUpdateOrder(): void {
     const updatedTouchPoints = this.getUpdatedTouchPoints();
+    console.log(updatedTouchPoints, '122')
     this.updateTouchPointOrder(updatedTouchPoints).then(response => {
       this.messageService.add({ severity: 'success', summary: 'TouchPoint Reordered Successfully', icon: 'pi pi-check' });
-      this.getOrder()
+      this.getOrder(true)
     }).catch(error => {
       console.error('Error updating order:', error);
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error' });
@@ -195,14 +196,22 @@ export class ManageOrdersComponent implements AfterViewInit {
   }
 
   showDialog() {
-    if (this.isMissed) {
-      this.visible = true;
-    } else {
+    this.order.clusters.forEach((cluster: any) => {
+      cluster.batches.forEach((batch: any) => {
+        if (batch.is_missed === true) {
+          if (batch.touch_points.length !== 0) {
+            this.visible = true;
+          }
+        }
+      });
+    });
+
+    if (!this.visible) {
       this.createOrder()
     }
   }
 
-  async getOrder() {
+  async getOrder(isUpdate?: boolean) {
     const res = await this.manageOrderService.fetchOrderDetails(this.orderId);
     if (!this.readyZone || Object.keys(this.readyZone).length === 0) {
       this.readyZone = {};
@@ -214,11 +223,14 @@ export class ManageOrdersComponent implements AfterViewInit {
     this.startFromHub = res.get_order.route.start_from_hub;
     this.endAtHub = res.get_order.route.end_at_hub;
     this.order = res.get_order;
-    if (this.order && this.order.clusters) {
-      this.accordionState = this.order.clusters.map((cluster:any) => 
-        cluster.batches.map(() => false));  // All accordion tabs closed initially
+    if (!isUpdate) {
+
+      if (this.order && this.order.clusters) {
+        this.accordionState = this.order.clusters.map((cluster: any) =>
+          cluster.batches.map(() => false));  // All accordion tabs closed initially
+      }
     }
-    console.log(this.accordionState,'122')
+    console.log(this.accordionState, '122')
     this.checkIfMissedOrder(this.order);
     this.batchInfo = this.order?.clusters.flatMap((cluster: any) =>
       cluster.batches.map((batch: any) => [
@@ -238,7 +250,7 @@ export class ManageOrdersComponent implements AfterViewInit {
       cluster.batches.some((batch: any) => batch.is_missed === true)
     );
   }
- 
+
 
 
   shouldShowSpinner(event: any) {
@@ -252,11 +264,12 @@ export class ManageOrdersComponent implements AfterViewInit {
     }
 
     this.activeClusterTabIndex = index;
+    this.activeAccordionIndex = null;
   }
 
-   onOpen(event: { index: number }, clusterIndex: number) {
+  onOpen(event: { index: number }, clusterIndex: number) {
     const batchIndex = event.index; // Extract the index of the opened accordion
-    this.accordionState[clusterIndex] = this.accordionState[clusterIndex].map((_, index) => index === batchIndex); 
+    this.accordionState[clusterIndex] = this.accordionState[clusterIndex].map((_, index) => index === batchIndex);
 
     this.accordionState[clusterIndex][batchIndex] = true; // Set the state to true for opened
     console.log(`Opened cluster ${clusterIndex} batch ${batchIndex}`, this.accordionState);
@@ -271,7 +284,7 @@ export class ManageOrdersComponent implements AfterViewInit {
   onAccordionChange(event: any) {
     this.activeAccordionIndex = event === this.activeAccordionIndex ? null : event;
   }
-  
+
 
   private getUpdatedTouchPoints(): any[] {
     return this.order.clusters.flatMap((cluster: any) =>

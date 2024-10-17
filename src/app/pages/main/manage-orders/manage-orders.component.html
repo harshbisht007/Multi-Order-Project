@@ -9,7 +9,8 @@
         (selectedZone?.[0]?.name || 'Default Name')}}</span>
     </p>
     <div class="h-[56vh] overflow-y-auto custom_scrollbar">
-      <p-accordion (activeIndexChange)="onAccordionChange($event)" (onOpen)="onOpen($event, clusterIndex)" (onClose)="onClose($event,activeClusterTabIndex)">
+      <p-accordion (activeIndexChange)="onAccordionChange($event)" (onOpen)="onOpen($event, clusterIndex)"
+        (onClose)="onClose($event,activeClusterTabIndex)">
         @if(cluster.batches){
 
         @for(batch of cluster.batches; let batchIndex = $index; track batchIndex) {
@@ -59,7 +60,7 @@
             </table>
           </div>
           <div class="grid grid-cols-2 gap-4  p-[1.25rem]">
-            <div>
+            <div class="h-[451px] overflow-y-auto">
               <table class="border-collapse border border-slate-400 w-full table-striped" cdkDropList
                 (cdkDropListDropped)="drop($event, batch)">
                 <thead>
@@ -75,7 +76,7 @@
                   <tr *ngFor="let tp of batch.touch_points; let i = index" cdkDrag>
                     <td class="border border-slate-300 p-3">{{ i + 1 }}.</td>
                     <td class="border border-slate-300 p-3">#{{ tp.touch_point?.id }}</td>
-                    <td class="border border-slate-300 p-3">{{ tp.touch_point?.category_type }}</td>
+                    <td class="border border-slate-300 p-3">{{ tp.touch_point?.customer_name }}</td>
                     <td class="border border-slate-300 p-3">{{ tp.touch_point?.address }}</td>
                     <td class="border border-slate-300 p-3 text-center">
                       <div class="flex justify-center items-center gap-2">
@@ -84,7 +85,7 @@
                           tooltipPosition="top"><img src="../../../../assets/icons/icons_move.svg" alt=""
                             class="mr-2 cursor-pointer"></span>
                         }@else(){
-                        <span pTooltip="ReOrder" hideDelay="3" tooltipPosition="top" cdkDragHandle
+                        <span pTooltip="Reorder" hideDelay="3" tooltipPosition="top" cdkDragHandle
                           class="cursor-grab"><img src="../../../../assets/icons/icons_drag.svg" alt=""></span>
                         <span pTooltip="Delete Order" hideDelay="3" tooltipPosition="top"
                           (click)="confirmDelete(tp,cluster.batches)"><img
@@ -98,11 +99,11 @@
               </table>
 
             </div>
-            <div class="h-[350px] w-full bg-white rounded-lg overflow-hidden border border-[#E5E7EB]">
+            <div class="h-[450px] w-full bg-white rounded-lg overflow-hidden border border-[#E5E7EB]">
               <app-map *ngIf="activeAccordionIndex === batchIndex && clusterIndex === activeClusterTabIndex"
                 [thirdStepDataForMarker]="batch.touch_points" (showSpinner)="shouldShowSpinner($event)"
                 [startFromHub]="startFromHub" [endAtHub]="endAtHub" [isMissed]="batch.is_missed"
-                [pickupLocation]="readyZone?.refrencePoint">
+                [pickupLocation]="readyZone?.refrencePoint" [zoneName]="selectedZone?.[0]?.name">
               </app-map>
             </div>
 

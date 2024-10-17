@@ -618,16 +618,17 @@ export class LoadDataComponent implements OnInit {
   async submitData(rows: any[]) {
     const sanitizedRows = rows.reduce((acc, col) => {
       if (col['status']) {
-        const { external_id, status, latitude, longitude, weight, pincode, customer_phone, ...rest } = col;
+        const { opening_time, closing_time, external_id, status, latitude, longitude, weight, pincode, customer_phone, ...rest } = col;
 
         const sanitizedRow = {
           ...rest,
+          opening_time: typeof opening_time == 'number' ? opening_time.toString() : opening_time,
+          closing_time: typeof closing_time == 'number' ? closing_time.toString() : closing_time,
           latitude: typeof latitude === 'string' ? parseInt(latitude, 10) : latitude,
           longitude: typeof longitude === 'string' ? parseInt(longitude, 10) : longitude,
           weight: typeof weight === 'string' ? parseInt(weight, 10) : weight,
           pincode: typeof pincode === 'number' ? pincode.toString() : pincode,
           external_id: typeof external_id === 'number' ? external_id.toString() : external_id,
-          
           customer_phone: typeof customer_phone === 'number' ? customer_phone.toString() : customer_phone
         };
 
