@@ -5,7 +5,7 @@
       <div class="flex justify-content-center items-center">
         <p class="flex mr-4 font-sm">Single Batch <img pTooltip="Creater order in single batch" tooltipPosition="right"
             src="../../../../assets/icons/icons-info.svg" alt="" class="ml-2"></p>
-        <p-inputSwitch [(ngModel)]="checked" />
+        <p-inputSwitch [(ngModel)]="checked" (onChange)="onBatchToggle()" />
         <p class="flex ml-4 font-sm">Multi Batch <img pTooltip="Create Orders In Clusters" tooltipPosition="right"
             src="../../../../assets/icons/icons-info.svg" alt="" class="ml-2">
         </p>

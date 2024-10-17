@@ -340,7 +340,12 @@ export class SetConfigurationComponent implements OnInit {
     const baseUrl = this.router.url.split('?')[0];
     this.router.navigate([baseUrl], { queryParams: {} });
   }
-
+  onBatchToggle() {
+    if (!this.checked) {
+      this.maxMinInput[0].value = 0;
+      this.maxMinInput[1].value = 0;
+    }
+  }
 
   async saveChanges() {
     const payload = {
