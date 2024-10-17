@@ -606,6 +606,7 @@ export class LoadDataComponent implements OnInit {
     };
 
     this.loading = false;
+    this.messageService.add({ severity: 'success', summary: 'Data Upload Successfully' });
   }
 
 

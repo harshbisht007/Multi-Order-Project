@@ -97,7 +97,7 @@
             (click)="showDialog()" />
 
           }@else{ -->
-          <p-button pRipple class="mr-2 mt-2" label="Save Changes" severity="success" [disabled]="isSaveDisabled"
+          <p-button pRipple class="ml-2 mt-2" label="Save Changes" severity="success" [disabled]="isSaveDisabled"
             (onClick)="saveChanges()">
           </p-button>
           <!-- } -->
@@ -113,7 +113,7 @@
     </button>
 
     <div class="flex space-x-2">
-      <button (click)="goBack()" class="text-black text-sm font-normal px-4 h-9 w-[120px]">
+      <button (click)="goBack()" class="text-black bg-[#E4E4E4] rounded-md text-sm font-normal px-4 h-9 w-[120px]">
         Back
       </button>
       <button (click)="runRouting()" [disabled]="!runRoute"
@@ -122,7 +122,7 @@
       </button>
     </div>
   </div>
-  <div class="flex justify-between items-center mt-4 border-top">
+  <div class="flex justify-between items-center mt-4 mb-2 border-top">
     <p class="text-sm font-normal text-[#878682]">{{ dataForMarker.length }} orders</p>
   </div>
   <div class="h-[400px] w-[100%] border rounded-md overflow-hidden">

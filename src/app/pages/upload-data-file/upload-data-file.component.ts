@@ -143,7 +143,6 @@ export class UploadDataFileComponent {
         }
 
         this.dialogRef.close(this.selectedFile);
-        this.messageService.add({ severity: 'success', summary: 'Data Upload Successfully' });
       };
 
       reader.readAsArrayBuffer(this.selectedFile);
