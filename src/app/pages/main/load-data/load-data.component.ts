@@ -84,6 +84,8 @@ export class LoadDataComponent implements OnInit {
   @Output() zoneForRouting: EventEmitter<any> = new EventEmitter()
   @Input() valueForTable: any[] = []
   @Input() readyZone: any;
+  removedOrders: CustomTouchPoint[] = [];
+
   loading: boolean = false;
   headers: any[] = [
     { field: 'shipment_id', header: 'Shipment Id' },
@@ -110,7 +112,6 @@ export class LoadDataComponent implements OnInit {
   selectedZone: Zone | null = null;
   selectedItems: any;
   totalInvalid: number = 0;
-  showToastForValidCheck: boolean = false;
   validColumnObject: CustomValidObject = {
     classes: {},
     message: '',
@@ -165,7 +166,8 @@ export class LoadDataComponent implements OnInit {
     this.referencePoint = this.getZoneMeanPoint(zonePoints);
     const distanceThreshold = 200;
     let farOrdersRemoved = false;
-
+  
+  
     this.rows = this.rows.filter((order: CustomTouchPoint) => {
       if (order.latitude && order.longitude) {
         const distance = this.getStraightDistanceFromLatLonInKm(
@@ -174,23 +176,46 @@ export class LoadDataComponent implements OnInit {
         );
         if (distance > distanceThreshold) {
           farOrdersRemoved = true;
-          return false;
+          this.removedOrders.push(order);
+          return false; 
         }
       }
-      return true;
+      return true; 
     });
+  
     if (farOrdersRemoved) {
       this.messageService.add({
         severity: 'error',
         summary: 'Far Orders Removed',
         detail: 'Orders beyond the threshold distance have been removed.'
       });
+  
     } else {
       this.messageService.add({
         severity: 'info',
         summary: 'Order updated',
         detail: 'No orders were beyond the distance threshold.'
       });
+    }
+  }
+  
+  generateRemovedOrdersExcel() {
+    this.removedOrders.forEach((val:any)=>{
+      delete val.status;
+    })
+    if (this.removedOrders.length === 0) {
+      this.messageService.add({ severity: 'error', summary: 'Please upload the data first', icon: 'pi pi-info-circle' });
+    } else {
+      const data = this.removedOrders;
+
+      const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
+
+      const workbook: XLSX.WorkBook = {
+        Sheets: { 'data': worksheet },
+        SheetNames: ['data']
+      };
+
+      XLSX.writeFile(workbook, 'Removed Orders.xlsx');
     }
   }
 
@@ -337,6 +362,7 @@ export class LoadDataComponent implements OnInit {
     if (this.fileInput) {
       this.fileInput.nativeElement.value = '';  // Reset the file input
     }
+    this.removedOrders=[]
     this.rows = [];
     this.selectedZone=null
     // this.headers = []
@@ -370,6 +396,7 @@ export class LoadDataComponent implements OnInit {
   }
   async appendDataToTable(newData: any) {
     if (this.rows && this.rows.length > 0) {
+      this.removedOrders=[]
       const uniqueKey = 'external_id';
       const existingIds = new Set(this.rows.map((row: any) => row[uniqueKey]));
 
@@ -481,50 +508,6 @@ export class LoadDataComponent implements OnInit {
     });
   }
 
-
-
-  // async onFileChange(event: any) {
-  //   this.loading = true;
-  //   const target: DataTransfer = <DataTransfer>(event.target);
-  //   if (target.files.length !== 1) {
-  //     throw new Error('Cannot use multiple files');
-  //   }
-  //   this.rows = [];
-  //   const reader: FileReader = new FileReader();
-  //   reader.onload = async (e: any) => {
-  //     const bstr: string = e.target.result;
-  //     const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
-
-  //     const wsname: string = wb.SheetNames[0];
-  //     const ws: XLSX.WorkSheet = wb.Sheets[wsname];
-  //     const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
-  //     const excelHeaders: string[] = rows[0];
-  //     const headerMapping: any = {};
-  //     excelHeaders.forEach((excelHeader: string, index: number) => {
-  //       const matchedHeader = this.headers.find((header: any) => header.header.toLowerCase() === excelHeader.toLowerCase());
-  //       if (matchedHeader) {
-  //         headerMapping[index] = matchedHeader.field;
-  //       }
-  //     });
-
-  //     this.rows = rows.slice(1).map((row: any) => {
-  //       const obj: any = {};
-  //       row.forEach((cell: any, index: number) => {
-  //         const headerField = headerMapping[index]; 
-  //         if (headerField) {
-  //           obj[headerField] = cell; 
-  //         }
-  //       });
-  //       return obj;
-  //     });
-
-  //     this.appendDataToTable(this.rows);
-
-  //   };
-
-  //   reader.readAsBinaryString(target.files[0]);
-  // }
-
   validateData(validateOnly?:boolean) {
     this.totalInvalid = 0;
 
@@ -542,7 +525,6 @@ export class LoadDataComponent implements OnInit {
       obj.status = hasComma || invalidTouchPointType || hasNullValue ? 'INVALID' : 'VALID';
     });
 
-    this.showToastForValidCheck = true;
 
     this.totalInvalid = this.rows.filter((obj: any) => obj.status === 'INVALID').length;
 
