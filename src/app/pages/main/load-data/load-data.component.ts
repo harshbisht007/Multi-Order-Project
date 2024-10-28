@@ -200,24 +200,30 @@ export class LoadDataComponent implements OnInit {
   }
   
   generateRemovedOrdersExcel() {
-    this.removedOrders.forEach((val:any)=>{
-      delete val.status;
-    })
     if (this.removedOrders.length === 0) {
-      this.messageService.add({ severity: 'error', summary: 'Please upload the data first', icon: 'pi pi-info-circle' });
-    } else {
-      const data = this.removedOrders;
+        this.messageService.add({ severity: 'error', summary: 'Please upload the data first', icon: 'pi pi-info-circle' });
+        return;
+    }
 
-      const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
+    const formattedData = this.removedOrders.map((order: any) => {
+        const formattedOrder: any = {};
+        this.headers.forEach(header => {
+            if (header.field !== 'status') {
+                formattedOrder[header.header] = order[header.field];
+            }
+        });
+        return formattedOrder;
+    });
 
-      const workbook: XLSX.WorkBook = {
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(formattedData);
+
+    const workbook: XLSX.WorkBook = {
         Sheets: { 'data': worksheet },
         SheetNames: ['data']
-      };
+    };
+    XLSX.writeFile(workbook, 'Removed Orders.xlsx');
+}
 
-      XLSX.writeFile(workbook, 'Removed Orders.xlsx');
-    }
-  }
 
 
   getZoneMeanPoint(arr: [number, number][]): [number, number] {
