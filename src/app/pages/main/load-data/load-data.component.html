@@ -47,7 +47,7 @@
           </div>
           @if(this.rows.length){
           <div class="" [ngClass]="validColumnObject.classes">
-            <img class="h-4 w-4 mr-3" [src]="validColumnObject.imageSrc" alt="no image">
+            <img *ngIf="validColumnObject.imageSrc" class="h-4 w-4 mr-3" [src]="validColumnObject.imageSrc" alt="no image">
             <span>{{ validColumnObject.message }}</span>
           </div>
           }

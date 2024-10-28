@@ -420,6 +420,13 @@ export class LoadDataComponent implements OnInit {
     console.log(this.rows, 'Data after merging and validation');
   }
   async onFileChange(event: any) {
+    this.validColumnObject={
+      classes: {},
+      message: '',
+      imageSrc: ''
+    }
+    
+
     this.loading = true;
     const target: DataTransfer = <DataTransfer>(event.target);
     if (target.files.length !== 1) {
