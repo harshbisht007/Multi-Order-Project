@@ -362,6 +362,8 @@ export class LoadDataComponent implements OnInit {
     if (this.fileInput) {
       this.fileInput.nativeElement.value = '';  // Reset the file input
     }
+    this.messageService.add({ severity: 'error', summary: 'Cancelled' });
+
     this.removedOrders=[]
     this.rows = [];
     this.selectedZone=null

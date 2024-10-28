@@ -333,6 +333,8 @@ export class SetConfigurationComponent implements OnInit {
 
   onCancel() {
     this.goToFirstStep.emit();
+    this.messageService.add({ severity: 'error', summary: 'Cancelled' });
+
     const baseUrl = this.router.url.split('?')[0];
     this.router.navigate([baseUrl], { queryParams: {} });
   }

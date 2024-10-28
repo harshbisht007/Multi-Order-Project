@@ -63,6 +63,7 @@ export class ManageOrdersComponent implements AfterViewInit {
 
   onCancel() {
     this.goToFirstStep.emit(true)
+    this.messageService.add({ severity: 'error', summary: 'Cancelled' });
     const baseUrl = this.router.url.split('?')[0];
     this.router.navigate([baseUrl], { queryParams: {} });
   }
