@@ -286,7 +286,6 @@ export class LoadDataComponent implements OnInit {
     this.isEditable = true
     this.originalData = { ...row }
     this.currentEditingRow = row;
-    console.log(row);
   }
 
   onRowEditSave(row: any) {
@@ -380,9 +379,7 @@ export class LoadDataComponent implements OnInit {
     // this.headers = []
     this.rows = []
     if (this.selectedSource === 'upload') {
-      console.log('Upload File selected');
     } else if (this.selectedSource === 'fetch') {
-      console.log('Fetch from Database selected');
     }
   }
 
@@ -425,7 +422,6 @@ export class LoadDataComponent implements OnInit {
 
     this.validateData(true);
 
-    console.log(this.rows, 'Data after merging and validation');
   }
   async onFileChange(event: any) {
     this.validColumnObject={
@@ -607,7 +603,6 @@ export class LoadDataComponent implements OnInit {
     try {
       const res = await this.createShipmentService.createShipments(sanitizedRows)
       this.dataForMarker.emit(rows);
-      console.log(res);
       this.goToConfiguration.emit(res.create_shipments);
       this.updateQueryParams('route_id', res.create_shipments);
 
@@ -637,7 +632,6 @@ export class LoadDataComponent implements OnInit {
       if (file) {
         this.onFileChange({ target: { files: [file] } });
       } else {
-        console.log('Dialog was closed without file upload');
       }
     });
   }

@@ -91,7 +91,6 @@ export class ManageOrdersComponent implements AfterViewInit {
   ngOnInit() {
     this.route.queryParamMap.subscribe((params: any) => {
       this.orderId = parseInt(params.get('order_id'));
-      console.log('order_id on init:', this.orderId);
     })
     // this.assignDriver = [
     //   { name: 'Assigned', code: 'assigned' },
@@ -144,14 +143,12 @@ export class ManageOrdersComponent implements AfterViewInit {
     if (isMissed) {
       try {
         const res = await this.manageOrderService.addInMissedBatch(touchPoint.touch_point.id);
-        console.log(res);
       } catch (error) {
         console.error('GraphQL Error:', error);
       }
     } else {
       try {
         const res = await this.manageOrderService.addNewMissedBatch(touchPoint.touch_point.id);
-        console.log(res);
       } catch (error) {
         console.error('GraphQL Error:', error);
       }
@@ -270,13 +267,11 @@ export class ManageOrdersComponent implements AfterViewInit {
     this.accordionState[clusterIndex] = this.accordionState[clusterIndex].map((_, index) => index === batchIndex);
 
     this.accordionState[clusterIndex][batchIndex] = true; // Set the state to true for opened
-    console.log(`Opened cluster ${clusterIndex} batch ${batchIndex}`, this.accordionState);
   }
 
   onClose(event: { index: number }, clusterIndex: number) {
     const batchIndex = event.index; // Extract the index of the closed accordion
     this.accordionState[clusterIndex][batchIndex] = false; // Set the state to false for closed
-    console.log(`Closed cluster ${clusterIndex} batch ${batchIndex}`, this.accordionState);
   }
 
   onAccordionChange(event: any) {

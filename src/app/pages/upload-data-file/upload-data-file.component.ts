@@ -135,7 +135,6 @@ export class UploadDataFileComponent {
 
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         const columns = jsonData[0] as any;
-        console.log(columns);
 
         if (columns.length !== 13 || !columns.every((col: any) => this.validFileFormat.includes(col))) {
           this.messageService.add({ severity: 'error', summary: 'Please upload a valid format.' });

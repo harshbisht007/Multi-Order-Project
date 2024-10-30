@@ -88,7 +88,6 @@ export class MainComponent {
         this.activeIndex = 0;
       }
 
-      console.log('Current activeIndex:', this.activeIndex);
     });
   }
   
@@ -112,7 +111,6 @@ export class MainComponent {
 
   activeStepChange(stepIndex: number): void {
     this.activeIndex = stepIndex;
-    console.log(this.activeIndex);
     
   }
   dataForSecondStepper(event: any) {

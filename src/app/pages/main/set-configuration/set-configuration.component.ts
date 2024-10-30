@@ -138,7 +138,6 @@ export class SetConfigurationComponent implements OnInit {
     effect(() => {
       this.categories = this.categoryService.categories();
       if (this.categories && this.categories.length > 0) {
-        console.log('Categories available: ', this.categories);
 
         // this.selectedCategories = [this.categories[0]]; 
       }
@@ -197,7 +196,6 @@ export class SetConfigurationComponent implements OnInit {
   async getRouteData() {
     this.route.queryParamMap.subscribe((params: any) => {
       this.routeId = parseInt(params.get('route_id'));
-      console.log('route_id on init:', this.routeId);
     })
 
 
@@ -239,10 +237,6 @@ export class SetConfigurationComponent implements OnInit {
           shiftTime: config.shift_time
         };
       });
-      console.log(this.selectedCategories);
-
-      console.log(this.additionalFields);
-
 
     } catch (error) {
       console.error(error)
@@ -272,7 +266,6 @@ export class SetConfigurationComponent implements OnInit {
   }
 
   selectedCategory(event: any) {
-    console.log(event, 'event');
     this.additionalFields = this.additionalFields || [];
 
     const selectedCategories = event.value;
@@ -319,7 +312,6 @@ export class SetConfigurationComponent implements OnInit {
       const baseUrl = this.router.url.split('?')[0];
       this.router.navigate([baseUrl], { queryParams: { order_id: res?.run_routing } });
     } catch (error) {
-      console.log(error)
       this.messageService.add({ severity: 'error', summary: 'Routing Failed' });
       this.showSpinner.emit(false)
     }
@@ -327,7 +319,6 @@ export class SetConfigurationComponent implements OnInit {
   }
 
   shouldShowSpinner(event: any) {
-    console.log(event, '12223')
     this.showSpinner.emit(event);
   }
 

@@ -64,11 +64,9 @@ export class BatchMoveDialogComponent implements OnInit, OnChanges {
   
     try {
       const response=await this.manageOrderService.moveTouchPointToBatch(batchId,touchPointId)
-      console.log('API Response:', response);
   
       // Assuming the response contains the necessary success information
       if (response) {
-        console.log(`Touch point ${touchPointId} successfully moved to batch ${batchId}`);
   
         this.display = false;
         this.displayChange.emit(this.display);
