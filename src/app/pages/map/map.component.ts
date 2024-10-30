@@ -173,7 +173,6 @@ export class MapComponent implements OnChanges {
   }
 
   private createSpecialMarker(point: any, index: number): void {
-    console.log(point, '122')
     const isMissed = this.isMissed;
 
     const iconOptions: L.IconOptions = {

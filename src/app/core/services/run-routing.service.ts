@@ -33,7 +33,6 @@ export class RunRoutingService {
   }
 
   async fetchOrderLatLng(outlets:any):Promise<any>{
-    console.log(outlets,'122')
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': this.authToken,

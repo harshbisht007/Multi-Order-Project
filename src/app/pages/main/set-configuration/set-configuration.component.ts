@@ -120,6 +120,7 @@ export class SetConfigurationComponent implements OnInit {
   additionalFields: any;
 
   categoriesFromSynco: any;
+  touhcPointLength: any;
 
   constructor(private categoryService: CategoryService, private graphqlService: GraphqlService, private runRoutingService: RunRoutingService,
     private router: Router,
@@ -203,14 +204,14 @@ export class SetConfigurationComponent implements OnInit {
     try {
       const res = await this.runRoutingService.fetchRouteDetails(this.routeId)
       this.dataForMarker = res.get_route.touch_points;
+      this.touhcPointLength = res.get_route.touch_points.length;
       if (!this.readyZone || Object.keys(this.readyZone).length === 0) {
         this.readyZone = {};
         this.readyZone['refrencePoint'] = [null, null];
         this.readyZone['refrencePoint'][1] = res.get_route.hub_location.latitude;
         this.readyZone['refrencePoint'][0] = res.get_route.hub_location.longitude;
-    }
-    
-      console.log(this.readyZone.refrencePoint, '122')
+      }
+
       this.checked = !res.get_route.single_batch
       const defaultTime = moment().format('HH:mm:ss');
       this.startTime = moment(res.get_route.start_time ?? defaultTime, 'HH:mm:ss').toDate();
@@ -221,7 +222,7 @@ export class SetConfigurationComponent implements OnInit {
       this.maxMinInput[0].value = res.get_route.max_orders_in_cluster
       this.maxMinInput[1].value = res.get_route.min_orders_in_cluster;
 
-      if(this.categoriesFromSynco?.length>0){
+      if (this.categoriesFromSynco?.length > 0) {
         this.selectedCategories = this.categoriesFromSynco.filter((val: any) =>
           res.get_route.vehicle_config.some((config: any) => config.category_id === val.id)
         );
@@ -249,11 +250,10 @@ export class SetConfigurationComponent implements OnInit {
   }
 
   async updateRoute() {
-    console.log(this.readyZone,'122')
     if (this.readyZone) {
       try {
         await this.runRoutingService.updateRoute(this.routeId, {
-          zone_id:this.readyZone.event.value.id,
+          zone_id: this.readyZone.event.value.id,
           hub_location: {
             latitude: this.readyZone.refrencePoint[1],
             longitude: this.readyZone.refrencePoint[0]
@@ -346,6 +346,13 @@ export class SetConfigurationComponent implements OnInit {
   }
 
   async saveChanges() {
+    if (this.touhcPointLength >= 100&&!this.checked) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Please enable multi-batch for orders with quantities greater than 100.',
+      });
+      return;
+    }
     const payload = {
       start_from_hub: this.checkboxOptions.find(option => option.id === 'startHub')?.model,
       end_at_hub: this.checkboxOptions.find(option => option.id === 'endHub')?.model,

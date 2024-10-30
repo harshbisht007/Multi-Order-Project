@@ -504,7 +504,6 @@ export class LoadDataComponent implements OnInit {
         lat: row?.geom?.latitude,
         lng: row?.geom?.longitude,
       }));
-      console.log(data, '122')
       return data;
     } catch (error) {
       console.error('Error fetching lat/lng from API:', error);

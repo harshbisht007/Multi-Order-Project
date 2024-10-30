@@ -41,7 +41,6 @@ export class ZoneService {
       .set('__active__bool', 'true')
       .set('__geom__ne', 'null');
   
-    console.log(zoneId,'122')
     if (zoneId) {
       params = params.set('__id__equal', zoneId);
     }

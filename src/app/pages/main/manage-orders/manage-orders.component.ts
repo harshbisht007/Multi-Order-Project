@@ -71,7 +71,6 @@ export class ManageOrdersComponent implements AfterViewInit {
   goBack() {
     this.goToPreviousStep.emit(true);
     const baseUrl = this.router.url.split('?')[0];
-    console.log(baseUrl, this.order.route.id, '122')
     this.router.navigate([baseUrl], { queryParams: { route_id: this.order.route.id } });
 
   }
@@ -185,7 +184,6 @@ export class ManageOrdersComponent implements AfterViewInit {
 
   onUpdateOrder(): void {
     const updatedTouchPoints = this.getUpdatedTouchPoints();
-    console.log(updatedTouchPoints, '122')
     this.updateTouchPointOrder(updatedTouchPoints).then(response => {
       this.messageService.add({ severity: 'success', summary: 'TouchPoint Reordered Successfully', icon: 'pi pi-check' });
       this.getOrder(true)
@@ -231,7 +229,6 @@ export class ManageOrdersComponent implements AfterViewInit {
           cluster.batches.map(() => false));  // All accordion tabs closed initially
       }
     }
-    console.log(this.accordionState, '122')
     this.checkIfMissedOrder(this.order);
     this.batchInfo = this.order?.clusters.flatMap((cluster: any) =>
       cluster.batches.map((batch: any) => [
