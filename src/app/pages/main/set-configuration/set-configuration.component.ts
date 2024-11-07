@@ -248,6 +248,7 @@ export class SetConfigurationComponent implements OnInit {
       try {
         await this.runRoutingService.updateRoute(this.routeId, {
           zone_id: this.readyZone.event.value.id,
+          zone_name:this.readyZone.event.value.name,
           hub_location: {
             latitude: this.readyZone.refrencePoint[1],
             longitude: this.readyZone.refrencePoint[0]

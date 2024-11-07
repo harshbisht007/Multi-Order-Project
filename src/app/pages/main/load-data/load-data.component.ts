@@ -101,7 +101,12 @@ export class LoadDataComponent implements OnInit {
     { field: 'touch_point_type', header: 'Touch Point Type' },
     { field: 'latitude', header: 'Latitude' },
     { field: 'longitude', header: 'Longitude' },
-    { field: 'status', header: 'Status' }
+    { field: 'status', header: 'Status' },
+    { field: 'instructions', header: 'Instructions' },
+    { field: 'mode_of_payment', header: 'Mode of Payment' },
+    { field: 'total_amount', header: 'Total' },
+    { field: 'split_amount', header: 'Split' },
+
   ];
   showActions: any = true;
   selectedSource: any = 'upload';
@@ -161,13 +166,13 @@ export class LoadDataComponent implements OnInit {
         name: ''
       };
   }
- 
+
   async removeFarOrders(zonePoints: any) {
     this.referencePoint = this.getZoneMeanPoint(zonePoints);
     const distanceThreshold = 200;
     let farOrdersRemoved = false;
-  
-  
+
+
     this.rows = this.rows.filter((order: CustomTouchPoint) => {
       if (order.latitude && order.longitude) {
         const distance = this.getStraightDistanceFromLatLonInKm(
@@ -177,19 +182,19 @@ export class LoadDataComponent implements OnInit {
         if (distance > distanceThreshold) {
           farOrdersRemoved = true;
           this.removedOrders.push(order);
-          return false; 
+          return false;
         }
       }
-      return true; 
+      return true;
     });
-  
+
     if (farOrdersRemoved) {
       this.messageService.add({
         severity: 'error',
         summary: 'Far Orders Removed',
         detail: 'Orders beyond the threshold distance have been removed.'
       });
-  
+
     } else {
       this.messageService.add({
         severity: 'info',
@@ -198,31 +203,31 @@ export class LoadDataComponent implements OnInit {
       });
     }
   }
-  
+
   generateRemovedOrdersExcel() {
     if (this.removedOrders.length === 0) {
-        this.messageService.add({ severity: 'error', summary: 'Please upload the data first', icon: 'pi pi-info-circle' });
-        return;
+      this.messageService.add({ severity: 'error', summary: 'Please upload the data first', icon: 'pi pi-info-circle' });
+      return;
     }
 
     const formattedData = this.removedOrders.map((order: any) => {
-        const formattedOrder: any = {};
-        this.headers.forEach(header => {
-            if (header.field !== 'status') {
-                formattedOrder[header.header] = order[header.field];
-            }
-        });
-        return formattedOrder;
+      const formattedOrder: any = {};
+      this.headers.forEach(header => {
+        if (header.field !== 'status') {
+          formattedOrder[header.header] = order[header.field];
+        }
+      });
+      return formattedOrder;
     });
 
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(formattedData);
 
     const workbook: XLSX.WorkBook = {
-        Sheets: { 'data': worksheet },
-        SheetNames: ['data']
+      Sheets: { 'data': worksheet },
+      SheetNames: ['data']
     };
     XLSX.writeFile(workbook, 'Removed Orders.xlsx');
-}
+  }
 
 
 
@@ -276,13 +281,13 @@ export class LoadDataComponent implements OnInit {
 
   onRowEditInit(row: any) {
     if (this.currentEditingRow && this.currentEditingRow !== row) {
-      this.messageService.add({ 
-          severity: 'warn', 
-          summary: 'You need to save or cancel the current editing before editing another row.', 
-          detail: 'You need to save or cancel the current editing before editing another row.' 
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'You need to save or cancel the current editing before editing another row.',
+        detail: 'You need to save or cancel the current editing before editing another row.'
       });
-      return; 
-  }
+      return;
+    }
     this.isEditable = true
     this.originalData = { ...row }
     this.currentEditingRow = row;
@@ -369,9 +374,9 @@ export class LoadDataComponent implements OnInit {
     }
     this.messageService.add({ severity: 'error', summary: 'Cancelled' });
 
-    this.removedOrders=[]
+    this.removedOrders = []
     this.rows = [];
-    this.selectedZone=null
+    this.selectedZone = null
     // this.headers = []
   }
 
@@ -401,7 +406,7 @@ export class LoadDataComponent implements OnInit {
   }
   async appendDataToTable(newData: any) {
     if (this.rows && this.rows.length > 0) {
-      this.removedOrders=[]
+      this.removedOrders = []
       const uniqueKey = 'external_id';
       const existingIds = new Set(this.rows.map((row: any) => row[uniqueKey]));
 
@@ -424,12 +429,12 @@ export class LoadDataComponent implements OnInit {
 
   }
   async onFileChange(event: any) {
-    this.validColumnObject={
+    this.validColumnObject = {
       classes: {},
       message: '',
       imageSrc: ''
     }
-    
+
 
     this.loading = true;
     const target: DataTransfer = <DataTransfer>(event.target);
@@ -469,7 +474,7 @@ export class LoadDataComponent implements OnInit {
         });
         return obj;
       });
-      const payload = this.rows.map((row:any) => {
+      const payload = this.rows.map((row: any) => {
         const skip = row['latitude'] && row['longitude'];
         return {
           skip: !!skip,
@@ -518,7 +523,7 @@ export class LoadDataComponent implements OnInit {
     });
   }
 
-  validateData(validateOnly?:boolean) {
+  validateData(validateOnly?: boolean) {
     this.totalInvalid = 0;
 
     this.rows.forEach((obj: any) => {
@@ -563,7 +568,7 @@ export class LoadDataComponent implements OnInit {
     };
 
     this.loading = false;
-    if(validateOnly){
+    if (validateOnly) {
 
       this.messageService.add({ severity: 'success', summary: 'Data Upload Successfully' });
     }
@@ -579,7 +584,7 @@ export class LoadDataComponent implements OnInit {
   async submitData(rows: any[]) {
     const sanitizedRows = rows.reduce((acc, col) => {
       if (col['status']) {
-        const { opening_time, closing_time, external_id, status, latitude, longitude, weight, pincode, customer_phone, ...rest } = col;
+        const { opening_time, closing_time, total, external_id, total_amount,status, split_amount, latitude, longitude, weight, pincode, customer_phone, ...rest } = col;
 
         const sanitizedRow = {
           ...rest,
@@ -588,9 +593,14 @@ export class LoadDataComponent implements OnInit {
           latitude: typeof latitude === 'string' ? parseInt(latitude, 10) : latitude,
           longitude: typeof longitude === 'string' ? parseInt(longitude, 10) : longitude,
           weight: typeof weight === 'string' ? parseInt(weight, 10) : weight,
+          total_amount: typeof total_amount === 'string' ? parseFloat(total_amount) : total_amount,
+          split_amount: typeof split_amount === 'string' ? parseFloat(split_amount) : split_amount,
           pincode: typeof pincode === 'number' ? pincode.toString() : pincode,
           external_id: typeof external_id === 'number' ? external_id.toString() : external_id,
-          customer_phone: typeof customer_phone === 'number' ? customer_phone.toString() : customer_phone
+          customer_phone: typeof customer_phone === 'number' ? customer_phone.toString() : customer_phone,
+          total: typeof total === 'number' ? total.toString() : total,
+
+
         };
 
         acc.push(sanitizedRow);

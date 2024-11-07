@@ -33,7 +33,11 @@ export class UploadDataFileComponent {
     "Touch Point Type",
     "Latitude",
     "Longitude",
-    "External Id"
+    "External Id",
+    "Instructions",
+    "Mode of Payment",
+    "Total",
+    "Split"
   ]
   @ViewChild('fileInput') fileInput: ElementRef | undefined;
   fileSelected: boolean = false;
@@ -136,7 +140,7 @@ export class UploadDataFileComponent {
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         const columns = jsonData[0] as any;
 
-        if (columns.length !== 13 || !columns.every((col: any) => this.validFileFormat.includes(col))) {
+        if (columns.length !== 17 || !columns.every((col: any) => this.validFileFormat.includes(col))) {
           this.messageService.add({ severity: 'error', summary: 'Please upload a valid format.' });
           return;
         }
