@@ -101,11 +101,11 @@ export class LoadDataComponent implements OnInit {
     { field: 'touch_point_type', header: 'Touch Point Type' },
     { field: 'latitude', header: 'Latitude' },
     { field: 'longitude', header: 'Longitude' },
-    { field: 'status', header: 'Status' },
     { field: 'instructions', header: 'Instructions' },
     { field: 'mode_of_payment', header: 'Mode of Payment' },
     { field: 'total_amount', header: 'Total' },
     { field: 'split_amount', header: 'Split' },
+    { field: 'status', header: 'Status' },
 
   ];
   showActions: any = true;
