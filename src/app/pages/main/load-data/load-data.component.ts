@@ -104,7 +104,6 @@ export class LoadDataComponent implements OnInit {
     { field: 'instructions', header: 'Instructions' },
     { field: 'mode_of_payment', header: 'Mode of Payment' },
     { field: 'total_amount', header: 'Total' },
-    { field: 'split_amount', header: 'Split' },
     { field: 'status', header: 'Status' },
 
   ];
@@ -534,8 +533,9 @@ export class LoadDataComponent implements OnInit {
       const invalidTouchPointType = obj.touch_point_type !== 'PICKUP' && obj.touch_point_type !== 'DROP';
 
       const hasNullValue = Object.keys(obj)
-        .filter(key => key !== 'address')
-        .some(key => obj[key] === null || obj[key] === undefined || obj[key] === '');
+      .filter(key => !['address', 'instructions', 'mode_of_payment', 'total_amount'].includes(key))
+      .some(key => obj[key] === null || obj[key] === undefined || obj[key] === '');
+    
 
       obj.status = hasComma || invalidTouchPointType || hasNullValue ? 'INVALID' : 'VALID';
     });
@@ -584,7 +584,7 @@ export class LoadDataComponent implements OnInit {
   async submitData(rows: any[]) {
     const sanitizedRows = rows.reduce((acc, col) => {
       if (col['status']) {
-        const { opening_time, closing_time, total, external_id, total_amount,status, split_amount, latitude, longitude, weight, pincode, customer_phone, ...rest } = col;
+        const { opening_time, closing_time, total, external_id,instructions, total_amount,status, latitude, longitude, weight, pincode, customer_phone, ...rest } = col;
 
         const sanitizedRow = {
           ...rest,
@@ -594,13 +594,11 @@ export class LoadDataComponent implements OnInit {
           longitude: typeof longitude === 'string' ? parseInt(longitude, 10) : longitude,
           weight: typeof weight === 'string' ? parseInt(weight, 10) : weight,
           total_amount: typeof total_amount === 'string' ? parseFloat(total_amount) : total_amount,
-          split_amount: typeof split_amount === 'string' ? parseFloat(split_amount) : split_amount,
           pincode: typeof pincode === 'number' ? pincode.toString() : pincode,
           external_id: typeof external_id === 'number' ? external_id.toString() : external_id,
           customer_phone: typeof customer_phone === 'number' ? customer_phone.toString() : customer_phone,
           total: typeof total === 'number' ? total.toString() : total,
-
-
+          instructions:typeof instructions === 'number' ? instructions.toString() : instructions
         };
 
         acc.push(sanitizedRow);

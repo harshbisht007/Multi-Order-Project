@@ -32,7 +32,7 @@
             <table class="table-auto w-full cursor-pointer">
               <tbody>
                 <tr class="font-sm">
-                  @for(item of batchInfo[batchIndex]; let i = $index; track i) {
+                  @for(item of batchInfo[clusterIndex]; let i = $index; track i) {
                   <td>
                     <p class="text-[#878682]">{{ item.label }}</p>
                     @if(item.label==='Batch ID'){
