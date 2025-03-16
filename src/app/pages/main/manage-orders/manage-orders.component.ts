@@ -84,11 +84,11 @@ export class ManageOrdersComponent implements AfterViewInit {
     try {
       const res = await this.manageOrderService.placeOrder(this.orderId);
       this.messageService.add({ severity: 'success', summary: 'Order Created Successfully', icon: 'pi pi-check' });
-      if (environment.zone.includes('demo')) {
-        window.location.href = 'https://synco-attendance.web.app/pages/multi-orders/pending-orders';
-      } else {
-        window.location.href = 'https://synco.roadcast.co.in/pages/multi-orders/pending-orders';
-      }
+      // if (environment.zone.includes('demo')) {
+      //   window.location.href = 'https://synco-attendance.web.app/pages/multi-orders/pending-orders';
+      // } else {
+      //   window.location.href = 'https://synco.roadcast.co.in/pages/multi-orders/pending-orders';
+      // }
     } catch (error) {
       console.error('GraphQL Error:', error);
       this.messageService.add({ severity: 'error', summary: 'Error', });
