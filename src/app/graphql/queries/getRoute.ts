@@ -49,6 +49,7 @@ avg_speed
 start_from_hub
 end_at_hub
 zone_id
+wait_time_per_stop
 single_batch
 overwrite_duplicate
 hub_location {
@@ -64,3 +65,13 @@ company_id
 }
 }
 `;
+
+export const getOrderDetails=gql`
+query Get_task_status($taskId: String!) {
+  get_task_status(task_id: $taskId) {
+    data
+    state
+    message
+  }
+}
+`

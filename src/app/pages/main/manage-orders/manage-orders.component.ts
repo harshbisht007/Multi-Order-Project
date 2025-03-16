@@ -5,7 +5,7 @@ import { AccordionModule } from "primeng/accordion";
 import { TableModule } from "primeng/table";
 import { TabViewModule } from 'primeng/tabview';
 import { DropdownModule } from 'primeng/dropdown';
-import { CommonModule, NgClass } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { TooltipModule } from 'primeng/tooltip';
 import { MapComponent } from "../../map/map.component";
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -15,13 +15,17 @@ import { BatchMoveDialogComponent } from '../../batch-move-dialog/batch-move-dia
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ManageOrdersService } from '../../../core/services/manage-orders.service';
 import { DialogModule } from 'primeng/dialog';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { ZoneService } from '../../../core/services/zone.service';
+import { ReadyZone, ReadyZoneData, zoneAPIResponse } from '../../../graphql/interfaces/zoneData';
+import { BatchInfo, BatchReRun } from '../../../graphql/interfaces/batchInfo';
+import { Batch, Order, Cluster, TouchPointDetails } from '../../../graphql/interfaces/orderType';
+import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-manage-orders',
   standalone: true,
   imports: [
-    AccordionModule, DialogModule, NgClass, TooltipModule, CommonModule, ConfirmDialogModule,
+    AccordionModule, DialogModule, TooltipModule, CommonModule, ConfirmDialogModule,
     TableModule, TabViewModule, DropdownModule, ToastModule,
     MapComponent, BatchMoveDialogComponent, DragDropModule
   ],
@@ -32,31 +36,31 @@ import { ZoneService } from '../../../core/services/zone.service';
 export class ManageOrdersComponent implements AfterViewInit {
   @ViewChild(MapComponent) mapComponent!: MapComponent;
 
-  @Output() goToPreviousStep: EventEmitter<any> = new EventEmitter<any>();
-  @Output() goToFirstStep: EventEmitter<any> = new EventEmitter<any>();
-  @Output() showSpinner: EventEmitter<any> = new EventEmitter<any>();
+  @Output() goToPreviousStep: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() goToFirstStep: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() showSpinner: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  @Input() readyZone: any;
+  @Input() readyZone!: ReadyZoneData;
   displayDialog: boolean = false;
   touchPointId!: number;
-  cluster = [];
+  cluster: Batch[] = [];
   reorder: boolean = false;
   visible: boolean = false;
   isMissed: boolean = false;
-  activeAccordionIndex: number | null = null;
-  // assignDriver: { name: string, code: string }[] = [];
-  @Input() routeId!: string;
+  activeAccordionIndex: number | number[] | null = null;
+  @Input() routeId!: number;
   @Input() orderId!: number;
-  order!: any;
-  batchInfo: any = []
-  startFromHub: any;
-  endAtHub: any;
-  selectedZone: any;
-  zoneId: any;
+  order!: Order;
+  batchInfo: BatchInfo[] = [];
+  startFromHub!: boolean;
+  endAtHub!: boolean;
+  selectedZone!: ReadyZone;
+  zoneId!: number;
 
 
-  activeClusterTabIndex: number = 0;  // Track the active cluster tab
+  activeClusterTabIndex: number = 0;
   accordionState: boolean[][] = [];
+  clusterIndex!: number;
 
   constructor(private zoneService: ZoneService, private route: ActivatedRoute, private manageOrderService: ManageOrdersService, private router: Router, private graphqlService: GraphqlService, private confirmationService: ConfirmationService, private messageService: MessageService) {
   }
@@ -80,7 +84,11 @@ export class ManageOrdersComponent implements AfterViewInit {
     try {
       const res = await this.manageOrderService.placeOrder(this.orderId);
       this.messageService.add({ severity: 'success', summary: 'Order Created Successfully', icon: 'pi pi-check' });
-      // window.location.href = 'https://synco-attendance.web.app/pages/multi-orders/pending-orders';
+      if (environment.zone.includes('demo')) {
+        window.location.href = 'https://synco-attendance.web.app/pages/multi-orders/pending-orders';
+      } else {
+        window.location.href = 'https://synco.roadcast.co.in/pages/multi-orders/pending-orders';
+      }
     } catch (error) {
       console.error('GraphQL Error:', error);
       this.messageService.add({ severity: 'error', summary: 'Error', });
@@ -89,8 +97,9 @@ export class ManageOrdersComponent implements AfterViewInit {
   }
 
   ngOnInit() {
-    this.route.queryParamMap.subscribe((params: any) => {
-      this.orderId = parseInt(params.get('order_id'));
+    this.route.queryParamMap.subscribe((params: ParamMap) => {
+      const order_id = parseInt(params.get('order_id')!, 10);
+      this.orderId = order_id;
     })
     // this.assignDriver = [
     //   { name: 'Assigned', code: 'assigned' },
@@ -103,8 +112,8 @@ export class ManageOrdersComponent implements AfterViewInit {
 
     await this.getOrder().then();
     this.zoneService.getZones(this.zoneId).subscribe(
-      (data) => {
-        this.selectedZone = data.data;
+      (data: zoneAPIResponse) => {
+        this.selectedZone = data.data[0];
       },
       (error) => {
         console.error('Error fetching zones:', error); // Handle errors here
@@ -115,8 +124,8 @@ export class ManageOrdersComponent implements AfterViewInit {
 
 
 
-  confirmDelete(touchPoint: any, batch: any) {
-    const isMissed = batch.some((element: any) => element.is_missed === true);
+  confirmDelete(touchPoint: TouchPointDetails, allBatches: Batch[], cuurentBatch: Batch, batchIndex: number, clusterIndex: number) {
+    const isMissed = allBatches.some((element) => element.is_missed === true);
 
     this.confirmationService.confirm({
       message: `Are you sure you want to delete Order ${touchPoint.touch_point_id} from batch? This order will be moved to Missed Orders`,
@@ -124,21 +133,18 @@ export class ManageOrdersComponent implements AfterViewInit {
       icon: 'pi pi-exclamation-triangle',
 
       accept: () => {
-        // Code to delete the item
-        this.deleteTouchPoint(touchPoint, isMissed);
+        this.deleteTouchPoint(touchPoint, isMissed, cuurentBatch.id, batchIndex, clusterIndex, cuurentBatch.additional_distance);
 
-        // Optionally show a success message
         this.messageService.add({ severity: 'success', summary: 'Touch point deleted', icon: 'pi pi-check' });
       },
       reject: () => {
-        // Optionally show a cancel message
         this.messageService.add({ severity: 'error', summary: 'Cancelled' });
       }
     });
   }
 
 
-  async deleteTouchPoint(touchPoint: any, isMissed: boolean) {
+  async deleteTouchPoint(touchPoint: TouchPointDetails, isMissed: boolean, batchId: number, batchIndex: number, clusterIndex: number, additionalDisatnce: number) {
 
     if (isMissed) {
       try {
@@ -153,27 +159,37 @@ export class ManageOrdersComponent implements AfterViewInit {
         console.error('GraphQL Error:', error);
       }
     }
-    await this.getOrder()
+
+    const res = await this.manageOrderService.reRunBatching(batchId)
+
+    await this.updateBatchProperty(res?.rerun_batch_routing, batchIndex, clusterIndex, additionalDisatnce);
+    await this.getOrder(true)
   }
 
-  openMoveDialog(touchPoint: any, batch: any) {
+  openMoveDialog(touchPoint: TouchPointDetails, batch: Batch[], clusterIndex: number) {
     this.cluster = batch
     this.touchPointId = touchPoint.touch_point_id;
     this.displayDialog = true;
+    this.clusterIndex = clusterIndex;
+
   }
 
-  closeDialog(result: boolean) {
+  async closeDialog(event: { success: boolean, selectedBatchIndex: any, selectedBatchId: any, additional_distance: any }) {
     this.displayDialog = false;
-    if (result) {
+    const { success, selectedBatchIndex, selectedBatchId, additional_distance } = event;
+    if (success) {
       this.messageService.add({ severity: 'success', summary: 'Touch point successfully moved', icon: 'pi pi-check' });
-      this.getOrder()
+      const res = await this.manageOrderService.reRunBatching(selectedBatchId)
+
+      await this.updateBatchProperty(res?.rerun_batch_routing, selectedBatchIndex, this.clusterIndex, additional_distance);
+      await this.getOrder(true)
     } else {
       this.messageService.add({ severity: 'error', summary: 'Cancelled', detail: 'Move operation was cancelled' });
 
     }
   }
 
-  drop(event: CdkDragDrop<any[]>, batch: any) {
+  drop(event: CdkDragDrop<DragEvent>, batch: Batch) {
     this.reorder = true;
     moveItemInArray(batch.touch_points, event.previousIndex, event.currentIndex);
     batch.isReordered = true;
@@ -192,8 +208,8 @@ export class ManageOrdersComponent implements AfterViewInit {
   }
 
   showDialog() {
-    this.order.clusters.forEach((cluster: any) => {
-      cluster.batches.forEach((batch: any) => {
+    this.order.clusters.forEach((cluster) => {
+      cluster.batches.forEach((batch) => {
         if (batch.is_missed === true) {
           if (batch.touch_points.length !== 0) {
             this.visible = true;
@@ -210,45 +226,76 @@ export class ManageOrdersComponent implements AfterViewInit {
   async getOrder(isUpdate?: boolean) {
     const res = await this.manageOrderService.fetchOrderDetails(this.orderId);
     if (!this.readyZone || Object.keys(this.readyZone).length === 0) {
-      this.readyZone = {};
-      this.readyZone['refrencePoint'] = [null, null];
-      this.readyZone['refrencePoint'][1] = res.get_order.route.hub_location.latitude;
-      this.readyZone['refrencePoint'][0] = res.get_order.route.hub_location.longitude;
+      this.readyZone = {
+        event: {
+          originalEvent: { isTrusted: true },
+          value: {
+            active: true,
+            address: '',
+            agreement_template: null,
+            company_id: '',
+            created_on: '',
+            description: '',
+            geom: { coordinates: [], type: 'Polygon' },
+            id: '',
+            name: '',
+            unique_id: '',
+            updated_on: ''
+          }
+        },
+        refrencePoint: [
+          res.get_order.route.hub_location.longitude ?? 0,
+          res.get_order.route.hub_location.latitude ?? 0
+        ]
+      };
     }
+
     this.zoneId = res.get_order.route.zone_id;
     this.startFromHub = res.get_order.route.start_from_hub;
     this.endAtHub = res.get_order.route.end_at_hub;
     this.order = res.get_order;
+
     if (!isUpdate) {
 
       if (this.order && this.order.clusters) {
-        this.accordionState = this.order.clusters.map((cluster: any) =>
-          cluster.batches.map(() => false));  // All accordion tabs closed initially
+        this.accordionState = this.order.clusters.map((cluster) =>
+          cluster.batches.map(() => false));
       }
     }
     this.checkIfMissedOrder(this.order);
-    this.batchInfo = this.order?.clusters.flatMap((cluster: any) =>
-      cluster.batches.map((batch: any) => [
-        { label: 'Batch ID', value: batch.id },
-        // { label: 'Order Volume', value: batch.volume || 'N/A' },
-        { label: 'Category', value: batch.category_name || 'N/A' },
-        { label: 'Total Distance', value: (batch.total_km || 0) + ' Km' },
-        // { label: 'Estimated Time', value: (batch.duration ? (batch.duration / 60).toFixed(2) : '0.00') + ' Hrs' },
-        { label: 'Total Load', value: batch.total_load || 'N/A' }
-      ])
-    );
+    this.batchInfo = this.order.clusters.map((cluster) => ({
+      clusterId: cluster.id,
+      batches: cluster.batches.map((batch) => ({
+        data: [
+          { label: 'Batch ID', value: batch.id },
+          { label: 'Category', value: batch.category_name || 'N/A' },
+          {
+            label: 'Total Time',
+            value: (() => {
+              const durationInMinutes = batch.duration || 0;
+              const hours = Math.floor(durationInMinutes / 60);
+              const minutes = durationInMinutes % 60;
 
+              return batch.duration?(hours ? `${hours} hours ` : '') +
+                (minutes ? `${minutes} minutes` : '').trim():'N/A';
+            })()
+          }, { label: 'Total Distance', value: (batch.total_km + batch.additional_distance || 0) + ' Km' },
+          { label: 'Total Load', value: batch.total_load || 'N/A' }
+        ]
+      }))
+    }));
   }
 
-  checkIfMissedOrder(data: any) {
-    this.isMissed = data.clusters.some((cluster: any) =>
-      cluster.batches.some((batch: any) => batch.is_missed === true)
+  checkIfMissedOrder(data: Order) {
+    this.isMissed = data.clusters.some((cluster) =>
+      cluster.batches.some((batch) => batch.is_missed === true)
     );
   }
 
 
 
-  shouldShowSpinner(event: any) {
+  shouldShowSpinner(event: boolean) {
+
     this.showSpinner.emit(event);
 
   }
@@ -257,38 +304,48 @@ export class ManageOrdersComponent implements AfterViewInit {
     if (this.activeClusterTabIndex !== index) {
       this.accordionState[this.activeClusterTabIndex] = this.accordionState[this.activeClusterTabIndex].map(() => false);
     }
-
     this.activeClusterTabIndex = index;
     this.activeAccordionIndex = null;
   }
 
-  onOpen(event: { index: number }, clusterIndex: number) {
-    const batchIndex = event.index; // Extract the index of the opened accordion
-    this.accordionState[clusterIndex] = this.accordionState[clusterIndex].map((_, index) => index === batchIndex);
+  async updateBatchProperty(batchData: BatchReRun, batchIndex: number, clusterIndex: number, additionalDistance: number) {
+    this.batchInfo[clusterIndex]?.batches[batchIndex]?.data.forEach((item) => {
+      if (item.label === 'Total Distance') {
+        item.value = Math.round(batchData?.total_km + additionalDistance).toString() + ' Km'
+      }
+      if (item.label === 'Total Load') {
+        item.value = Math.round(batchData?.total_load).toString();
+      }
+    });
+  }
 
-    this.accordionState[clusterIndex][batchIndex] = true; // Set the state to true for opened
+  async onOpen(event: { index: number }, clusterIndex: number, data: Batch[]) {
+    const batchIndex = event.index;
+    // const res = await this.manageOrderService.reRunBatching(data[batchIndex].id);
+    // await this.updateBatchProperty(res?.rerun_batch_routing, batchIndex, clusterIndex);
+    this.accordionState[clusterIndex] = this.accordionState[clusterIndex].map((_, index) => index === batchIndex);
+    this.accordionState[clusterIndex][batchIndex] = true;
   }
 
   onClose(event: { index: number }, clusterIndex: number) {
-    const batchIndex = event.index; // Extract the index of the closed accordion
-    this.accordionState[clusterIndex][batchIndex] = false; // Set the state to false for closed
+    const batchIndex = event.index;
+    this.accordionState[clusterIndex][batchIndex] = false;
   }
 
-  onAccordionChange(event: any) {
+  onAccordionChange(event: number | number[]) {
     this.activeAccordionIndex = event === this.activeAccordionIndex ? null : event;
   }
 
 
-  private getUpdatedTouchPoints(): any[] {
-    return this.order.clusters.flatMap((cluster: any) =>
-      cluster.batches.flatMap((batch: any) =>
-        batch.touch_points.map((tp: any) => ({ id: tp.id }))
+  private getUpdatedTouchPoints() {
+    return this.order.clusters.flatMap((cluster) =>
+      cluster.batches.flatMap((batch) =>
+        batch.touch_points.map((tp) => ({ id: tp.id }))
       )
     );
   }
 
-  private async updateTouchPointOrder(touchPoints: any[]): Promise<any> {
-
+  private async updateTouchPointOrder(touchPoints: { id: number }[]) {
     const rows = touchPoints.map((tp, index) => ({
       priority: index + 1,
       id: tp.id,

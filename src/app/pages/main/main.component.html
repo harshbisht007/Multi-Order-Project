@@ -4,7 +4,7 @@
       <p-stepperPanel header="Order Data">
         <ng-template pTemplate="content" let-nextCallback="nextCallback" let-index="index">
           <app-load-data (goToConfiguration)="setRouteId($event)" (dataForMarker)="getData($event)"
-            (zoneForRouting)="zoneForRouting($event)" [valueForTable]="dataForMarker"
+            (zoneForRouting)="zoneForRouting($event)" [valueForTable]="dataForMarker" (showSpinner)="showLoader=$event"
             [readyZone]="readyZone"></app-load-data>
         </ng-template>
       </p-stepperPanel>

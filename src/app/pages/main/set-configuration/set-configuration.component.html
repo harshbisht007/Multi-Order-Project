@@ -25,12 +25,13 @@
         </div>
         }
       </div>
+      <p class="text-green-900">The settings below will be applied to every cluster.</p>
 
       }
 
 
       <div class="grid grid-cols-2 gap-4 mt-4">
-        <div class="grid grid-cols-2 gap-4 items-center">
+        <div class="grid grid-cols-3 gap-4 items-center">
           @for( option of checkboxOptions; track $index){
           <div class="flex items-center">
             <input type="checkbox" [id]="option.id" class="h-4 w-4 rounded accent-[--baseColor] mr-1"
@@ -44,25 +45,31 @@
           </div>
           }
         </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-3 gap-4">
           <div>
             <label for="routeStartTime" class="required">Route Start Time (HH:MM)</label>
             <p-calendar [(ngModel)]="startTime" [iconDisplay]="'input'" [showIcon]="true" [timeOnly]="true"
               inputId="templatedisplay" (ngModelChange)="onTimeChange($event)">
               <ng-template pTemplate="inputicon" let-clickCallBack="clickCallBack">
-                <i class="pi pi-user pointer-events-none" (click)="clickCallBack($event)"></i>
+                <i class="pi pi-calendar pointer-events-none" (click)="clickCallBack($event)"></i>
               </ng-template>
             </p-calendar>
           </div>
 
           <div>
-            <label for="vehicleCategory">Vehicle Category</label>
+            <label for="waitTimePerStop" class="required">Max. Wait Time Per Stop</label>
+            <input type="number" [(ngModel)]="waitTimePerStop" type="number" [min]="0" pInputText
+              placeholder="Enter Wait Time per Stop" class="mt-3" (ngModelChange)="checkFormValidity()" />
+          </div>
+
+          <div>
+            <label for="vehicleCategory" class="mb-1 block">Vehicle Category</label>
             <!-- <p-multiSelect [options]="categories" [(ngModel)]="selectedCategories" id="vehicleCategory"
               (onChange)="selectedCategory($event)" optionLabel="name" class="mt-2 cust_multi_select"
               placeholder="Select Categories">
             </p-multiSelect> -->
             <p-multiSelect [options]="categoriesFromSynco" [(ngModel)]="selectedCategories" id="vehicleCategory"
-              (onChange)="selectedCategory($event)" optionLabel="name" class="mt-2 cust_multi_select"
+              (onChange)="selectedCategory($event)" optionLabel="name" class="cust_multi_select"
               placeholder="Select Categories">
             </p-multiSelect>
           </div>
@@ -70,7 +77,7 @@
       </div>
       @for(category of additionalFields; track $index) {
       <h3 class="font-sm font-semibold mt-4 mb-1">{{ category.name }}</h3>
-      <div class="grid grid-cols-3 gap-x-8 gap-y-4">
+      <div class="grid grid-cols-4 gap-x-8 gap-y-4">
         @for(field of categoryFields;track field.id;let i =$index ){
         <div>
           <label [for]="field.id + i" class="required">{{ field.label }}</label>
@@ -110,7 +117,7 @@
   <div class="flex justify-between items-center mt-4 mb-2 border-top">
     <p class="text-sm font-normal text-[#878682]">{{ dataForMarker.length }} orders</p>
   </div>
-  <div class="h-[400px] w-[100%] border rounded-md overflow-hidden">
+  <div class="h-[525px] w-[100%] border rounded-md overflow-hidden">
     <app-map [dataForMarker]="dataForMarker" (showSpinner)="shouldShowSpinner($event)"
       [pickupLocation]="readyZone?.refrencePoint"></app-map>
   </div>

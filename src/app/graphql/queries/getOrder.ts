@@ -67,6 +67,9 @@ export const getOrderDetails = gql`query Get_order($getOrderId: Int!) {
           cluster_id
           total_load
           total_km
+          additional_distance
+          start_at_hub
+          end_at_hub
           id
         }
         is_missed
@@ -80,3 +83,10 @@ export const getOrderDetails = gql`query Get_order($getOrderId: Int!) {
   }
   
   `
+
+
+export const reRunBatching = gql`
+query Query($batchId: Int!) {
+  rerun_batch_routing(batch_id: $batchId)
+}
+`

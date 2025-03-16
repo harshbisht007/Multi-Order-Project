@@ -12,8 +12,8 @@ export class TokenInjectorInterceptor implements HttpInterceptor {
   constructor(private route: ActivatedRoute) {
   this.authToken=localStorage.getItem('synco_auth_token');
     }
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // if (req.url.includes('amazon') || req.url.includes('/api/v1/auth/zone') || req.url.includes('api/v1/auth/category')) {
+    intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+      // if (req.url.includes('amazon') || req.url.includes('/api/v1/auth/zone') || req.url.includes('api/v1/auth/category')) {
     //   return next.handle(req);
     // }
 

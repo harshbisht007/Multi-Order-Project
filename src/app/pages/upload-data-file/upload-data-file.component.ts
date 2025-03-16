@@ -53,12 +53,14 @@ export class UploadDataFileComponent {
     this.fileInput?.nativeElement.click();
   }
 
-  onFileSelect(event: any) {
-    const file = event.target.files[0];
+  onFileSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] || null;
     if (file) {
       this.processFile(file);
     }
   }
+
   downloadSample() {
     const link = document.createElement('a');
     link.href = 'assets/sample_shipments.xlsx';
@@ -85,10 +87,12 @@ export class UploadDataFileComponent {
     const reader = new FileReader();
 
     if (fileType === 'csv') {
-      reader.onload = (e: any) => this.processCSV(e.target.result, file);
+      reader.onload = (e: ProgressEvent<FileReader>) =>
+        this.processCSV((e.target?.result as string) || '', file);
       reader.readAsText(file);
     } else {
-      reader.onload = (e: any) => this.processExcel(e.target.result, file);
+      reader.onload = (e: ProgressEvent<FileReader>) =>
+        this.processExcel(e.target?.result as ArrayBuffer, file);
       reader.readAsArrayBuffer(file);
     }
   }
@@ -129,17 +133,20 @@ export class UploadDataFileComponent {
   onUpload() {
     if (this.selectedFile) {
       const reader = new FileReader();
-      reader.onload = (e: any) => {
-        const data = new Uint8Array(e.target.result);
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const data: Uint8Array = new Uint8Array(e.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: 'array' });
 
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
 
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        const columns = jsonData[0] as any;
+        const columns: string[] = jsonData[0] as string[];
 
-        if (columns.length !== 16 || !columns.every((col: any) => this.validFileFormat.includes(col))) {
+        if (
+          columns.length !== 16 ||
+          !columns.every((col: string) => this.validFileFormat.includes(col))
+        ) {
           this.messageService.add({ severity: 'error', summary: 'Please upload a valid format.' });
           return;
         }

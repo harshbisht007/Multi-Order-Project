@@ -6,38 +6,46 @@ import { getRouteDetails } from '../../graphql/queries/getRoute';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from './auth.service';
 import { Observable } from '@apollo/client';
+import { GeomOutlet, LatLngResponse } from '../../pages/main/load-data/load-data.component';
+import { getOrderDetails } from '../../graphql/queries/getRoute';
+import { environment } from '../../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
 export class RunRoutingService {
-  authToken: any;
-  url:any='https://synco-demo.roadcast.net/api/v1/auth/get_outlet_geom';
+  authToken: string|null;
+  url:string=environment.get_outlet;
 
   constructor(private graphqlService: GraphqlService,private authService:AuthService,private http:HttpClient) {
     this.authToken=this.authService.getToken()
 
    }
 
-  async runRouting(routeId: number) {
+  async getRouteTaskId(routeId: number) {
     return await this.graphqlService.runMutation(run_routing, { id: routeId });
   }
 
-  async updateRoute(routeId: any,payload: any){
+  async updateRoute(routeId: number,payload: any){
     return await this.graphqlService.runMutation(updateRoute, { id: routeId, change:payload})
 
   }
 
-  async fetchRouteDetails(routeId:any){
+  async fetchRouteDetails(routeId:number){
     return await this.graphqlService.runQuery(getRouteDetails,{getRouteId:routeId})
 
   }
 
-  async fetchOrderLatLng(outlets:any):Promise<any>{
+  async fetchOrderStatus(taskId:string){
+    return await this.graphqlService.runQuery(getOrderDetails,{taskId:taskId});
+  }
+
+  async fetchOrderLatLng(outlets:GeomOutlet[]):Promise<{response : LatLngResponse[]}|undefined>{
+    
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': this.authToken,
+      'Authorization': this.authToken || '',
     });
    
-    return this.http.post<any>(this.url, outlets, { headers }).toPromise();
+    return this.http.post<{ response: LatLngResponse[]}| undefined>(this.url, outlets, { headers }).toPromise();
   }
 }

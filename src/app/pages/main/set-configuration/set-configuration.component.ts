@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, effect, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, effect, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { DropdownModule } from "primeng/dropdown";
 import { FormsModule } from "@angular/forms";
 import { MultiSelectModule } from "primeng/multiselect";
@@ -7,9 +7,8 @@ import { CalendarModule } from 'primeng/calendar';
 import { CategoryService } from "../../../core/services/category.service";
 import { Category } from "../../../graphql/generated";
 import { ToggleButtonModule } from "primeng/togglebutton";
-import { gql } from "apollo-angular";
 import { GraphqlService } from "../../../core/services/graphql.service";
-import { CommonModule, NgClass } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { AccordionModule } from 'primeng/accordion';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
@@ -18,12 +17,16 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MapComponent } from '../../map/map.component';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import moment from 'moment';
 import { RunRoutingService } from '../../../core/services/run-routing.service';
-import { read } from 'xlsx';
+import { ReadyZoneData } from '../../../graphql/interfaces/zoneData';
+import { ConfigurationData, VehicleConfig } from '../../../graphql/interfaces/configurationData';
+import { ShipmentData } from '../../../graphql/interfaces/shipmentData';
+import { AdditionalField, CategorySecondaryType, CategoryThirdType, MultiSelectEvent } from '../../../graphql/interfaces/categoryAdditonal';
+import { firstValueFrom, Subject, takeUntil, timer } from 'rxjs';
 export interface ExtendedCategory extends Category {
   vehiclesCount: number;
   capacity: number;
@@ -41,7 +44,7 @@ export interface ExtendedCategory extends Category {
     CommonModule, IconFieldModule, InputIconModule,
     MapComponent,
     DropdownModule, ButtonModule,
-    NgClass, InputTextModule, ToastModule,
+    InputTextModule, ToastModule,
     FormsModule,
     CalendarModule,
     AccordionModule, TooltipModule,
@@ -55,22 +58,23 @@ export interface ExtendedCategory extends Category {
   templateUrl: './set-configuration.component.html',
   styleUrl: './set-configuration.component.scss'
 })
-export class SetConfigurationComponent implements OnInit {
+export class SetConfigurationComponent implements OnInit, OnDestroy {
   startFromHub: boolean = true;
   endAtHub: boolean = true;
   overWriteDuplicate: boolean = true;
-  @Input() retrieveSecondStepData: any;
-  @Output() showSpinner: EventEmitter<any> = new EventEmitter();
-  @Output() dataForSecondStepper: EventEmitter<any> = new EventEmitter()
+  @Input() retrieveSecondStepData!: ConfigurationData | null;
+  @Output() showSpinner: EventEmitter<boolean> = new EventEmitter();
+  @Output() dataForSecondStepper: EventEmitter<ConfigurationData> = new EventEmitter()
   startTime: any;
-  isDisable = true;
+  isDisable: boolean = true;
+  private destroy$ = new Subject<void>();
 
   categoryFields: Array<{ label: string; model: keyof ExtendedCategory; placeholder: string; id: string }> = [
-    { label: 'No. of Vehicles', model: 'count', placeholder: 'Enter number of vehicles', id: 'noOfVehicles' },
-    { label: 'Capacity of Each Vehicle', model: 'capacity', placeholder: 'Enter vehicle capacity', id: 'capacityOfVehicle' },
-    { label: 'Max Range of Each Vehicle (In Km)', model: 'range', placeholder: 'Enter max range', id: 'maxRange' },
-    { label: 'Wait Time per Stop', model: 'waitTime', placeholder: 'Enter wait time', id: 'waitTime' },
-    { label: 'Total Shift Time (In Minutes)', model: 'shiftTime', placeholder: 'Enter total shift time', id: 'totalShiftTime' }
+    { label: 'Max. No. of Vehicles', model: 'count', placeholder: 'Enter number of vehicles', id: 'noOfVehicles' },
+    { label: 'Max. Capacity of Each Vehicle', model: 'capacity', placeholder: 'Enter vehicle capacity', id: 'capacityOfVehicle' },
+    { label: 'Max. Range of Each Vehicle (In Km)', model: 'range', placeholder: 'Enter max range', id: 'maxRange' },
+    // { label: 'Maximum Wait Time per Stop', model: 'waitTime', placeholder: 'Enter wait time', id: 'waitTime' },
+    { label: 'Max. Total Shift Time (In Minutes)', model: 'shiftTime', placeholder: 'Enter total shift time', id: 'totalShiftTime' }
 
   ];
 
@@ -87,16 +91,18 @@ export class SetConfigurationComponent implements OnInit {
     { id: 'endHub', label: 'End at Hub', model: this.endAtHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'End the route at the hub.' },
   ];
 
-  @Input() routeId!: any;
+  @Input() routeId!: number;
   isSaveDisabled: boolean = true;
-  @Input() dataForMarker!: any[];
-  @Input() readyZone: any
+  @Input() dataForMarker!: ShipmentData[];
+  @Input() readyZone!: ReadyZoneData
   @Output() manageOrders: EventEmitter<boolean> = new EventEmitter<boolean>();
-  @Output() goToPreviousStep: EventEmitter<any> = new EventEmitter<any>();
-  @Output() goToFirstStep: EventEmitter<void> = new EventEmitter<void>();
+  @Output() goToPreviousStep: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() goToFirstStep: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   categories: Category[] = [];
-  selectedCategories: any[] = [];
+  selectedCategories: CategorySecondaryType[] = [];
+  additionalFields!: AdditionalField[];
+  categoriesFromSynco: CategorySecondaryType[] = [];
   visible: boolean = false;
   checked: boolean = false;
   maxMinInput: Array<{ label: string, placeholder: string, value: number, src: string, tooltip: string }> = [
@@ -116,11 +122,10 @@ export class SetConfigurationComponent implements OnInit {
     }
   ];
   runRoute: boolean = false;
-  @Output() orderId: EventEmitter<any> = new EventEmitter<any>();
-  additionalFields: any;
+  @Output() orderId: EventEmitter<number> = new EventEmitter<number>();
 
-  categoriesFromSynco: any;
-  touhcPointLength: any;
+  touchPointLength!: number;
+  waitTimePerStop: any;
 
   constructor(private categoryService: CategoryService, private graphqlService: GraphqlService, private runRoutingService: RunRoutingService,
     private router: Router,
@@ -143,6 +148,10 @@ export class SetConfigurationComponent implements OnInit {
       }
     });
   }
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
 
   async ngOnInit() {
@@ -159,7 +168,7 @@ export class SetConfigurationComponent implements OnInit {
       this.startTime = this.retrieveSecondStepData.payload.start_time;
       this.maxMinInput[0].value = this.retrieveSecondStepData.payload.max_orders_in_cluster;
       this.maxMinInput[1].value = this.retrieveSecondStepData.payload.min_orders_in_cluster;
-
+      this.waitTimePerStop=this.retrieveSecondStepData.payload.wait_time_per_stop;
       // this.selectedCategories = this.retrieveSecondStepData.vehicle_config.map((config: any) => {
       //   return {
       //     name: config.category_name,
@@ -168,7 +177,7 @@ export class SetConfigurationComponent implements OnInit {
       //   };
       // });
       this.selectedCategories = this.retrieveSecondStepData.selectedCategories
-      this.additionalFields = this.retrieveSecondStepData.payload.vehicle_config.map((config: any) => {
+      this.additionalFields = this.retrieveSecondStepData.payload.vehicle_config.map((config) => {
         return {
           name: config.category_name,
           count: config.count,
@@ -178,12 +187,11 @@ export class SetConfigurationComponent implements OnInit {
           shiftTime: config.shift_time
         };
       });
-      if (this.additionalFields.length) {
-
-        this.checkFormValidity()
-      }
     }
 
+    if (this.additionalFields.length) {
+      this.checkFormValidity()
+    }
 
     this.checkboxOptions = [
       { id: 'startHub', label: 'Start from Hub', model: this.startFromHub, icon: '../../../../assets/icons/icons-info.svg', tooltip: 'Start the route from the hub.' },
@@ -194,20 +202,39 @@ export class SetConfigurationComponent implements OnInit {
 
 
   async getRouteData() {
-    this.route.queryParamMap.subscribe((params: any) => {
-      this.routeId = parseInt(params.get('route_id'));
+    this.route.queryParamMap.subscribe((params: ParamMap) => {
+      const routeId = parseInt(params.get('route_id')!, 10);
+      this.routeId = routeId;
     })
 
 
     try {
       const res = await this.runRoutingService.fetchRouteDetails(this.routeId)
       this.dataForMarker = res.get_route.touch_points;
-      this.touhcPointLength = res.get_route.touch_points.length;
+      this.touchPointLength = res.get_route.touch_points.length;
       if (!this.readyZone || Object.keys(this.readyZone).length === 0) {
-        this.readyZone = {};
-        this.readyZone['refrencePoint'] = [null, null];
-        this.readyZone['refrencePoint'][1] = res.get_route.hub_location.latitude;
-        this.readyZone['refrencePoint'][0] = res.get_route.hub_location.longitude;
+        this.readyZone = {
+          event: {
+            originalEvent: { isTrusted: true },
+            value: {
+              active: true,
+              address: '',
+              agreement_template: null,
+              company_id: '',
+              created_on: '',
+              description: '',
+              geom: { coordinates: [], type: 'Polygon' },
+              id: '',
+              name: '',
+              unique_id: '',
+              updated_on: ''
+            }
+          },
+          refrencePoint: [
+            res.get_route.hub_location.longitude ?? 0,
+            res.get_route.hub_location.latitude ?? 0
+          ]
+        };
       }
 
       this.checked = !res.get_route.single_batch
@@ -216,18 +243,18 @@ export class SetConfigurationComponent implements OnInit {
       this.startFromHub = res.get_route.start_from_hub;
       this.overWriteDuplicate = res.get_route.overwrite_duplicate;
       this.endAtHub = res.get_route.end_at_hub
-
+      this.waitTimePerStop=res.get_route.wait_time_per_stop;
+      
       this.maxMinInput[0].value = res.get_route.max_orders_in_cluster
       this.maxMinInput[1].value = res.get_route.min_orders_in_cluster;
 
       if (this.categoriesFromSynco?.length > 0) {
-        this.selectedCategories = this.categoriesFromSynco.filter((val: any) =>
-          res.get_route.vehicle_config.some((config: any) => config.category_id === val.id)
+        this.selectedCategories = this.categoriesFromSynco.filter((val) =>
+          res.get_route.vehicle_config.some((config: VehicleConfig) => config.category_id === val.id)
         );
       }
 
-      this.additionalFields = res.get_route.vehicle_config.map((config: any) => {
-
+      this.additionalFields = res.get_route.vehicle_config.map((config: VehicleConfig) => {
         return {
           name: config.category_name,
           count: config.count,
@@ -248,11 +275,12 @@ export class SetConfigurationComponent implements OnInit {
       try {
         await this.runRoutingService.updateRoute(this.routeId, {
           zone_id: this.readyZone.event.value.id,
-          zone_name:this.readyZone.event.value.name,
+          zone_name: this.readyZone.event.value.name,
           hub_location: {
             latitude: this.readyZone.refrencePoint[1],
             longitude: this.readyZone.refrencePoint[0]
-          }
+          },
+          company_id: this.readyZone.event.value.company_id
         })
 
 
@@ -266,20 +294,20 @@ export class SetConfigurationComponent implements OnInit {
 
   }
 
-  selectedCategory(event: any) {
+  selectedCategory(event: MultiSelectEvent) {
     this.additionalFields = this.additionalFields || [];
 
     const selectedCategories = event.value;
 
-    const selectedFieldNames = selectedCategories.map((category: any) => category.name);
+    const selectedFieldNames = selectedCategories.map((category: CategoryThirdType) => category.name);
 
-    this.additionalFields = this.additionalFields.filter((field: any) =>
+    this.additionalFields = this.additionalFields.filter((field: AdditionalField) =>
       selectedFieldNames.includes(field.name)
     );
 
     const newFields = selectedCategories
-      .filter((category: any) => !this.additionalFields.some((field: any) => field.name === category.name))
-      .map((category: any) => ({
+      .filter((category: CategoryThirdType) => !this.additionalFields.some((field) => field.name === category.name))
+      .map((category: CategoryThirdType) => ({
         name: category.name,
         count: category.count || null,
         capacity: category.weight || null,
@@ -303,15 +331,8 @@ export class SetConfigurationComponent implements OnInit {
   async runRouting() {
     this.showSpinner.emit(true)
     try {
-      const res = await this.runRoutingService.runRouting(this.routeId);
-
-      if (res) {
-        this.showSpinner.emit(false)
-      }
-      this.orderId.emit(res?.run_routing);
-      this.manageOrders.emit(true);
-      const baseUrl = this.router.url.split('?')[0];
-      this.router.navigate([baseUrl], { queryParams: { order_id: res?.run_routing } });
+      const res = await this.runRoutingService.getRouteTaskId(this.routeId);
+      await this.runPollingForOrderStatus(res.run_routing)
     } catch (error) {
       this.messageService.add({ severity: 'error', summary: 'Routing Failed' });
       this.showSpinner.emit(false)
@@ -319,7 +340,35 @@ export class SetConfigurationComponent implements OnInit {
 
   }
 
-  shouldShowSpinner(event: any) {
+  async runPollingForOrderStatus(taskID: string) {
+    const pollInterval = 10000;
+    let isPolling = true;
+
+    while (isPolling) {
+      const res = await this.runRoutingService.fetchOrderStatus(taskID);
+
+      if (res?.get_task_status?.state === 'SUCCESS') {
+        isPolling = false;
+        this.orderId.emit(res?.get_task_status?.data);
+        this.manageOrders.emit(true);
+        const baseUrl = this.router.url.split('?')[0];
+        this.router.navigate([baseUrl], { queryParams: { order_id: res?.get_task_status?.data } });
+        this.showSpinner.emit(false);
+      } else if (res?.get_task_status?.state === 'FAILURE') {
+        isPolling = false;
+        this.messageService.add({ severity: 'error', summary: 'Routing Failed' });
+        this.showSpinner.emit(false);
+      } else {
+        try {
+          await firstValueFrom(timer(pollInterval).pipe(takeUntil(this.destroy$)));
+        } catch {
+          isPolling = false;
+        }
+      }
+    }
+  }
+
+  shouldShowSpinner(event: boolean) {
     this.showSpinner.emit(event);
   }
 
@@ -338,53 +387,74 @@ export class SetConfigurationComponent implements OnInit {
   }
 
   async saveChanges() {
-    if (this.touhcPointLength >= 100&&!this.checked) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Please enable multi-batch for orders with quantities greater than 100.',
-      });
-      return;
+    if (this.touchPointLength > 100 && !this.checked) {
+      return this.showMessage('error', 'Please enable multi-batch for orders with quantities greater than 100.');
     }
+    const [maxOrders, minOrders] = [this.maxMinInput[0].value, this.maxMinInput[1].value];
+    if (minOrders > maxOrders) {
+      return this.showMessage('error', 'Minimum orders in each cluster cannot be greater than maximum order in each cluster.');
+    }
+    if (minOrders <= 0 && this.checked) {
+      return this.showMessage('error', 'Minimum orders in each cluster must be greater than zero.');
+    }
+    if (maxOrders > this.touchPointLength) {
+      return this.showMessage('error', 'Maximum orders in each cluster cannot exceed the total data count.');
+    }
+    if (minOrders > this.touchPointLength) {
+      return this.showMessage('error', 'Minimum orders in each cluster cannot exceed the total data count.');
+    }
+
     const payload = {
-      start_from_hub: this.checkboxOptions.find(option => option.id === 'startHub')?.model,
-      end_at_hub: this.checkboxOptions.find(option => option.id === 'endHub')?.model,
+      start_from_hub: this.getCheckboxModel('startHub'),
+      end_at_hub: this.getCheckboxModel('endHub'),
       single_batch: !this.checked,
-      overwrite_duplicate: this.checkboxOptions.find(option => option.id === 'overwrite')?.model,
-      start_time: moment(this.startTime, moment.ISO_8601, true).isValid()
-        ? moment(this.startTime).format('HH:mm')
-        : this.startTime,
-      max_orders_in_cluster: this.maxMinInput[0].value,
-      min_orders_in_cluster: this.maxMinInput[1].value,
-      vehicle_config: this.selectedCategories.map((category, index) => {
-        const additionalField = this.additionalFields[index];
-        return {
-          category_name: category.name,
-          category_id: category.id,
-          count: additionalField?.count ?? null,
-          capacity: additionalField?.capacity ?? null,
-          range: additionalField?.range ?? null,
-          wait_time_per_stop: additionalField?.waitTime ?? null,
-          shift_time: additionalField?.shiftTime ?? null,
-          company_id: category.company_id
-        };
-      })
-    }
+      overwrite_duplicate: this.getCheckboxModel('overwrite'),
+      start_time: this.getFormattedStartTime(),
+      max_orders_in_cluster: maxOrders,
+      min_orders_in_cluster: minOrders,
+      wait_time_per_stop: this.waitTimePerStop,
+      vehicle_config: this.buildVehicleConfig()
+    };
 
     try {
-      this.dataForSecondStepper.emit({ payload, selectedCategories: this.selectedCategories })
-      const res = await this.runRoutingService.updateRoute(this.routeId, payload)
+      this.dataForSecondStepper.emit({ payload, selectedCategories: this.selectedCategories });
+      const { update_route: { id } } = await this.runRoutingService.updateRoute(this.routeId, payload);
+      this.routeId = id;
+      this.runRoute = true;
 
-      this.routeId = res.update_route.id;
-      this.messageService.add({ severity: 'success', summary: 'Route Configuration Saved', icon: 'pi pi-check' });
-      this.runRoute = true
-
-
+      this.showMessage('success', 'Route Configuration Saved');
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'Error' });
-
+      this.showMessage('error', 'Error');
       console.error('GraphQL Error:', error);
     }
+  }
 
+  // Helper Functions
+  private showMessage(severity: string, summary: string) {
+    this.messageService.add({ severity, summary, icon: severity === 'success' ? 'pi pi-check' : undefined });
+  }
+
+  private getCheckboxModel(id: string) {
+    return this.checkboxOptions.find(option => option.id === id)?.model || false;
+  }
+
+  private getFormattedStartTime() {
+    return moment(this.startTime, moment.ISO_8601, true).isValid()
+      ? moment(this.startTime).format('HH:mm')
+      : this.startTime;
+  }
+
+  private buildVehicleConfig() {
+    return this.selectedCategories.map((category, index) => ({
+      category_name: category.name,
+      category_id: category.id,
+      count: this.additionalFields[index]?.count ?? null,
+      capacity: this.additionalFields[index]?.capacity ?? null,
+      range: this.additionalFields[index]?.range ?? null,
+      wait_time_per_stop: this.additionalFields[index]?.waitTime ?? null,
+      shift_time: this.additionalFields[index]?.shiftTime ?? null,
+      company_id: category.company_id
+    }));
   }
 
 
@@ -392,10 +462,13 @@ export class SetConfigurationComponent implements OnInit {
     this.visible = true;
   }
 
-  checkFormValidity() {
-    this.isSaveDisabled = this.additionalFields.some((category: any) => {
-      return this.categoryFields.some(field => !category[field.model]);
-    });
+  async checkFormValidity() {
+    this.isSaveDisabled = !this.waitTimePerStop || 
+                          this.selectedCategories.length === 0 || 
+                          this.additionalFields.some((category) => 
+                            this.categoryFields.some((field) => !category[field.model])
+                          );
   }
+  
 
 }

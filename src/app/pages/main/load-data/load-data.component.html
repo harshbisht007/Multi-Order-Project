@@ -15,22 +15,24 @@
 
     </div>
   </div>
-  <p-table #dt1 (onHeaderCheckboxToggle)="onHeaderCheckboxToggle($event)" (onRowSelect)="onRowSelect($event)"
-    (onRowUnselect)="onRowUnselect($event)" [(selection)]="selectedItems" [columns]="headers"
+  <p-table #dt1  [(selection)]="selectedItems" [columns]="headers"
     [globalFilterFields]="headers" [loading]="loading" [paginator]="true" [rowsPerPageOptions]="[10, 25, 50]"
     [rows]="10" [value]="rows" editMode="row" styleClass="p-datatable-striped">
     <ng-template pTemplate="caption">
 
       <div class="grid gap-4 grid-cols-2 mb-2">
         <div>
-          <p-button (onClick)="uploadData()" class="mr-2" icon="pi pi-download" label="Upload file" pRipple
+          @if(rows.length){
+            <p class="text-[#676879] font-normal text-[13px]">{{ rows.length }} Rows imported</p>
+          }
+          <p-button (onClick)="uploadData()" class="mr-2" icon="pi pi-upload" label="Upload file" pRipple
             severity="success" />
 
           <p-button (onClick)="fetchDataFromDB()" class="mr-2" icon="pi pi-refresh" label="Fetch Data" pRipple
             severity="success" />
-          <p-button (onClick)="downloadTable()" [outlined]="true" class="mr-2" icon="pi pi-upload"
+          <p-button (onClick)="downloadTable()" [outlined]="true" class="mr-2" icon="pi pi-download"
             label="Download Report" pRipple severity="success" />
-            <p-button (onClick)="generateRemovedOrdersExcel()" [outlined]="true" [disabled]="removedOrders.length==0" class="mr-2" icon="pi pi-upload"
+            <p-button (onClick)="generateRemovedOrdersExcel()" [outlined]="true" [disabled]="removedOrders.length==0" class="mr-2" icon="pi pi-download"
             label="Download Rejected Points" pRipple severity="success" />
 
           <p-button (onClick)="confirmDelete()" [disabled]="!rows.length || !selectedItems?.length" [outlined]="true"
@@ -68,9 +70,8 @@
           </span>
         </th>
 
-        @if (showActions) {
         <th>Actions</th>
-        }
+        
 
       </tr>
     </ng-template>
@@ -149,7 +150,8 @@
 
   <div class="flex space-x-2">
 
-    <button (click)="onSubmit()" [disabled]="totalInvalid>0 || rows.length === 0 || referencePoint?.length==0"
+    <button (click)="onSubmit()"     [disabled]="totalInvalid > 0 || rows.length === 0 || (refrencePoint[0] === 0 && refrencePoint[1] === 0)"
+
       class="bg-[--baseColor] text-white text-sm font-normal px-4 h-9 rounded-md w-[120px] disabled:cursor-not-allowed disabled:bg-[#BFDFDC]">
       Continue
     </button>

@@ -7,6 +7,7 @@ import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
 import { GraphqlService } from '../../core/services/graphql.service';
 import { ManageOrdersService } from '../../core/services/manage-orders.service';
+import { Batch } from '../../graphql/interfaces/orderType';
 @Component({
   standalone: true,
   selector: 'app-batch-move-dialog',
@@ -17,27 +18,33 @@ import { ManageOrdersService } from '../../core/services/manage-orders.service';
     FormsModule]
 })
 export class BatchMoveDialogComponent implements OnInit, OnChanges {
-  @Input() display: boolean = false; // To control the dialog visibility
+  @Input() display: boolean = false;
   @Input() touchPointId!: number;
-  @Input() cluster: any; // Assuming 'cluster' contains the batches array
-  @Output() displayChange: EventEmitter<boolean> = new EventEmitter<boolean>(); // Add this for two-way binding
-  @Output() closeDialog: EventEmitter<boolean> = new EventEmitter<boolean>();
-  selectedBatch: any;
-  batchOptions: { label: string, value: any }[] = [];
+  @Input() cluster!: Batch[];
+  @Output() displayChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() closeDialog: EventEmitter<{ success: boolean, selectedBatchIndex: number | null, selectedBatchId: number | null, additional_distance: number | null }> = new EventEmitter();
+  selectedBatch!: { label: string; value: number; index: number; additional_distance: number } | null;
+  batchOptions: { label: string, value: number }[] = [];
 
-  constructor(private graphqlService: GraphqlService,private manageOrderService:ManageOrdersService) { }
+  constructor(private graphqlService: GraphqlService, private manageOrderService: ManageOrdersService) { }
   ngOnChanges(changes: SimpleChanges): void {
     this.selectedBatch = null
     if (changes['cluster']) {
-      const batches = changes['cluster']['currentValue'];
-      const numberOfOptions = Math.max(0, batches.length - 1); 
-    
-      this.batchOptions = batches.slice(0, numberOfOptions).map((batch: any, index: number) => ({
-        label: `Batch ${index + 1}`,
-        value: batch.id
-      }));
+      const batches: Batch[] = changes['cluster']['currentValue'];
+
+      const numberOfOptions = Math.max(0, batches.length - 1);
+      this.batchOptions = batches
+        .filter((batch) => !batch.is_missed)
+        .slice(0, numberOfOptions)
+        .map((batch, index) => ({
+          label: `Batch ${batch.sequence_id}`,
+          value: batch.id,
+          index: index,
+          additional_distance: batch.additional_distance
+        }));
+
     }
-    
+
 
   }
   ngOnInit(): void {
@@ -47,30 +54,32 @@ export class BatchMoveDialogComponent implements OnInit, OnChanges {
 
   onCancel(): void {
     this.display = false;
-    this.displayChange.emit(this.display);  
-    this.closeDialog.emit(false);
+    this.displayChange.emit(this.display);
+    this.closeDialog.emit({ success: false, selectedBatchIndex: null, selectedBatchId: null, additional_distance: null });
   }
+ 
 
 
   onMove(): void {
     if (this.selectedBatch) {
-      this.moveTouchPointToBatch(this.selectedBatch.value, this.touchPointId);
-
+      this.moveTouchPointToBatch(this.selectedBatch.value, this.touchPointId, this.selectedBatch.index, this.selectedBatch.additional_distance);
     }
 
   }
 
-  private async moveTouchPointToBatch(batchId: number, touchPointId: number): Promise<void> {
-  
+  private async moveTouchPointToBatch(batchId: number, touchPointId: number, selectedBatchIndex: number, additional_distance: number): Promise<void> {
+
     try {
-      const response=await this.manageOrderService.moveTouchPointToBatch(batchId,touchPointId)
-  
-      // Assuming the response contains the necessary success information
+      const response = await this.manageOrderService.moveTouchPointToBatch(batchId, touchPointId)
+      const missedBatch= this.cluster.find(cluster => cluster.is_missed);
+      
+      
       if (response) {
-  
+
         this.display = false;
         this.displayChange.emit(this.display);
-        this.closeDialog.emit(true);
+        // await this.manageOrderService.reRunBatching(missedBatch?.id)
+        this.closeDialog.emit({ success: true, selectedBatchIndex: selectedBatchIndex, selectedBatchId: batchId, additional_distance: additional_distance });
       } else {
         console.error('Failed to move touch point. Response:', response);
       }
@@ -78,5 +87,5 @@ export class BatchMoveDialogComponent implements OnInit, OnChanges {
       console.error('GraphQL Error:', error);
     }
   }
-  
+
 }

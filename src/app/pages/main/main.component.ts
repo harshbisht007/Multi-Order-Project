@@ -4,18 +4,18 @@ import { Button } from "primeng/button";
 import { LoadDataComponent } from "./load-data/load-data.component";
 import { SetConfigurationComponent } from "./set-configuration/set-configuration.component";
 import { ManageOrdersComponent } from "./manage-orders/manage-orders.component";
-import { NgClass } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import {ReadyZoneData } from '../../graphql/interfaces/zoneData';
+import { ShipmentData } from '../../graphql/interfaces/shipmentData';
+import { ConfigurationData } from '../../graphql/interfaces/configurationData';
 @Component({
   selector: 'app-main',
   standalone: true,
   imports: [
     StepperModule,
-    Button,
-    NgClass,
     LoadDataComponent,
     SetConfigurationComponent,
     ManageOrdersComponent,
@@ -26,14 +26,14 @@ import { filter } from 'rxjs/operators';
 })
 export class MainComponent {
   @Input() showLoader:boolean=false;
-  @Input() dataForMarker: any[] = [];
-  @Input() readyZone: any;
+  @Input() dataForMarker: ShipmentData[] = [];
+  @Input() readyZone!: ReadyZoneData;
   @Input() orderId!: number;
   activeIndex: number = 0;
-  routeId: any;
+  routeId!: number;
   email = 'roadcast_test@roadcast.in';
   password = 'Kuchnahi';
-  @Input() retrieveSecondStepData: any
+  @Input() retrieveSecondStepData!: ConfigurationData|null;
   constructor(private authService: AuthService,
     private route: ActivatedRoute,
     private router: Router
@@ -70,8 +70,8 @@ export class MainComponent {
     this.checkQueryParams();
 
     this.router.events
-      .pipe(filter((event: any) => event instanceof NavigationEnd)) // Filter for NavigationEnd events
-      .subscribe(() => this.checkQueryParams());
+    .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd)) 
+    .subscribe(() => this.checkQueryParams());
   
   }
 
@@ -93,19 +93,21 @@ export class MainComponent {
   
   
 
-  setRouteId(routeId: string): void {
+  setRouteId(routeId: number): void {
     this.routeId = routeId;
+    this.retrieveSecondStepData=null;
     this.activeIndex = 1;
   }
 
-   reqOrderId(event: any) {
-    this.orderId = event;
+  reqOrderId(orderId: number): void {
+    this.orderId = orderId;
   }
 
-  getData(data: any[]): void {
+
+  getData(data: ShipmentData[]): void {    
     this.dataForMarker = data;
   }
-  zoneForRouting(event: any) {
+  zoneForRouting(event: ReadyZoneData) {    
     this.readyZone = event;
   }
 
@@ -113,7 +115,7 @@ export class MainComponent {
     this.activeIndex = stepIndex;
     
   }
-  dataForSecondStepper(event: any) {
+  dataForSecondStepper(event: ConfigurationData) {
     this.retrieveSecondStepData = event;
   }
   goToFirstStep(): void {

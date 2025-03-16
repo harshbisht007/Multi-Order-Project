@@ -23,7 +23,6 @@ body {
 }
 
 
-
 .p-inputtext, .p-togglebutton, .p-selectbutton, .p-inputgroup,.p-multiselect{
     box-shadow: none !important;
     width: 100%;
@@ -372,3 +371,5 @@ body {
   position: absolute;
   border-radius: 50%;
 }
+
+.p-tabview .p-tabview-nav-content {scrollbar-width: thin !important; height: 71px !important;}

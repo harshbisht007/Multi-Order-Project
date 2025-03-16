@@ -5,14 +5,16 @@ import {gql} from "apollo-angular";
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
+import { zoneAPIResponse } from '../../graphql/interfaces/zoneData';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ZoneService {
-  private apiUrl = 'https://synco-demo.roadcast.net/api/v1/auth/zone';  
+  private apiUrl = environment.zone;  
 
-  authToken:any;
+  authToken:string|null;
   zones: WritableSignal<Zone[]> = signal([] as Zone[]);
   constructor(private graphqlService: GraphqlService,private http: HttpClient,private authService:AuthService) {
     this.authToken=this.authService.getToken()
@@ -31,10 +33,10 @@ export class ZoneService {
   }
 
 
-  getZones(zoneId?: any): Observable<any> {
+  getZones(zoneId?: number): Observable<zoneAPIResponse> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': this.authToken,
+      'Authorization': this.authToken || '',
     });
   
     let params = new HttpParams()
@@ -45,7 +47,7 @@ export class ZoneService {
       params = params.set('__id__equal', zoneId);
     }
   
-    return this.http.get<any>(this.apiUrl, { headers, params });
+    return this.http.get<zoneAPIResponse>(this.apiUrl, { headers, params });
   }
   
   

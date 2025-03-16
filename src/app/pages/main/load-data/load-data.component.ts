@@ -1,4 +1,4 @@
-import { Component, effect, EventEmitter, input, Input, OnChanges, OnInit, output, Output, SimpleChanges, ViewChild, viewChild } from '@angular/core';
+import { Component, effect, ElementRef, EventEmitter, input, Input, OnChanges, OnInit, output, Output, SimpleChanges, ViewChild, viewChild } from '@angular/core';
 import { TouchPoint, Zone } from "../../../graphql/generated";
 import { Table, TableModule, TableRowSelectEvent, TableRowUnSelectEvent } from "primeng/table";
 import { Button } from "primeng/button";
@@ -30,18 +30,33 @@ import jsPDF from 'jspdf';
 import { CreateShipmentService } from '../../../core/services/create-shipment.service';
 import { FetchDatafromDBService } from '../../../core/services/fetch-datafrom-db.service';
 import { RunRoutingService } from '../../../core/services/run-routing.service';
-
-export interface CustomTouchPoint extends TouchPoint {
-  latitude: number;
-  longitude: number;
-  status: Boolean
-
-}
+import { ReadyZone, ReadyZoneData } from '../../../graphql/interfaces/zoneData';
+import { Header, ShipmentData } from '../../../graphql/interfaces/shipmentData';
+import moment from 'moment';
 
 export interface CustomValidObject {
   classes: { [key: string]: boolean };
   message: string;
   imageSrc: string;
+}
+interface CheckboxEvent {
+  checked: boolean;
+  originalEvent: Event;
+}
+export interface GeomOutlet {
+  address: string;
+  external_id: string;
+  skip:boolean;
+}
+
+interface Geom {
+  latitude: number;
+  longitude: number;
+}
+
+export interface LatLngResponse {
+  external_id: string;
+  geom: Geom;
 }
 
 
@@ -76,15 +91,15 @@ export interface CustomValidObject {
   styleUrl: './load-data.component.scss'
 })
 export class LoadDataComponent implements OnInit {
-  rows: CustomTouchPoint[] = [];
-  @ViewChild('fileInput') fileInput!: any;
-  originalData: any = {}
-  @Output() goToConfiguration: EventEmitter<string> = new EventEmitter();
-  @Output() dataForMarker: EventEmitter<any> = new EventEmitter();
-  @Output() zoneForRouting: EventEmitter<any> = new EventEmitter()
-  @Input() valueForTable: any[] = []
-  @Input() readyZone: any;
-  removedOrders: CustomTouchPoint[] = [];
+  rows: ShipmentData[] = [];
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>; 
+  originalData: ShipmentData | null = null;
+  @Output() goToConfiguration: EventEmitter<number> = new EventEmitter();
+  @Output() dataForMarker: EventEmitter<ShipmentData[]> = new EventEmitter();
+  @Output() zoneForRouting: EventEmitter<ReadyZoneData> = new EventEmitter();
+  @Input() valueForTable: ShipmentData[] = []
+  @Input() readyZone!: ReadyZoneData;
+  removedOrders: ShipmentData[] = [];
 
   loading: boolean = false;
   headers: any[] = [
@@ -107,23 +122,24 @@ export class LoadDataComponent implements OnInit {
     { field: 'status', header: 'Status' },
 
   ];
-  showActions: any = true;
-  selectedSource: any = 'upload';
-  sources: any;
+  selectedSource: string = 'upload';
+  sources: Array<{ name: string; value: string }> = [];
   isEditable: boolean = false
   zones = this.zoneService.zones;
-  zoneFromSynco: any;
+  zoneFromSynco!: ReadyZone[];
   selectedZone: Zone | null = null;
-  selectedItems: any;
+  selectedItems!: ShipmentData[];
   totalInvalid: number = 0;
   validColumnObject: CustomValidObject = {
     classes: {},
     message: '',
     imageSrc: ''
   }
-  currentEditingRow: any = null;
+  @Output() showSpinner: EventEmitter<boolean> = new EventEmitter();
+
+  currentEditingRow: ShipmentData | null = null;
   dialogRef: DynamicDialogRef | undefined;
-  referencePoint: any[] = []
+  refrencePoint: [number, number] = [0, 0]
   constructor(private zoneService: ZoneService, private graphqlService: GraphqlService, private runRouteService: RunRoutingService,
     private confirmationService: ConfirmationService, private messageService: MessageService, private fetchDataFromDBService: FetchDatafromDBService,
     public dialogService: DialogService, public createShipmentService: CreateShipmentService,
@@ -132,9 +148,13 @@ export class LoadDataComponent implements OnInit {
   }
 
   ngOnInit() {
+    
+    this.showSpinner.emit(false)
     this.zoneService.getZones().subscribe(
       (data) => {
-        this.zoneFromSynco = data.data; // Handle the API response here
+
+        this.zoneFromSynco = data.data; 
+        
       },
       (error) => {
         console.error('Error fetching zones:', error); // Handle errors here
@@ -142,8 +162,8 @@ export class LoadDataComponent implements OnInit {
     );
 
     if (this.readyZone) {
-      this.selectedZone = this.readyZone.event.value;
-      this.referencePoint = this.readyZone.referencePoint
+      this.selectedZone = this.readyZone.event.value
+      this.refrencePoint = this.readyZone.refrencePoint
     }
     if (this.valueForTable.length) {
       // this.headers = Object.keys(this.valueForTable[0]);
@@ -155,9 +175,13 @@ export class LoadDataComponent implements OnInit {
     ];
   }
 
+  getFieldNames(headers: Array<{ field: string; header: string }>): string[] {
+    return headers.map(item => item.field);  // Extract only the 'field' values
+  }
+
   async onZoneChange(event: DropdownChangeEvent) {
     await this.removeFarOrders(event.value.geom.coordinates[0]);
-    this.zoneForRouting.emit({ event, refrencePoint: this.referencePoint });
+    this.zoneForRouting.emit({ event, refrencePoint: this.refrencePoint });
     if (!this.rows.length)
       this.selectedZone = {
         __typename: 'Zone',
@@ -166,16 +190,17 @@ export class LoadDataComponent implements OnInit {
       };
   }
 
-  async removeFarOrders(zonePoints: any) {
-    this.referencePoint = this.getZoneMeanPoint(zonePoints);
+  async removeFarOrders(zonePoints: [number,number][]) {
+    
+    this.refrencePoint = this.getZoneMeanPoint(zonePoints);
     const distanceThreshold = 200;
     let farOrdersRemoved = false;
 
 
-    this.rows = this.rows.filter((order: CustomTouchPoint) => {
+    this.rows = this.rows.filter((order: ShipmentData) => {
       if (order.latitude && order.longitude) {
         const distance = this.getStraightDistanceFromLatLonInKm(
-          this.referencePoint[1], this.referencePoint[0],
+          this.refrencePoint[1], this.refrencePoint[0],
           order.latitude, order.longitude
         );
         if (distance > distanceThreshold) {
@@ -208,26 +233,28 @@ export class LoadDataComponent implements OnInit {
       this.messageService.add({ severity: 'error', summary: 'Please upload the data first', icon: 'pi pi-info-circle' });
       return;
     }
-
-    const formattedData = this.removedOrders.map((order: any) => {
-      const formattedOrder: any = {};
-      this.headers.forEach(header => {
-        if (header.field !== 'status') {
+  
+    const formattedData = this.removedOrders.map((order: ShipmentData) => {
+      
+      const formattedOrder: { [key: string]: string | number } = {};
+  
+      this.headers.forEach((header: Header) => {
+        if (header.field !== 'status'&&header.field!=='geom'&&header.field!=='touch_point_status') {
           formattedOrder[header.header] = order[header.field];
         }
       });
+  
       return formattedOrder;
     });
-
+  
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(formattedData);
-
+  
     const workbook: XLSX.WorkBook = {
       Sheets: { 'data': worksheet },
       SheetNames: ['data']
     };
     XLSX.writeFile(workbook, 'Removed Orders.xlsx');
   }
-
 
 
   getZoneMeanPoint(arr: [number, number][]): [number, number] {
@@ -239,22 +266,22 @@ export class LoadDataComponent implements OnInit {
 
     for (let i = 0; i < length; i++) {
       const [x0, y0] = arr[i];
-      const [x1, y1] = arr[(i + 1) % length]; // Avoid recalculating the modulus
+      const [x1, y1] = arr[(i + 1) % length];
 
-      const twoSA = x0 * y1 - x1 * y0; // Calculate signed area (two times)
+      const twoSA = x0 * y1 - x1 * y0;
       twoTimesSignedArea += twoSA;
       cxTimes6SignedArea += (x0 + x1) * twoSA;
       cyTimes6SignedArea += (y0 + y1) * twoSA;
     }
 
-    const sixSignedArea = 3 * twoTimesSignedArea; // Final signed area calculation
+    const sixSignedArea = 3 * twoTimesSignedArea;
     return [
       cxTimes6SignedArea / sixSignedArea,
       cyTimes6SignedArea / sixSignedArea,
     ];
   }
 
-  deg2rad(deg: any) {
+  deg2rad(deg: number) {
     return deg * (Math.PI / 180);
   }
 
@@ -278,7 +305,7 @@ export class LoadDataComponent implements OnInit {
     return R * c;
   }
 
-  onRowEditInit(row: any) {
+  onRowEditInit(row: ShipmentData) {
     if (this.currentEditingRow && this.currentEditingRow !== row) {
       this.messageService.add({
         severity: 'warn',
@@ -292,34 +319,18 @@ export class LoadDataComponent implements OnInit {
     this.currentEditingRow = row;
   }
 
-  onRowEditSave(row: any) {
+  onRowEditSave(row: ShipmentData) {
     this.isEditable = false;
     this.validateData();
     this.messageService.add({ severity: 'info', summary: 'Saved Successfully', icon: 'pi pi-check' });
     this.currentEditingRow = null;
-  }
-  onRowEditCancel(row: any, index: any) {
-    this.isEditable = false;
-    this.currentEditingRow = null;
-    this.rows[index] = { ...this.originalData };
-    this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
-  }
-  onHeaderCheckboxToggle(headCheckBox: any) {
-    if (headCheckBox.checked == true) {
-      this.showActions = false;
-    } else if (headCheckBox.checked == false) {
-      this.showActions = true;
     }
-  }
-  onRowSelect(event: TableRowSelectEvent) {
-    if (this.selectedItems.length === this.rows.length) {
-      this.showActions = false;
+    onRowEditCancel(row: ShipmentData, index: number) {
+      this.isEditable = false;
+      this.currentEditingRow = null;
+      this.rows[index] = { ...this.originalData } as ShipmentData;
+      this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
     }
-  }
-  onRowUnselect(event: TableRowUnSelectEvent) {
-    this.showActions = true;
-  }
-
   confirmDelete() {
     this.confirmationService.confirm({
       message: `Do you want to delete ${this.selectedItems.length} rows? `,
@@ -341,11 +352,9 @@ export class LoadDataComponent implements OnInit {
     })
   }
 
-  validateRow(item: any): boolean {
-    return item.shipment_id && item.external_id && item.address;
-  }
 
-  deleteOrder(event: any) {
+  deleteOrder(event: ShipmentData) {
+    
     this.confirmationService.confirm({
       message: 'Do you want to delete this row?',
       header: 'Are you sure?',
@@ -376,6 +385,7 @@ export class LoadDataComponent implements OnInit {
     this.removedOrders = []
     this.rows = [];
     this.selectedZone = null
+    this.refrencePoint=[0,0];
     // this.headers = []
   }
 
@@ -388,141 +398,185 @@ export class LoadDataComponent implements OnInit {
   }
 
   async fetchDataFromDB() {
-
     try {
+      this.loading = true;
       const res = await this.fetchDataFromDBService.fetchDataFromDB();
+      
+      const uniqueData = Array.from(
+        res.list_touch_point.reduce((map: Map<string, ShipmentData>, obj: ShipmentData) => {
+          if (!map.has(obj.shipment_id)) {
+            map.set(obj.shipment_id, obj);
+          }
+          return map;
+        }, new Map<string, ShipmentData>()).values()
+      ) as ShipmentData[];  
+  
       if (res.list_touch_point.length > 0) {
-        this.loading = true;
-        this.appendDataToTable(res.list_touch_point)
+        if (this.fileInput) {
+          this.fileInput.nativeElement.value = '';
+        }
+        this.selectedZone = null;
+        await this.appendDataToTable(uniqueData);
+        await this.getLatLngForRow();
+        await this.validateData(true);
+        this.loading = false;
       } else {
-        this.messageService.add({ severity: 'error', summary: 'Database is empty', icon: 'pi pi-info-circle' });
-
+        this.loading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Database is empty',
+          icon: 'pi pi-info-circle',
+        });
       }
     } catch (error) {
-      console.error(error)
+      this.loading = false;
+      console.error(error);
     }
-
   }
-  async appendDataToTable(newData: any) {
-    if (this.rows && this.rows.length > 0) {
-      this.removedOrders = []
-      const uniqueKey = 'external_id';
-      const existingIds = new Set(this.rows.map((row: any) => row[uniqueKey]));
+  
+  async appendDataToTable(newData: ShipmentData[]) {
+    if (!this.rows || this.rows.length === 0) {
+      this.rows = [...newData];
+    } else {
+      const uniqueKey = 'shipment_id';
+      const existingIds = new Set(this.rows.map((row: ShipmentData) => row[uniqueKey]));
 
-      newData.forEach((newRow: any) => {
-        if (!existingIds.has(newRow[uniqueKey])) {
+      newData.forEach((newRow: ShipmentData) => {
+        const existingRow = this.rows.find((row: ShipmentData) => row[uniqueKey] === newRow[uniqueKey]);
+
+        if (existingRow) {
+          return;
+        } else if (!existingIds.has(newRow[uniqueKey])) {
           this.rows.push(newRow);
-        } else {
-          const existingRow = this.rows.find((row: any) => row[uniqueKey] === newRow[uniqueKey]);
-
-          if (existingRow) {
-            Object.assign(existingRow, newRow);
-          }
         }
       });
-    } else {
-      this.rows = [...newData];
     }
 
-    this.validateData(true);
+    this.rows = [...this.rows];
+
+    this.rows.forEach((row: ShipmentData) => {
+      if (!row.latitude || !row.longitude) {
+        if (row.geom && row.geom.latitude && row.geom.longitude) {
+          row['latitude'] = row.geom.latitude;
+          row['longitude'] = row.geom.longitude;
+        }
+      }
+    });
 
   }
   async onFileChange(event: any) {
-    this.validColumnObject = {
-      classes: {},
-      message: '',
-      imageSrc: ''
-    }
-
-
+    this.validColumnObject = { classes: {}, message: '', imageSrc: '' };
+    this.removedOrders = [];
     this.loading = true;
-    const target: DataTransfer = <DataTransfer>(event.target);
+  
+    const target = <DataTransfer>event.target;
     if (target.files.length !== 1) {
       throw new Error('Cannot use multiple files');
     }
-    this.rows = [];
-    const reader: FileReader = new FileReader();
-
-    reader.onload = async (e: any) => {
-      const bstr: string = e.target.result;
-      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
-      const wsname: string = wb.SheetNames[0];
-      const ws: XLSX.WorkSheet = wb.Sheets[wsname];
-      const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
-
-      const excelHeaders: string[] = rows[0];
-      const headerMapping: any = {};
-
-      excelHeaders.forEach((excelHeader: string, index: number) => {
-        const matchedHeader = this.headers.find((header: any) => header.header.toLowerCase() === excelHeader.toLowerCase());
-        if (matchedHeader) {
-          headerMapping[index] = matchedHeader.field;
-        }
-      });
-
-      this.rows = rows.slice(1).map((row: any) => {
-        const obj: any = {};
-        Object.values(headerMapping).forEach((headerField: any) => {
-          obj[headerField] = null;
-        });
-        row.forEach((cell: any, index: number) => {
+  
+    const reader = new FileReader();
+    reader.onload = async (e: ProgressEvent<FileReader>) => {
+      const rows: string[][]  = XLSX.utils.sheet_to_json(
+        XLSX.read(e.target?.result as ArrayBuffer, { type: 'binary' }).Sheets[
+          XLSX.read(e.target?.result as ArrayBuffer, { type: 'binary' }).SheetNames[0]
+        ], { header: 1 }
+      );
+  
+  
+      const headerMapping = rows[0].reduce((map: any, excelHeader: string, index: number) => {
+        const matchedHeader = this.headers.find(
+          (header) => header.header.toLowerCase() === excelHeader.toLowerCase()
+        );
+        if (matchedHeader) map[index] = matchedHeader.field;
+        return map;
+      }, {});
+  
+      const excelData = rows.slice(1).map((row) =>
+        row.reduce((obj: any, cell: any, index: number) => {
           const headerField = headerMapping[index];
-          if (headerField) {
-            obj[headerField] = cell !== undefined ? cell : null;
-          }
-        });
-        return obj;
-      });
-      const payload = this.rows.map((row: any) => {
-        const skip = row['latitude'] && row['longitude'];
-        return {
-          skip: !!skip,
-          external_id: typeof row?.external_id == 'number' ? row?.external_id.toString() : row.external_id,
-          address: row.address,
-        };
-      });
-      const rowsToFetchLatLng = payload.filter((p) => !p.skip);
-      if (rowsToFetchLatLng.length > 0) {
-        try {
-          const apiResponse: any = await this.fetchLatLngFromApi(rowsToFetchLatLng);
-          this.updateLatLngInRows(apiResponse);
-        } catch (error) {
-          console.error('Error fetching lat/lng from API', error);
-        }
-      }
-      this.appendDataToTable(this.rows);
+          if (headerField) obj[headerField] = this.parseCell(cell, rows[0][index]);
+          return obj;
+        }, {})
+      );
+  
+      await this.appendDataToTable(excelData);
+      await this.getLatLngForRow();
+      await this.validateData(true);
+
+      this.loading = false;
     };
 
     reader.readAsBinaryString(target.files[0]);
   }
+  
 
-  async fetchLatLngFromApi(payload: any[]): Promise<any[]> {
+  parseCell(cell: any, header: string): any {
+    if (header.toLowerCase().includes('time')) {
+      if (typeof cell === 'number' && cell >= 0 && cell < 1) {
+        const totalSeconds = Math.round(cell * 86400); // Convert fractional day to seconds
+        return [
+          Math.floor(totalSeconds / 3600),
+          Math.floor((totalSeconds % 3600) / 60),
+          totalSeconds % 60,
+        ]
+          .map((unit) => unit.toString().padStart(2, '0'))
+          .join(':');
+      }
+      return typeof cell === 'string' ? cell : null;
+    }
+    return cell;
+  }
+
+  async getLatLngForRow() {
+    const payload = this.rows.map((row: ShipmentData) => {
+      const skip = row['latitude'] && row['longitude'];
+      return {
+        skip: !!skip,
+        external_id: typeof row?.external_id == 'number' ? row?.external_id.toString() : row.external_id,
+        address: row.address,
+      };
+    });
+    const rowsToFetchLatLng = payload.filter((p) => !p.skip);
+    if (rowsToFetchLatLng.length > 0) {
+      try {
+        const apiResponse = await this.fetchLatLngFromApi(rowsToFetchLatLng);
+        this.updateLatLngInRows(apiResponse);
+      } catch (error) {
+        console.error('Error fetching lat/lng from API', error);
+      }
+    }
+  }
+
+  async fetchLatLngFromApi(payload: GeomOutlet[]): Promise<{ external_id: string; lat: number; lng: number }[]> {
     try {
       const response = await this.runRouteService.fetchOrderLatLng(payload);
-      const data = response?.response.map((row: any) => ({
+      
+      const data: { external_id: string; lat: number; lng: number }[] | undefined = response?.response.map((row: LatLngResponse) => ({
         external_id: row.external_id,
         lat: row?.geom?.latitude,
         lng: row?.geom?.longitude,
       }));
-      return data;
+      
+      return data || [];
     } catch (error) {
       console.error('Error fetching lat/lng from API:', error);
       throw error;
     }
   }
+  
 
-
-  updateLatLngInRows(apiResponse: any[]) {
+  updateLatLngInRows(apiResponse: { external_id: string; lat: number; lng: number }[]): void {
     apiResponse.forEach((response) => {
       const rowToUpdate = this.rows.find((row) => row.external_id == response.external_id);
       if (rowToUpdate) {
-        rowToUpdate['latitude'] = response.lat;
-        rowToUpdate['longitude'] = response.lng;
+        rowToUpdate.latitude = response.lat;
+        rowToUpdate.longitude = response.lng;
       }
     });
   }
+  
+  async validateData(validateOnly?: boolean) {
 
-  validateData(validateOnly?: boolean) {
     this.totalInvalid = 0;
 
     this.rows.forEach((obj: any) => {
@@ -533,15 +587,15 @@ export class LoadDataComponent implements OnInit {
       const invalidTouchPointType = obj.touch_point_type !== 'PICKUP' && obj.touch_point_type !== 'DROP';
 
       const hasNullValue = Object.keys(obj)
-      .filter(key => !['address', 'instructions', 'mode_of_payment', 'total_amount'].includes(key))
-      .some(key => obj[key] === null || obj[key] === undefined || obj[key] === '');
-    
+        .filter(key => !['address', 'instructions', 'mode_of_payment', 'total_amount'].includes(key))
+        .some(key => obj[key] === null || obj[key] === undefined || obj[key] === '');
+
 
       obj.status = hasComma || invalidTouchPointType || hasNullValue ? 'INVALID' : 'VALID';
     });
 
 
-    this.totalInvalid = this.rows.filter((obj: any) => obj.status === 'INVALID').length;
+    this.totalInvalid = this.rows.filter((obj: ShipmentData) => obj.status === 'INVALID').length;
 
     this.validColumnObject = {
       classes: {
@@ -567,7 +621,6 @@ export class LoadDataComponent implements OnInit {
         : '../../../../assets/icons/icons_check_circle.svg'
     };
 
-    this.loading = false;
     if (validateOnly) {
 
       this.messageService.add({ severity: 'success', summary: 'Data Upload Successfully' });
@@ -575,30 +628,45 @@ export class LoadDataComponent implements OnInit {
   }
 
 
-  async onSubmit() {
-    if (this.rows.length > 0) {
-      await this.submitData(this.rows);
+  async onSubmit(): Promise<void> {
+    if (this.rows?.length) {
+      const processedRows = this.rows.map(({ touch_point_status, geom, ...rest }) => rest);
+      await this.submitData(processedRows);
     }
   }
+  
 
-  async submitData(rows: any[]) {
-    const sanitizedRows = rows.reduce((acc, col) => {
+  async submitData(rows: ShipmentData[]) {
+    const sanitizedRows: ShipmentData[] = rows.reduce<ShipmentData[]>((acc, col) => {
       if (col['status']) {
-        const { opening_time, closing_time, total, external_id,instructions, total_amount,status, latitude, longitude, weight, pincode, customer_phone, ...rest } = col;
+        const {
+          opening_time,
+          closing_time,
+          external_id,
+          instructions,
+          total_amount,
+          latitude,
+          longitude,
+          weight,
+          pincode,
+          customer_phone,
+          status,
+          ...rest
+        } = col;
 
-        const sanitizedRow = {
+        const sanitizedRow: ShipmentData = {
           ...rest,
-          opening_time: typeof opening_time == 'number' ? opening_time.toString() : opening_time,
-          closing_time: typeof closing_time == 'number' ? closing_time.toString() : closing_time,
-          latitude: typeof latitude === 'string' ? parseInt(latitude, 10) : latitude,
-          longitude: typeof longitude === 'string' ? parseInt(longitude, 10) : longitude,
-          weight: typeof weight === 'string' ? parseInt(weight, 10) : weight,
+          opening_time: typeof opening_time === 'number' ? opening_time.toString() : opening_time,
+          closing_time: typeof closing_time === 'number' ? closing_time.toString() : closing_time,
+          latitude: typeof latitude === 'string' ? parseFloat(latitude) : latitude,
+          longitude: typeof longitude === 'string' ? parseFloat(longitude) : longitude,
+          weight: typeof weight === 'string' ? parseFloat(weight) : weight,
           total_amount: typeof total_amount === 'string' ? parseFloat(total_amount) : total_amount,
           pincode: typeof pincode === 'number' ? pincode.toString() : pincode,
           external_id: typeof external_id === 'number' ? external_id.toString() : external_id,
           customer_phone: typeof customer_phone === 'number' ? customer_phone.toString() : customer_phone,
-          total: typeof total === 'number' ? total.toString() : total,
-          instructions:typeof instructions === 'number' ? instructions.toString() : instructions
+          instructions: typeof instructions === 'number' ? instructions.toString() : instructions,
+          mode_of_payment: col.mode_of_payment,
         };
 
         acc.push(sanitizedRow);
@@ -606,10 +674,9 @@ export class LoadDataComponent implements OnInit {
       return acc;
     }, []);
 
-
-
     try {
-      const res = await this.createShipmentService.createShipments(sanitizedRows)
+
+      const res = await this.createShipmentService.createShipments(sanitizedRows);
       this.dataForMarker.emit(rows);
       this.goToConfiguration.emit(res.create_shipments);
       this.updateQueryParams('route_id', res.create_shipments);
@@ -619,12 +686,12 @@ export class LoadDataComponent implements OnInit {
     }
   }
 
-  updateQueryParams(paramName: any, paramValue: any) {
-    // Query params ko update karenge
+  updateQueryParams(paramName: string, paramValue: number) {
+    
     this.router.navigate([], {
       relativeTo: this.activatedRoute,
       queryParams: { [paramName]: paramValue },
-      queryParamsHandling: 'merge'  // Existing query params ko preserve karna
+      queryParamsHandling: 'merge' 
     });
   }
 
@@ -646,15 +713,36 @@ export class LoadDataComponent implements OnInit {
 
   downloadTable() {
     if (this.rows.length === 0) {
-      this.messageService.add({ severity: 'error', summary: 'Please upload the data first', icon: 'pi pi-info-circle' });
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Please upload the data first',
+        icon: 'pi pi-info-circle',
+      });
     } else {
-      const data = this.rows;
-
-      const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
-
+      const filteredHeaders = this.headers.filter(
+        (header) => header.field !== 'status'
+      );
+      const headerFields = filteredHeaders.map(
+        (header) => header.field as keyof ShipmentData
+      );
+      const headerNames = filteredHeaders.map((header) => header.header);
+  
+      const data = this.rows.map((row) =>
+        headerFields.reduce((acc, field) => {
+          acc[field] = row[field]; 
+          return acc;
+        }, {} as Record<keyof ShipmentData, any>)
+      );
+  
+      const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data, {
+        header: headerFields as string[],
+      });
+  
+      XLSX.utils.sheet_add_aoa(worksheet, [headerNames], { origin: 'A1' });
+  
       const workbook: XLSX.WorkBook = {
-        Sheets: { 'data': worksheet },
-        SheetNames: ['data']
+        Sheets: { data: worksheet },
+        SheetNames: ['data'],
       };
 
       XLSX.writeFile(workbook, 'Multi_Order_Report.xlsx');

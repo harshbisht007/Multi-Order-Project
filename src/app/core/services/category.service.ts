@@ -5,18 +5,19 @@ import {gql} from "apollo-angular";
 import { AuthService } from './auth.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { CategoryAPIresponse } from '../../graphql/interfaces/categoryAdditonal';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CategoryService {
-  private apiUrl='https://synco-demo.roadcast.net/api/v1/auth/category?__active__bool=true&__weight__ne=null&__range_km__ne=null';
-  authToken:any;
+  private apiUrl=environment.category;
+  authToken:string|null;
 
   categories: WritableSignal<Category[]> = signal([] as Category[]);
   constructor(private http: HttpClient,private graphqlService: GraphqlService,private authService:AuthService) {
-    this.authToken=this.authService.getToken()
-
+    this.authToken=this.authService.getToken()    
     this.init().then()
   }
 
@@ -31,12 +32,12 @@ export class CategoryService {
     this.categories.set(res.list_categories)
 
   }
-  getCategories(): Observable<any> {
+  getCategories(): Observable<CategoryAPIresponse> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': this.authToken,
+      'Authorization': this.authToken || '',
     });
 
-    return this.http.get<any>(this.apiUrl, { headers });
+    return this.http.get<CategoryAPIresponse>(this.apiUrl, { headers });
   }
 }

@@ -6,6 +6,8 @@ import { pick } from 'apollo-angular/http/http-batch-link';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
+import { ShipmentData } from '../../graphql/interfaces/shipmentData';
+import { TouchPoint, TouchPointDetails } from '../../graphql/interfaces/orderType';
 @Component({
   standalone: true,
   selector: 'app-map',
@@ -15,14 +17,14 @@ import { LeafletModule } from '@asymmetrik/ngx-leaflet';
   providers: [MessageService]
 })
 export class MapComponent implements OnChanges {
-  @Input() dataForMarker: any;
-  @Input() thirdStepDataForMarker: any;
-  @Input() pickupLocation: any;
-  @Input() zoneName: any;
-  @Input() isMissed: any;
-  @Output() showSpinner: EventEmitter<any> = new EventEmitter();
-  @Input() startFromHub: any;
-  @Input() endAtHub: any;
+  @Input() dataForMarker!: ShipmentData[];
+  @Input() thirdStepDataForMarker!: TouchPointDetails[];
+  @Input() pickupLocation!: [number, number] | undefined;
+  @Input() zoneName!: string | undefined;
+  @Input() isMissed!: boolean;
+  @Output() showSpinner: EventEmitter<boolean> = new EventEmitter();
+  @Input() startFromHub!: boolean;
+  @Input() endAtHub!: boolean;
   map!: L.Map;
   layerMainGroup!: L.LayerGroup[];
 
@@ -48,7 +50,7 @@ export class MapComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.map) {
-      if (changes['dataForMarker']?.currentValue) {
+      if (changes['dataForMarker']?.currentValue && this.pickupLocation) {
         this.plotMarkers(changes['dataForMarker'].currentValue, this.pickupLocation);
       }
       if (changes['thirdStepDataForMarker']?.currentValue) {
@@ -85,8 +87,11 @@ export class MapComponent implements OnChanges {
     this.showSpinner.emit(true)
     setTimeout(async () => {
       if (this.dataForMarker) {
-        await this.plotMarkers(this.dataForMarker, this.pickupLocation);
+        if(this.pickupLocation) {
+          await this.plotMarkers(this.dataForMarker, this.pickupLocation);
+        }
       } else if (this.thirdStepDataForMarker) {
+        
         await this.plotMarkerForThirdStep(this.thirdStepDataForMarker);
       }
       this.showSpinner.emit(false)
@@ -94,19 +99,21 @@ export class MapComponent implements OnChanges {
 
   }
 
-  private async plotMarkers(data: any[], hubLocation: any[]): Promise<void> {
-    this.clearMarkers();
+  private async plotMarkers(data: ShipmentData[], hubLocation: [number,number]): Promise<void> {
+    
+    await this.clearMarkers();
 
     const markers = data
-      .filter(row => (row.latitude || (row.geom && row.geom.latitude)) && (row.longitude || (row.geom && row.geom.longitude)))
-      .map(row => {
-        const latitude = row.latitude || row.geom.latitude;
-        const longitude = row.longitude || row.geom.longitude;
-
-        const marker = this.createMarker(latitude, longitude, row.shipment_id, 'assets/images/map-marker.png', [15, 31]);
-        this.markersLayer.addLayer(marker);
-        return marker.getLatLng();
-      });
+    .filter(row => (row.latitude || row.geom?.latitude) && (row.longitude || row.geom?.longitude))
+    .map(row => {
+      const latitude = row.latitude || row.geom?.latitude;
+      const longitude = row.longitude || row.geom?.longitude;
+  
+      const marker = this.createMarker(latitude!, longitude!, row.shipment_id, 'assets/images/map-marker.png', [15, 31]);
+      this.markersLayer.addLayer(marker);
+      return marker.getLatLng();
+    });
+  
 
     if (hubLocation?.length > 0) {
       const hubMarker = this.createMarker(hubLocation[1], hubLocation[0], this.zoneName ? this.zoneName : 'Hub', 'assets/images/merchant.png', [30, 30]);
@@ -122,15 +129,15 @@ export class MapComponent implements OnChanges {
 
 
 
-  private async plotMarkerForThirdStep(data: any[]): Promise<void> {
+  private async plotMarkerForThirdStep(data: TouchPointDetails[]): Promise<void> {
+    
     await this.clearMarkers();
-    if (!this.isMissed) {
+    if (!this.isMissed && this.pickupLocation) {
       this.touchPointMarkers.push(this.createMarker(this.pickupLocation[1], this.pickupLocation[0], this.zoneName ? this.zoneName : 'Hub', 'assets/images/merchant.png', [30, 30]));
 
       const coordinates = await this.buildCoordinates(data);
 
-      // Fetch and plot the route
-      if (coordinates.length > 1) {
+      if (coordinates && coordinates.length>=1) {
         const route = await this.fetchRoute(coordinates);
         this.plotRoute(route);
       } else {
@@ -145,34 +152,40 @@ export class MapComponent implements OnChanges {
     data.forEach((point, index) => this.createSpecialMarker(point, index + 1));
   }
 
-  private async buildCoordinates(data: any): Promise<any> {
+  private async buildCoordinates(data: TouchPointDetails[]) {
+    
     let coordinates;
-    if (this.startFromHub && this.endAtHub) {
-      coordinates = [
-        [this.pickupLocation[0], this.pickupLocation[1]],
-        ...data.map((point: any) => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]), // Touch points
-        [this.pickupLocation[0], this.pickupLocation[1]]
-      ];
-    } else if (this.startFromHub) {
-      coordinates = [
-        [this.pickupLocation[0], this.pickupLocation[1]],
-        ...data.map((point: any) => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]), // Touch points
-      ]
-    } else if (this.endAtHub) {
-      coordinates = [
-        ...data.map((point: any) => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]), // Touch points
-        [this.pickupLocation[0], this.pickupLocation[1]],
+    if(this.pickupLocation){
 
-      ]
-    } else {
-      coordinates = [
-        ...data.map((point: any) => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]), // Touch points
-      ]
+      if (this.startFromHub && this.endAtHub) {
+        coordinates = [
+          [this.pickupLocation[0], this.pickupLocation[1]],
+          ...data.map((point) => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]), // Touch points
+          [this.pickupLocation[0], this.pickupLocation[1]]
+        ];
+      } else if (this.startFromHub) {
+        coordinates = [
+          [this.pickupLocation[0], this.pickupLocation[1]],
+          ...data.map((point) => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]), // Touch points
+        ]
+      } else if (this.endAtHub) {
+        coordinates = [
+          ...data.map((point) => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]), // Touch points
+          [this.pickupLocation[0], this.pickupLocation[1]],
+  
+        ]
+      } else {
+        coordinates = [
+          ...data.map((point) => [point.touch_point.geom.longitude, point.touch_point.geom.latitude]), // Touch points
+        ]
+      }
     }
+    
     return coordinates;
   }
 
-  private createSpecialMarker(point: any, index: number): void {
+  private createSpecialMarker(point: TouchPointDetails, index: number): void {
+    
     const isMissed = this.isMissed;
 
     const iconOptions: L.IconOptions = {
@@ -227,10 +240,10 @@ export class MapComponent implements OnChanges {
     }
   }
 
-  private async fetchRoute(coordinates: number[][]): Promise<any> {
+  private async fetchRoute(coordinates: number[][]){
     try {
       const response = await this.http.post(
-        'https://test-bolt.roadcast.net/api/v1/auth/calculate_eta_route', {
+        'https://prod-s2.track360.net.in/api/v1/auth/calculate_eta_route', {
         coordinates,
         radiuses: [-1]
       }).toPromise();
@@ -246,6 +259,7 @@ export class MapComponent implements OnChanges {
 
 
   private plotRoute(route: any): void {
+    
     if (this.previousRouteLayer) {
       this.map.removeLayer(this.previousRouteLayer);
     }
@@ -265,11 +279,15 @@ export class MapComponent implements OnChanges {
       this.map.removeLayer(marker); // Removes the marker from the map
     });
     this.touchPointMarkers = [];
+    if (this.previousRouteLayer) {
+      this.map.removeLayer(this.previousRouteLayer);
+      this.previousRouteLayer = null;
+    }
+    if (this.markerBounds) {
+      this.map.fitBounds(this.markerBounds);
+    }
   }
   ngOnDestroy() {
-    if (this.map) {
-
-    }
     this.clearMarkers()
   }
 }

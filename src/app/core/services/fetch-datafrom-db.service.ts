@@ -10,6 +10,6 @@ export class FetchDatafromDBService {
    }
 
   async fetchDataFromDB(){
-    return await this.graphqlService.runQuery(fetchDataFromDB);
+    return await this.graphqlService.runQuery(fetchDataFromDB, { equal: "MISSED",limit:1000});
   }
 }
